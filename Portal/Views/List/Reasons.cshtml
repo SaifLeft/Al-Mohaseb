@@ -1,0 +1,205 @@
+﻿@using Portal.Models.ViewModels;
+@model ReasonVM;
+@{
+    ViewData["Title"] = "جميع الأسباب";
+}
+
+<!-- Content Page -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row card p-4">
+        <div class="divider divider-info">
+            <div class="divider-text">الصفحة الرئسية</div>
+        </div>
+        <!-- Stage -->
+        <div class="row gy-4">
+            <!-- API Details -->
+            <div class="col-xl-9">
+                <div class="card mb-4">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="card-title m-0 me-2">قائمة الأسباب</h5>
+                    </div>
+                    <div class="card-body demo-vertical-spacing demo-only-element">
+                        <table class="table border-danger table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">الرقم</th>
+                                    <th scope="col">الأسباب</th>
+                                    <th scope="col">التحكم</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Reasons.Any())
+                                {
+                                    @foreach (var item in Model.Reasons)
+                                    {
+                                        <tr>
+                                            <th scope="row">@item.Item1</th>
+                                            <td>@item.Item2</td>
+                                            <td>
+                                                <a style="color:azure" onclick="Edit('@item.Item1')" class="btn btn-primary">تعديل</a>
+                                                <a style="color:azure" onclick="Delete('@item.Item1')" class="btn btn-danger">حذف</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center">لا يوجد أسباب</td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+            <!-- Stage API Box -->
+            <div id="StageAPIBox" class="col-md-3">
+                <div class="card mb-4">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="card-title m-0 me-2">انشاء سبب جديد</h5>
+                    </div>
+                    <div class="card-body demo-vertical-spacing demo-only-element">
+                        <label class="form-label" for="Reason">السبب</label>
+                        <input type="text" class="form-control" id="Reason">
+                        <button type="submit" id="ReasonBtn" class="btn btn-primary">أضافة</button>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+@section Stylesheet{
+    <link rel="stylesheet" href="~/assets/vendor/libs/select2/select2.css">
+    <link rel="stylesheet" href="~/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+
+
+    }
+
+@section Scripts{
+    <script src="~/assets/vendor/libs/select2/select2.js"></script>
+    <script src="~/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+
+
+    <script>
+
+        $(document).ready(function () {
+
+
+            // Add New Reason
+            $("#ReasonBtn").click(function () {
+                var Reason = $("#Reason").val();
+                if (Reason == "") {
+                    alert("الرجاء ادخال السبب");
+                    return;
+                }
+                $.ajax({
+                    url: "@Url.Action("CreateReason","Create")",
+                    type: "POST",
+                    data: { Reason: Reason },
+                    success: function (data) {
+                        if (data == "1") {
+                            alert("تمت الاضافة بنجاح");
+                            location.reload();
+                        }
+                        else {
+                            alert("حدث خطأ");
+                        }
+                    }
+                });
+            });
+
+
+
+
+        });
+
+        //function Delete(id) with ajax swal2 to confirm the delete by enter the password of the user who logged in.
+        function Delete(id) {
+            Swal.fire({
+                title: 'هل انت متأكد؟',
+                text: "لن تتمكن من التراجع عن هذا الاجراء!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'نعم, احذفه!',
+                cancelButtonText: 'الغاء'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'ادخل كلمة المرور',
+                        input: 'password',
+                        inputAttributes: {
+                            autocapitalize: 'off'
+                        },
+                        showCancelButton: true,
+                        confirmButtonText: 'حذف',
+                        showLoaderOnConfirm: true,
+                        preConfirm: (password) => {
+                            // call ajax.
+                            return $.ajax({
+                                url: "@Url.Action("DeleteReason","Create")",
+                                type: "POST",
+                                data: { id: id, password: password },
+                                success: function (data) {
+                                    console.log(data);
+                                    if (data == "1") {
+                                        return "1";
+                                    }
+                                    else if (data == "2") {
+                                        return "2";
+                                    }
+                                    else {
+                                        return "0";
+                                    }
+                                }
+                            });
+
+
+                        },
+                        allowOutsideClick: () => !Swal.isLoading()
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            if (result.value == "1") {
+                                //success message and close the swal2 after 2 seconds.
+                                Swal.fire(
+                                    'تم!',
+                                    'تم الحذف بنجاح',
+                                    'success'
+                                ).then((result) => {
+                                    if (result.isConfirmed) {
+                                        location.reload();
+                                    }
+                                });
+
+                            }
+                            else if (result.value == "2") {
+                                Swal.fire(
+                                    'خطأ!',
+                                    'كلمة المرور غير صحيحة',
+                                    'error'
+                                );
+                            }
+                            else {
+                                Swal.fire(
+                                    'خطأ!',
+                                    'حدث خطأ',
+                                    'error'
+                                );
+                            }
+                        }
+                    })
+                }
+            })
+        }
+
+    </script>
+
+
+    }

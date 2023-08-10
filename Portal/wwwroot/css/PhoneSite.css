@@ -1,0 +1,4 @@
+/* Custom RTL CSS for DataTables */
+.dataTables_wrapper {
+    direction: rtl;
+}

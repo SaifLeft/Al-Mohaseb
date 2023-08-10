@@ -1,0 +1,15 @@
+/* In your custom CSS file (e.g., custom.css) */
+
+@font-face {
+    font-family: 'AlmaraiLight'; /* The name to reference the font */
+    src: url('../assets/font/Almarai-Light.ttf') format('truetype') /* Relative path to your TTF font file */
+}
+/* In your custom CSS file (e.g., custom.css) */
+
+body {
+    font-family: 'AlmaraiLight', sans-serif; /* Apply the custom font to the entire body */
+}
+
+h1, h2, h3, h4, h5, h6, p, a, button,div, span {
+    font-family: 'AlmaraiLight', sans-serif; /* Apply the custom font to heading elements */
+}

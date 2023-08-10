@@ -1,0 +1,45 @@
+﻿@using Portal.Models.ViewModels;
+@model LoginVM
+@{
+    ViewData["Title"] = "تسجيل الدخول";
+
+    Layout = "_AuthLayout";
+}
+
+<div class="authentication-wrapper authentication-basic container-p-y ">
+    <div class="authentication-inner py-4">
+        <!-- Register -->
+        <div class="card background">
+            <div class="card-body">
+                <!-- /Logo -->
+                <h4 class="mb-2">تسيجل الدخول</h4>
+                <p class="mb-4"></p>
+
+                <form class="mb-3" asp-area="" asp-controller="Auth" asp-action="Index" method="POST">
+                    <div class="mb-3 form-password-toggle">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label" for="password">كلمة المرور</label>
+
+                        </div>
+                        <div class="input-group input-group-merge">
+                            <input type="password"
+                                   asp-for="Password"
+                                   class="form-control"
+                                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                   aria-describedby="كلمة المرور" />
+                            <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <button class="btn btn-primary d-grid w-100" type="submit">تسجيل الدخول</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+        <!-- /Register -->
+    </div>
+</div>
