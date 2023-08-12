@@ -39,9 +39,9 @@ namespace Portal.Controllers
                 .Include(n => n.MosbPersonReasonMapping)
                 .AsQueryable();
 
+            
 
             totalRecord = await data.CountAsync();
-
             filterRecord = totalRecord;
 
             var phoneList = await data
