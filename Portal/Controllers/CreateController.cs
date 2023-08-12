@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Portal.Data;
 using Portal.Models;
 using Portal.Models.ViewModels;
@@ -10,7 +11,7 @@ namespace Portal.Controllers
     {
         private readonly ILogger<CreateController> _logger;
         private readonly AlMohasebDBContext _context;
-        string UserPassword = string.Empty;
+        readonly string UserPassword = string.Empty;
         private readonly IConfiguration _configuration;
 
         public CreateController(ILogger<CreateController> logger, AlMohasebDBContext context, IConfiguration configuration)
@@ -33,37 +34,87 @@ namespace Portal.Controllers
         {
             return View();
         }
-        public IActionResult Names()
+        public async Task<IActionResult> Names()
         {
             return View();
         }
+
         [HttpPost]
-        public async Task<ActionResult> Names(PersonVM VM)
+        public async Task<IActionResult> Names(PersonVM VM)
         {
-            if (ModelState.IsValid)
+            try
             {
-                MosbName Add = new MosbName();
-                Add.Name = VM.Name;
-                Add.PhoneNumber = VM.Phone;
-                Add.ReasonsId = VM.ReasonId;
-                Add.CivilNumber = VM.CivilNumber;
-                Add.RegisterDate = DateTime.Now.ToString("yyyy-MM-dd");
-               await _context.MosbName.AddAsync(Add);
-               var status = await _context.SaveChangesAsync();
-                return RedirectToAction("Names", status);
+                if (ModelState.IsValid)
+                {
+                    var existingCivilNumber = await _context.MosbName.AnyAsync(x => x.CivilNumber == VM.CivilNumber);
+                    if (existingCivilNumber)
+                    {
+                        ModelState.AddModelError("CivilNumber", "هذا الرقم المدني موجود بالفعل");
+                        return View();
+                    }
+
+                    var existingPhone = await _context.MosbName.AnyAsync(x => x.PhoneNumber == VM.Phone);
+                    if (existingPhone)
+                    {
+                        ModelState.AddModelError("Phone", "هذا الرقم موجود بالفعل");
+                        return View();
+                    }
+
+                    using (var transaction = await _context.Database.BeginTransactionAsync())
+                    {
+                        var newMosbName = new MosbName
+                        {
+                            Name = VM.Name,
+                            PhoneNumber = VM.Phone,
+                            CivilNumber = VM.CivilNumber,
+                            RegisterDate = DateTime.Now.ToString("yyyy-MM-dd")
+                        };
+
+                        var addedMosbName = await _context.MosbName.AddAsync(newMosbName);
+
+                        await _context.SaveChangesAsync();
+
+                        foreach (var reasonId in VM.ReasonsList)
+                        {
+                            _context.MosbPersonReasonMapping.Add(new MosbPersonReasonMapping
+                            {
+                                ReasonsId = reasonId,
+                                NameId = addedMosbName.Entity.Id
+                            });
+                        }
+
+                        var saveChangesResult = await _context.SaveChangesAsync();
+                        if (saveChangesResult == 0)
+                        {
+                            await transaction.RollbackAsync();
+                            ViewBag.AddStatus = "Error";
+                            ModelState.AddModelError("", "حدث خطأ عام");
+                            return View();
+                        }
+
+                        await transaction.CommitAsync();
+                        ViewBag.AddStatus = "Success";
+                        return RedirectToAction("Names", "List");
+                    }
+                }
+                else
+                {
+                    ViewBag.AddStatus = "Error";
+                    ModelState.AddModelError("", "حدث خطأ عام");
+                }
+
+                return View();
             }
-            else
+            catch (Exception)
             {
-                ModelState.AddModelError("", "حدث خطأ عام");
+                throw;
             }
-            return View();
-
-
         }
+
         public async Task<ActionResult> CreateReason(string Reason)
         {
             var reason = new MosbReasons { Name = Reason };
-            _context.MosbReasons.AddAsync(reason);
+            await _context.MosbReasons.AddAsync(reason);
             int add = await _context.SaveChangesAsync();
             if (add == 0)
             {

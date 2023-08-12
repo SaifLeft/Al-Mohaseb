@@ -5,10 +5,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+var connectionString = builder.Configuration.GetConnectionString("AlMohasebDBContext");
 
 builder.Services.AddDbContext<AlMohasebDBContext>(options =>
 {
-    options.UseSqlite("Data Source = AlMohaseb-ERD.db");
+    options.UseSqlite(connectionString);
 });
 
 var app = builder.Build();

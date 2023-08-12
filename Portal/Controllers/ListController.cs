@@ -18,7 +18,6 @@ namespace Portal.Controllers
         {
             _context = context;
         }
-        private readonly ILogger<CreateController> _logger;
 
 
         public IActionResult Index()
@@ -32,11 +31,12 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> GetUserDetails()
         {
+
             int totalRecord = 0;
             int filterRecord = 0;
 
             var data = _context.MosbName
-                .Include(n => n.Reasons)
+                .Include(n => n.MosbPersonReasonMapping)
                 .AsQueryable();
 
 
@@ -51,7 +51,8 @@ namespace Portal.Controllers
                     name = p.Name,
                     phone = p.PhoneNumber,
                     civilnumber = p.CivilNumber,
-                    reasons = p.Reasons.Name,
+                    date = p.RegisterDate,
+                    reasons = p.MosbPersonReasonMapping.Select(x => x.Reasons.Name).ToList()
                 })
                 .ToListAsync();
 

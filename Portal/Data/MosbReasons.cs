@@ -9,7 +9,7 @@ namespace Portal.Data
     {
         public MosbReasons()
         {
-            MosbName = new HashSet<MosbName>();
+            MosbPersonReasonMapping = new HashSet<MosbPersonReasonMapping>();
             MosbReceivePayments = new HashSet<MosbReceivePayments>();
             MosbSpendMoney = new HashSet<MosbSpendMoney>();
         }
@@ -17,7 +17,7 @@ namespace Portal.Data
         public long Id { get; set; }
         public string Name { get; set; }
 
-        public virtual ICollection<MosbName> MosbName { get; set; }
+        public virtual ICollection<MosbPersonReasonMapping> MosbPersonReasonMapping { get; set; }
         public virtual ICollection<MosbReceivePayments> MosbReceivePayments { get; set; }
         public virtual ICollection<MosbSpendMoney> MosbSpendMoney { get; set; }
     }

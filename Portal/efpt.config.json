@@ -20,6 +20,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "MOSB_PERSON_REASON_MAPPING",
+         "ObjectType": 0
+      },
+      {
          "Name": "MOSB_REASONS",
          "ObjectType": 0
       },
@@ -32,7 +36,7 @@
          "ObjectType": 0
       }
    ],
-   "UiHint": "C:\\Users\\hayzh\\Documents\\AlMohaseb\\AlMohaseb.Solution\\Portal\\AlMohaseb-ERD.db",
+   "UiHint": "AlMohaseb-ERD",
    "UncountableWords": null,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,

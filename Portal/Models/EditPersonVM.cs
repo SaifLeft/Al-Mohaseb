@@ -2,7 +2,7 @@
 
 namespace Portal.Models.ViewModels
 {
-    public class PersonVM
+    public class EditPersonVM
     {
         [Required(ErrorMessage = "السبب مطلوب")]
         public string Name { get; set; }
@@ -13,6 +13,7 @@ namespace Portal.Models.ViewModels
         [Display(Name = "الرقم المدني")]
 
         public long CivilNumber { get; set; }
+        public long Id { get; internal set; }
         [Required(ErrorMessage = "السبب مطلوب")]
         public List<long> ReasonsList { get; set; }
     }

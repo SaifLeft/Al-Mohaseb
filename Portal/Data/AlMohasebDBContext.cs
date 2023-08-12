@@ -19,6 +19,7 @@ namespace Portal.Data
         }
 
         public virtual DbSet<MosbName> MosbName { get; set; }
+        public virtual DbSet<MosbPersonReasonMapping> MosbPersonReasonMapping { get; set; }
         public virtual DbSet<MosbReasons> MosbReasons { get; set; }
         public virtual DbSet<MosbReceivePayments> MosbReceivePayments { get; set; }
         public virtual DbSet<MosbSpendMoney> MosbSpendMoney { get; set; }
@@ -50,16 +51,34 @@ namespace Portal.Data
                     .HasColumnType("integer(8)")
                     .HasColumnName("PHONE_NUMBER");
 
+                entity.Property(e => e.RegisterDate)
+                    .HasColumnType("varchar(255)")
+                    .HasColumnName("REGISTER_DATE");
+            });
+
+            modelBuilder.Entity<MosbPersonReasonMapping>(entity =>
+            {
+                entity.HasKey(e => new { e.Id, e.ReasonsId, e.NameId });
+
+                entity.ToTable("MOSB_PERSON_REASON_MAPPING");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
                 entity.Property(e => e.ReasonsId)
                     .HasColumnType("integer(10)")
                     .HasColumnName("REASONS_ID");
 
-                entity.Property(e => e.RegisterDate)
-                    .HasColumnType("varchar(255)")
-                    .HasColumnName("REGISTER_DATE");
+                entity.Property(e => e.NameId)
+                    .HasColumnType("integer(10)")
+                    .HasColumnName("NAME_ID");
+
+                entity.HasOne(d => d.Name)
+                    .WithMany(p => p.MosbPersonReasonMapping)
+                    .HasForeignKey(d => d.NameId)
+                    .OnDelete(DeleteBehavior.ClientSetNull);
 
                 entity.HasOne(d => d.Reasons)
-                    .WithMany(p => p.MosbName)
+                    .WithMany(p => p.MosbPersonReasonMapping)
                     .HasForeignKey(d => d.ReasonsId)
                     .OnDelete(DeleteBehavior.ClientSetNull);
             });
