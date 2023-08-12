@@ -7,13 +7,18 @@ namespace Portal.Data
 {
     public partial class MosbSpendMoney
     {
+        public MosbSpendMoney()
+        {
+            ReasonsSpendMoneyMapping = new HashSet<ReasonsSpendMoneyMapping>();
+        }
+
         public long Id { get; set; }
         public long NameId { get; set; }
         public string Date { get; set; }
         public double Amount { get; set; }
         public long MosbReasonsid { get; set; }
 
-        public virtual MosbReasons MosbReasons { get; set; }
         public virtual MosbName Name { get; set; }
+        public virtual ICollection<ReasonsSpendMoneyMapping> ReasonsSpendMoneyMapping { get; set; }
     }
 }

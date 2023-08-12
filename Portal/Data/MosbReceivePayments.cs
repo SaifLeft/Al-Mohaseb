@@ -7,6 +7,11 @@ namespace Portal.Data
 {
     public partial class MosbReceivePayments
     {
+        public MosbReceivePayments()
+        {
+            ReceivePaymentsReasonsMapping = new HashSet<ReceivePaymentsReasonsMapping>();
+        }
+
         public long Id { get; set; }
         public long NameId { get; set; }
         public string Date { get; set; }
@@ -14,6 +19,6 @@ namespace Portal.Data
         public long ReasonsId { get; set; }
 
         public virtual MosbName Name { get; set; }
-        public virtual MosbReasons Reasons { get; set; }
+        public virtual ICollection<ReceivePaymentsReasonsMapping> ReceivePaymentsReasonsMapping { get; set; }
     }
 }

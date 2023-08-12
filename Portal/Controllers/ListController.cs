@@ -36,7 +36,7 @@ namespace Portal.Controllers
             int filterRecord = 0;
 
             var data = _context.MosbName
-                .Include(n => n.MosbPersonReasonMapping)
+                .Include(n => n.PersonReasonMapping)
                 .AsQueryable();
 
             
@@ -52,7 +52,7 @@ namespace Portal.Controllers
                     phone = p.PhoneNumber,
                     civilnumber = p.CivilNumber,
                     date = p.RegisterDate,
-                    reasons = p.MosbPersonReasonMapping.Select(x => x.Reasons.Name).ToList()
+                    reasons = p.PersonReasonMapping.Select(x => x.Reasons.Name).ToList()
                 })
                 .ToListAsync();
 
@@ -79,10 +79,54 @@ namespace Portal.Controllers
         {
             return await _context.MosbReasons.ToListAsync();
         }
+        [HttpGet]
+        public async Task<List<MosbName>> GetNames()
+        {
+            return await _context.MosbName.ToListAsync();
+        }
 
         public IActionResult ReceivePayments()
         {
             return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> GetReceivePaymentsDetails()
+        {
+            var search = Request.Form["search[value]"].FirstOrDefault();
+
+            int totalRecord = 0;
+            int filterRecord = 0;
+
+            var data = _context.MosbReceivePayments
+                .Include(n => n.ReceivePaymentsReasonsMapping)
+                .AsQueryable();
+
+
+
+            totalRecord = await data.CountAsync();
+            filterRecord = totalRecord;
+
+            var phoneList = await data
+                .Select(p => new
+                {
+                    id = p.Id,
+                    name = p.Name.Name,
+                    amount = p.Amount,
+                    date = p.Date,
+                    reasons = p.ReceivePaymentsReasonsMapping.Select(x => x.Reasons.Name).ToList()
+                })
+                .ToListAsync();
+
+
+
+            var returnObj = new
+            {
+                recordsTotal = totalRecord,
+                recordsFiltered = filterRecord,
+                Data = phoneList
+            };
+
+            return Ok(returnObj);
         }
 
         public IActionResult SpendMoney()

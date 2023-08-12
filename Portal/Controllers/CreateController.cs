@@ -76,7 +76,7 @@ namespace Portal.Controllers
 
                         foreach (var reasonId in VM.ReasonsList)
                         {
-                            _context.MosbPersonReasonMapping.Add(new MosbPersonReasonMapping
+                            _context.PersonReasonMapping.Add(new PersonReasonMapping
                             {
                                 ReasonsId = reasonId,
                                 NameId = addedMosbName.Entity.Id
@@ -87,23 +87,21 @@ namespace Portal.Controllers
                         if (saveChangesResult == 0)
                         {
                             await transaction.RollbackAsync();
-                            ViewBag.AddStatus = "Error";
                             ModelState.AddModelError("", "حدث خطأ عام");
-                            return View();
                         }
 
                         await transaction.CommitAsync();
-                        ViewBag.AddStatus = "Success";
+                        TempData["AddStatus"] = "Success";
                         return RedirectToAction("Names", "List");
                     }
                 }
                 else
                 {
-                    ViewBag.AddStatus = "Error";
+                    TempData["AddStatus"] = "Error";
                     ModelState.AddModelError("", "حدث خطأ عام");
+                    return View();
                 }
 
-                return View();
             }
             catch (Exception)
             {
@@ -143,9 +141,66 @@ namespace Portal.Controllers
             return Ok(delete);
         }
 
+
         public IActionResult ReceivePayments()
         {
             return View();
+        }
+        [HttpPost]
+        public async Task<ActionResult> ReceivePayments(ReceivePaymentsVM VM)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+
+                    using (var transaction = await _context.Database.BeginTransactionAsync())
+                    {
+                        var newReceivePayments = new MosbReceivePayments
+                        {
+                            NameId = VM.NameId,
+                            Date = DateTime.Now.ToString("yyyy-MM-dd"),
+                            Amount = VM.Amount,
+                        };
+
+                        var AddedRePayment = await _context.MosbReceivePayments.AddAsync(newReceivePayments);
+
+                        await _context.SaveChangesAsync();
+
+                        foreach (var reasonId in VM.ReasonsList)
+                        {
+                            _context.ReceivePaymentsReasonsMapping.Add(new ReceivePaymentsReasonsMapping
+                            {
+                                ReasonsId = reasonId,
+                                ReceivePaymentsId = AddedRePayment.Entity.Id
+                            });
+                        }
+
+                        var saveChangesResult = await _context.SaveChangesAsync();
+                        if (saveChangesResult == 0)
+                        {
+                            await transaction.RollbackAsync();
+                            ModelState.AddModelError("", "حدث خطأ عام");
+                        }
+
+                        await transaction.CommitAsync();
+                        TempData["AddStatus"] = "Success";
+                        return RedirectToAction("ReceivePayments", "List");
+                    }
+                }
+                else
+                {
+                    TempData["AddStatus"] = "Error";
+                    ModelState.AddModelError("", "حدث خطأ عام");
+                    return View();
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
         public IActionResult SpendMoney()

@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace Portal.Data
 {
-    public partial class MosbPersonReasonMapping
+    public partial class ReceivePaymentsReasonsMapping
     {
         public long Id { get; set; }
+        public long ReceivePaymentsId { get; set; }
         public long ReasonsId { get; set; }
-        public long NameId { get; set; }
 
-        public virtual MosbName Name { get; set; }
         public virtual MosbReasons Reasons { get; set; }
+        public virtual MosbReceivePayments ReceivePayments { get; set; }
     }
 }

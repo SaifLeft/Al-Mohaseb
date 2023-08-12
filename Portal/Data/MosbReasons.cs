@@ -9,16 +9,16 @@ namespace Portal.Data
     {
         public MosbReasons()
         {
-            MosbPersonReasonMapping = new HashSet<MosbPersonReasonMapping>();
-            MosbReceivePayments = new HashSet<MosbReceivePayments>();
-            MosbSpendMoney = new HashSet<MosbSpendMoney>();
+            PersonReasonMapping = new HashSet<PersonReasonMapping>();
+            ReasonsSpendMoneyMapping = new HashSet<ReasonsSpendMoneyMapping>();
+            ReceivePaymentsReasonsMapping = new HashSet<ReceivePaymentsReasonsMapping>();
         }
 
         public long Id { get; set; }
         public string Name { get; set; }
 
-        public virtual ICollection<MosbPersonReasonMapping> MosbPersonReasonMapping { get; set; }
-        public virtual ICollection<MosbReceivePayments> MosbReceivePayments { get; set; }
-        public virtual ICollection<MosbSpendMoney> MosbSpendMoney { get; set; }
+        public virtual ICollection<PersonReasonMapping> PersonReasonMapping { get; set; }
+        public virtual ICollection<ReasonsSpendMoneyMapping> ReasonsSpendMoneyMapping { get; set; }
+        public virtual ICollection<ReceivePaymentsReasonsMapping> ReceivePaymentsReasonsMapping { get; set; }
     }
 }
