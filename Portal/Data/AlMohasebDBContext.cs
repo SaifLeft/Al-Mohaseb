@@ -90,10 +90,6 @@ namespace Portal.Data
                     .HasColumnType("integer(10)")
                     .HasColumnName("NAME_ID");
 
-                entity.Property(e => e.ReasonsId)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("REASONS_ID");
-
                 entity.HasOne(d => d.Name)
                     .WithMany(p => p.MosbReceivePayments)
                     .HasForeignKey(d => d.NameId)
@@ -114,10 +110,6 @@ namespace Portal.Data
                     .IsRequired()
                     .HasColumnType("varchar(50)")
                     .HasColumnName("DATE");
-
-                entity.Property(e => e.MosbReasonsid)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("MOSB_REASONSID");
 
                 entity.Property(e => e.NameId)
                     .HasColumnType("integer(10)")

@@ -60,40 +60,38 @@ namespace Portal.Controllers
                         return View();
                     }
 
-                    using (var transaction = await _context.Database.BeginTransactionAsync())
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    var newMosbName = new MosbName
                     {
-                        var newMosbName = new MosbName
+                        Name = VM.Name,
+                        PhoneNumber = VM.Phone,
+                        CivilNumber = VM.CivilNumber,
+                        RegisterDate = DateTime.Now.ToString("yyyy-MM-dd")
+                    };
+
+                    var addedMosbName = await _context.MosbName.AddAsync(newMosbName);
+
+                    await _context.SaveChangesAsync();
+
+                    foreach (var reasonId in VM.ReasonsList)
+                    {
+                        _context.PersonReasonMapping.Add(new PersonReasonMapping
                         {
-                            Name = VM.Name,
-                            PhoneNumber = VM.Phone,
-                            CivilNumber = VM.CivilNumber,
-                            RegisterDate = DateTime.Now.ToString("yyyy-MM-dd")
-                        };
-
-                        var addedMosbName = await _context.MosbName.AddAsync(newMosbName);
-
-                        await _context.SaveChangesAsync();
-
-                        foreach (var reasonId in VM.ReasonsList)
-                        {
-                            _context.PersonReasonMapping.Add(new PersonReasonMapping
-                            {
-                                ReasonsId = reasonId,
-                                NameId = addedMosbName.Entity.Id
-                            });
-                        }
-
-                        var saveChangesResult = await _context.SaveChangesAsync();
-                        if (saveChangesResult == 0)
-                        {
-                            await transaction.RollbackAsync();
-                            ModelState.AddModelError("", "حدث خطأ عام");
-                        }
-
-                        await transaction.CommitAsync();
-                        TempData["AddStatus"] = "Success";
-                        return RedirectToAction("Names", "List");
+                            ReasonsId = reasonId,
+                            NameId = addedMosbName.Entity.Id
+                        });
                     }
+
+                    var saveChangesResult = await _context.SaveChangesAsync();
+                    if (saveChangesResult == 0)
+                    {
+                        await transaction.RollbackAsync();
+                        ModelState.AddModelError("", "حدث خطأ عام");
+                    }
+
+                    await transaction.CommitAsync();
+                    TempData["AddStatus"] = "Success";
+                    return RedirectToAction("Names", "List");
                 }
                 else
                 {
@@ -154,39 +152,37 @@ namespace Portal.Controllers
                 if (ModelState.IsValid)
                 {
 
-                    using (var transaction = await _context.Database.BeginTransactionAsync())
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    var newReceivePayments = new MosbReceivePayments
                     {
-                        var newReceivePayments = new MosbReceivePayments
+                        NameId = VM.NameId,
+                        Date = VM.Date,
+                        Amount = VM.Amount,
+                    };
+
+                    var AddedRePayment = await _context.MosbReceivePayments.AddAsync(newReceivePayments);
+
+                    await _context.SaveChangesAsync();
+
+                    foreach (var reasonId in VM.ReasonsList)
+                    {
+                        _context.ReceivePaymentsReasonsMapping.Add(new ReceivePaymentsReasonsMapping
                         {
-                            NameId = VM.NameId,
-                            Date = DateTime.Now.ToString("yyyy-MM-dd"),
-                            Amount = VM.Amount,
-                        };
-
-                        var AddedRePayment = await _context.MosbReceivePayments.AddAsync(newReceivePayments);
-
-                        await _context.SaveChangesAsync();
-
-                        foreach (var reasonId in VM.ReasonsList)
-                        {
-                            _context.ReceivePaymentsReasonsMapping.Add(new ReceivePaymentsReasonsMapping
-                            {
-                                ReasonsId = reasonId,
-                                ReceivePaymentsId = AddedRePayment.Entity.Id
-                            });
-                        }
-
-                        var saveChangesResult = await _context.SaveChangesAsync();
-                        if (saveChangesResult == 0)
-                        {
-                            await transaction.RollbackAsync();
-                            ModelState.AddModelError("", "حدث خطأ عام");
-                        }
-
-                        await transaction.CommitAsync();
-                        TempData["AddStatus"] = "Success";
-                        return RedirectToAction("ReceivePayments", "List");
+                            ReasonsId = reasonId,
+                            ReceivePaymentsId = AddedRePayment.Entity.Id
+                        });
                     }
+
+                    var saveChangesResult = await _context.SaveChangesAsync();
+                    if (saveChangesResult == 0)
+                    {
+                        await transaction.RollbackAsync();
+                        ModelState.AddModelError("", "حدث خطأ عام");
+                    }
+
+                    await transaction.CommitAsync();
+                    TempData["AddStatus"] = "Success";
+                    return RedirectToAction("ReceivePayments", "List");
                 }
                 else
                 {
@@ -206,6 +202,61 @@ namespace Portal.Controllers
         public IActionResult SpendMoney()
         {
             return View();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> SpendMoney(SpendMoneyVM VM)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    var newSpendMoney = new MosbSpendMoney
+                    {
+                        NameId = VM.NameId,
+                        Date = VM.Date,
+                        Amount = VM.Amount,
+                    };
+
+                    var AddedSpendMoney = await _context.MosbSpendMoney.AddAsync(newSpendMoney);
+
+                    await _context.SaveChangesAsync();
+
+                    foreach (var reasonId in VM.ReasonsList)
+                    {
+                        _context.ReasonsSpendMoneyMapping.Add(new ReasonsSpendMoneyMapping
+                        {
+                            ReasonsId = reasonId,
+                            SpendMoneyId = AddedSpendMoney.Entity.Id
+                        });
+                    }
+
+                    var saveChangesResult = await _context.SaveChangesAsync();
+                    if (saveChangesResult == 0)
+                    {
+                        await transaction.RollbackAsync();
+                        ModelState.AddModelError("", "حدث خطأ عام");
+                    }
+
+                    await transaction.CommitAsync();
+                    TempData["AddStatus"] = "Success";
+                    return RedirectToAction("SpendMoney", "List");
+                }
+                else
+                {
+                    TempData["AddStatus"] = "Error";
+                    ModelState.AddModelError("", "حدث خطأ عام");
+                    return View();
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
 

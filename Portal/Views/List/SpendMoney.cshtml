@@ -1,1 +1,343 @@
-﻿
+﻿@{
+    ViewData["Title"] = "قائمة المصروفات";
+}
+
+<!-- Content Page -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h3>قائمة المصروفات</h3>
+    <div class="card p-4">
+
+        <div class="card-body">
+            <a class="btn btn-dark" asp-controller="Create" asp-action="SpendMoney"><i class="bx bx-plus me-0 me-lg-2"></i><span class="d-none d-lg-inline-block">صرف مبلغ لشخص</span></a>
+            <div class="table-responsive mt-5">
+                <table id="userTable" class="table table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>تاريخ الصرف</th>
+                            <th>مبلغ الصرف</th>
+                            <th>الصرف لسبب</th>
+                            <th>الأجراء</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Stylesheet{
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/typeahead-js/typeahead.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/select2/select2.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/formvalidation/dist/css/formValidation.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/sweetalert2/sweetalert2.css">
+
+
+    }
+
+@section Scripts{
+    <script src="~/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="~/assets/vendor/libs/datatables/jquery.dataTables.js"></script>
+    <script src="~/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive/datatables.responsive.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/moment/moment.js"></script>
+    <script src="~/assets/vendor/libs/datatables/jquery.dataTables.js"></script>
+    <script src="~/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive/datatables.responsive.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/datatables-buttons/datatables-buttons.js"></script>
+    <script src="~/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/jszip/jszip.js"></script>
+    <script src="~/lib/datatablesRTL/pdfmake.js"></script>
+    <script src="~/lib/datatablesRTL/vfs_fonts.js"></script>
+    <script src="~/lib/datatablesRTL/buttons.print.min.js"></script>
+    <script src="~/lib/datatablesRTL/buttons.html5.min.js"></script>
+    <script src="~/assets/vendor/libs/select2/select2.js"></script>
+    <script src="~/assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js"></script>
+    <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js"></script>
+    <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js"></script>
+    <script src="~/assets/vendor/libs/cleavejs/cleave.js"></script>
+    <script src="~/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+
+    @*    <script src="~/assets/js/app-user-list.js"></script>
+*@
+
+
+    <script>
+        $(document).ready(function () {
+            var table = $('#userTable').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "filter": true,
+                "pageLength": 50,
+                "lengthMenu": [20, 30, 40, 50, 100],
+                "orderMulti": false,
+                "ajax": {
+                    "url": "@Url.Action("GetSpendMoneyDetails","List")",
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                dom:
+                    '<"row mx-2"' +
+                    '<"col-md-2"<"me-3"l>>' +
+                    '<"col-md-10"<"dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-3 mb-md-0"fB>>' +
+                    '>t' +
+                    '<"row mx-2"' +
+                    '<"col-sm-12 col-md-6"i>' +
+                    '<"col-sm-12 col-md-6"p>' +
+                    '>',
+                "language": {
+                    "sProcessing": "جاري التحميل...",
+                    "sLengthMenu": "إظهار _MENU_ المدخلات",
+                    "sZeroRecords": "لا يوجد سجلات مطابقة",
+                    "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                    "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+                    "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                    "sInfoPostFix": "",
+                    "sSearch": "ابحث:",
+                    "sUrl": "",
+                    "oPaginate": {
+                        "sFirst": "الأول",
+                        "sPrevious": "السابق",
+                        "sNext": "التالي",
+                        "sLast": "الأخير"
+                    }
+                },
+                buttons: [
+                    {
+                        extend: 'collection',
+                        className: 'btn btn-label-secondary dropdown-toggle mx-3',
+                        text: '<i class="bx bx-upload me-2"></i>تصدير البيانات',
+                        buttons: [
+                            {
+                                extend: 'print',
+                                text: '<i class="bx bx-printer me-2" ></i>طباعة',
+                                className: 'dropdown-item',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5],
+                                    // prevent avatar to be print
+                                    format: {
+                                        body: function (inner, coldex, rowdex) {
+                                            if (inner.length <= 0) return inner;
+                                            var el = $.parseHTML(inner);
+                                            var result = '';
+                                            $.each(el, function (index, item) {
+                                                if (item.classList !== undefined && item.classList.contains('name')) {
+                                                    result = result + item.lastChild.firstChild.textContent;
+                                                } else if (item.innerText === undefined) {
+                                                    result = result + item.textContent;
+                                                } else result = result + item.innerText;
+                                            });
+                                            return result;
+                                        }
+                                    }
+
+
+                                },
+                                customize: function (win) {
+                                    //customize print view for dark
+                                    $(win.document.body)
+                                        .css('color', headingColor)
+                                        .css('border-color', borderColor)
+                                        .css('background-color', bodyBg);
+                                    $(win.document.body)
+                                        .find('table')
+                                        .addClass('compact')
+                                        .css('color', 'inherit')
+                                        .css('border-color', 'inherit')
+                                        .css('background-color', 'inherit');
+                                }
+                            },
+                            {
+                                extend: 'csv',
+                                text: '<i class="bx bx-file me-2" ></i>CSV',
+                                className: 'dropdown-item',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5],
+                                    // prevent avatar to be display
+                                    format: {
+                                        body: function (inner, coldex, rowdex) {
+                                            if (inner.length <= 0) return inner;
+                                            var el = $.parseHTML(inner);
+                                            var result = '';
+                                            $.each(el, function (index, item) {
+                                                if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                                    result = result + item.lastChild.firstChild.textContent;
+                                                } else if (item.innerText === undefined) {
+                                                    result = result + item.textContent;
+                                                } else result = result + item.innerText;
+                                            });
+                                            return result;
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                extend: 'excel',
+                                text: 'Excel',
+                                className: 'dropdown-item',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5],
+                                    // prevent avatar to be display
+                                    format: {
+                                        body: function (inner, coldex, rowdex) {
+                                            if (inner.length <= 0) return inner;
+                                            var el = $.parseHTML(inner);
+                                            var result = '';
+                                            $.each(el, function (index, item) {
+                                                if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                                    result = result + item.lastChild.firstChild.textContent;
+                                                } else if (item.innerText === undefined) {
+                                                    result = result + item.textContent;
+                                                } else result = result + item.innerText;
+                                            });
+                                            return result;
+                                        }
+                                    }
+                                }
+                            },
+                            {
+                                extend: 'pdf',
+                                text: '<i class="bx bxs-file-pdf me-2"></i>PDF',
+                                className: 'dropdown-item',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5],
+                                    // prevent avatar to be display
+                                    format: {
+                                        body: function (inner, coldex, rowdex) {
+                                            if (inner.length <= 0) return inner;
+                                            var el = $.parseHTML(inner);
+                                            var result = '';
+                                            $.each(el, function (index, item) {
+                                                if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                                    result = result + item.lastChild.firstChild.textContent;
+                                                } else if (item.innerText === undefined) {
+                                                    result = result + item.textContent;
+                                                } else result = result + item.innerText;
+                                            });
+                                            return result;
+                                        }
+                                    },
+                                    customize: function (doc) {
+                                        doc.defaultStyle.font = 'Arial';
+                                        doc.styles.tableHeader.font = 'Arial';
+                                        doc.content[1].table.widths = ['*', '*', '*', '*', '*'];
+                                    }
+
+
+
+
+                                }
+                            },
+                            {
+                                extend: 'copy',
+                                text: '<i class="bx bx-copy me-2" ></i>نسخ',
+                                className: 'dropdown-item',
+                                exportOptions: {
+                                    columns: [1, 2, 3, 4, 5],
+                                    // prevent avatar to be display
+                                    format: {
+                                        body: function (inner, coldex, rowdex) {
+                                            if (inner.length <= 0) return inner;
+                                            var el = $.parseHTML(inner);
+                                            var result = '';
+                                            $.each(el, function (index, item) {
+                                                if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                                    result = result + item.lastChild.firstChild.textContent;
+                                                } else if (item.innerText === undefined) {
+                                                    result = result + item.textContent;
+                                                } else result = result + item.innerText;
+                                            });
+                                            return result;
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "columns": [
+                    { "data": "name", "name": "Name", "autoWidth": true },
+                    { "data": "date", "name": "date", "autoWidth": true },
+                    {
+                        "render": function (data, type, full, meta) { return full.amount + ' ريال'; }
+                    },
+                    {
+                        "render": function (data, type, full, meta) {
+                            console.log(full.reasons);
+                            var colors = ["primary", "secondary", "success", "danger", "warning", "info", "dark"];
+
+                            var result = '';
+                            $.each(full.reasons, function (index, item) {
+                                result = result + '<span class="badge p-1 bg-label-' + colors[Math.floor(Math.random() * colors.length)] + '">' + item + '</span>';
+                            });
+                            return result;
+
+                        }
+                    },
+                    {
+                        "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="/Edit/EditSpendMoney?id=' + full.id + '">تعديل</a>'; }
+                    }
+                ]
+            });
+
+
+
+            var AddStatus = '@TempData["AddStatus"]';
+            if (AddStatus == "Success") {
+                Swal.fire({
+                    title: 'تمت العملية بنجاح',
+                    text: 'تمت صرف المبلغ بنجاح',
+                    icon: 'success',
+                    confirmButtonText: 'حسنا'
+                });
+            }
+            else if (AddStatus == "Error") {
+                Swal.fire({
+                    title: 'حدث خطأ',
+                    text: 'حدث خطأ أثناء اضافة صرف جديد',
+                    icon: 'error',
+                    confirmButtonText: 'حسنا'
+                });
+            }
+
+            var UpdateStatus = '@TempData["UpdateStatus"]';
+            if (UpdateStatus == "Success") {
+                Swal.fire({
+                    title: 'تمت العملية بنجاح',
+                    text: 'تم تعديل المبلغ الصرف بنجاح',
+                    icon: 'success',
+                    confirmButtonText: 'حسنا'
+                });
+            }
+            else if (UpdateStatus == "Error") {
+                Swal.fire({
+                    title: 'حدث خطأ',
+                    text: 'حدث خطأ أثناء تعديل مبلغ الصرف',
+                    icon: 'error',
+                    confirmButtonText: 'حسنا'
+                });
+            }
+
+
+
+
+
+
+        });
+
+
+
+    </script>
+        }

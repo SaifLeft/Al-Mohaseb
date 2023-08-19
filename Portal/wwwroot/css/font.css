@@ -10,6 +10,6 @@ body {
     font-family: 'AlmaraiLight', sans-serif; /* Apply the custom font to the entire body */
 }
 
-h1, h2, h3, h4, h5, h6, p, a, button,div, span {
+h1, h2, h3, h4, h5, h6, p, a, button, div, tspan, span {
     font-family: 'AlmaraiLight', sans-serif; /* Apply the custom font to heading elements */
 }

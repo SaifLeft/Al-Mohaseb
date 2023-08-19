@@ -133,6 +133,45 @@ namespace Portal.Controllers
         {
             return View();
         }
+        [HttpPost]
+        public async Task<IActionResult> GetSpendMoneyDetails()
+        {
+            var search = Request.Form["search[value]"].FirstOrDefault();
+
+            int totalRecord = 0;
+            int filterRecord = 0;
+
+            var data = _context.MosbSpendMoney
+                .Include(n => n.ReasonsSpendMoneyMapping)
+                .AsQueryable();
+
+
+
+            totalRecord = await data.CountAsync();
+            filterRecord = totalRecord;
+
+            var phoneList = await data
+                .Select(p => new
+                {
+                    id = p.Id,
+                    name = p.Name.Name,
+                    amount = p.Amount,
+                    date = p.Date,
+                    reasons = p.ReasonsSpendMoneyMapping.Select(x => x.Reasons.Name).ToList()
+                })
+                .ToListAsync();
+
+
+
+            var returnObj = new
+            {
+                recordsTotal = totalRecord,
+                recordsFiltered = filterRecord,
+                Data = phoneList
+            };
+
+            return Ok(returnObj);
+        }
 
     }
 }

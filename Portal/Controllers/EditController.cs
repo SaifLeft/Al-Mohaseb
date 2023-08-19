@@ -205,7 +205,102 @@ namespace Portal.Controllers
                 ViewBag.UpdateStatus = "Error: " + ex.Message;
                 return View(VM);
             }
-        }   
+        }
+
+        //EditSpendMoney
+        public async Task<IActionResult> EditSpendMoney(long id)
+        {
+            var spendMoney = await _dbContext.MosbSpendMoney
+                .Include(x => x.ReasonsSpendMoneyMapping)
+                .FirstOrDefaultAsync(n => n.Id == id);
+
+            if (spendMoney == null)
+            {
+                return NotFound();
+            }
+
+            EditSpendMoneyVM VM = new()
+            {
+                NameId = spendMoney.Id,
+                Amount = spendMoney.Amount,
+                Date = spendMoney.Date
+            };
+            ViewBag.Date = DateTime.Parse(spendMoney.Date).ToString("yyyy-MM-dd");
+            ViewBag.SelectedName = spendMoney.NameId;
+            ViewBag.selectedReasonsList = spendMoney.ReasonsSpendMoneyMapping.Select(x => x.ReasonsId).ToList();
+            ViewBag.Id = id;
+
+            return View(VM);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditSpendMoney(EditSpendMoneyVM VM)
+        {
+            try
+            {
+                VM.NameId = long.Parse(Request.Form["Id"]);
+                if (!ModelState.IsValid)
+                {
+                    return View(VM);
+                }
+
+                using var transaction = _dbContext.Database.BeginTransaction();
+                var spendMoney = await _dbContext.MosbSpendMoney.Include(x => x.ReasonsSpendMoneyMapping).FirstOrDefaultAsync(n => n.Id == VM.NameId);
+
+                if (spendMoney == null)
+                {
+                    return NotFound();
+                }
+
+                // Update spendMoney properties
+                if (spendMoney.NameId != VM.NameId) spendMoney.NameId = VM.NameId;
+                if (spendMoney.Amount != VM.Amount) spendMoney.Amount = VM.Amount;
+                if (spendMoney.Date != VM.Date) spendMoney.Date = VM.Date;
+
+                _dbContext.Update(spendMoney);
+
+                await _dbContext.SaveChangesAsync();
+
+                // Handle reason mappings
+                var newSelectedReasonsList = VM.ReasonsList;
+                var oldSelectedReasonsList = spendMoney.ReasonsSpendMoneyMapping.Select(x => x.ReasonsId).ToList();
+
+                var addedReasonsList = newSelectedReasonsList.Except(oldSelectedReasonsList).ToList();
+                var removedReasonsList = oldSelectedReasonsList.Except(newSelectedReasonsList).ToList();
+
+                foreach (var reasonId in addedReasonsList)
+                {
+                    _dbContext.ReasonsSpendMoneyMapping.Add(new ReasonsSpendMoneyMapping
+                    {
+                        ReasonsId = reasonId,
+                        SpendMoneyId = VM.NameId
+                    });
+                }
+
+                await _dbContext.SaveChangesAsync();
+
+                foreach (var reasonId in removedReasonsList)
+                {
+                    var reason = await _dbContext.ReasonsSpendMoneyMapping.FirstOrDefaultAsync(x => x.ReasonsId == reasonId && x.SpendMoneyId == VM.NameId);
+                    if (reason != null)
+                    {
+                        _dbContext.ReasonsSpendMoneyMapping.Remove(reason);
+                    }
+                }
+
+                await _dbContext.SaveChangesAsync();
+
+                transaction.Commit();
+                ViewBag.UpdateStatus = "Success";
+
+                return RedirectToAction("SpendMoney", "List");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.UpdateStatus = "Error: " + ex.Message;
+                return View(VM);
+            }
+        }
 
     }
 }
