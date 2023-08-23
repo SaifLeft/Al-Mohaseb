@@ -40,7 +40,7 @@ namespace Portal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Names(PersonVM VM)
+        public async Task<IActionResult> Names(NameVM VM)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace Portal.Controllers
 
         public async Task<ActionResult> CreateReason(string Reason)
         {
-            var reason = new MosbReasons { Name = Reason };
+            var reason = new MosbReasons { Name = Reason,Date= DateTime.Now.ToString("yyyy-MM-dd") };
             await _context.MosbReasons.AddAsync(reason);
             int add = await _context.SaveChangesAsync();
             if (add == 0)

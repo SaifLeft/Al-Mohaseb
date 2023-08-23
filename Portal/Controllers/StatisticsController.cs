@@ -13,11 +13,12 @@ namespace Portal.Controllers
     {
         private AlMohasebDBContext _context;
 
+        #region Index
         public StatisticsController(AlMohasebDBContext context)
         {
             _context = context;
         }
-        public async Task<IActionResult> Index(int? FirstYear = 0, int? SecondYear = 0)
+        public async Task<IActionResult> Index(int? RPFirstYear = 0, int? RPSecondYear = 0, int? SMFirstYear = 0, int? SMSecondYear = 0, int? AddCountYear = 0)
         {
             var VM = new StatisticsVM();
             var allNames = await _context.MosbName.ToListAsync();
@@ -26,55 +27,119 @@ namespace Portal.Controllers
             var allSpendMoney = await _context.MosbSpendMoney.ToListAsync();
 
 
-            if (FirstYear == 0 && SecondYear == 0)
+            if (RPFirstYear == 0 && RPSecondYear == 0)
             {
-                FirstYear = DateTime.Now.Year - 1;
-                SecondYear = DateTime.Now.Year ;
+                RPFirstYear = DateTime.Now.Year - 1;
+                RPSecondYear = DateTime.Now.Year ;
             }
-            else if (FirstYear == 0 && SecondYear != 0)
+            else if (RPFirstYear == 0 && RPSecondYear != 0)
             {
-                FirstYear = SecondYear - 1;
-                SecondYear = FirstYear ;
+                RPFirstYear = RPSecondYear - 1;
+                RPSecondYear = RPFirstYear ;
             }
-            else if (FirstYear != 0 && SecondYear == 0)
+            else if (RPFirstYear != 0 && RPSecondYear == 0)
             {
-                SecondYear = FirstYear - 1;
+                RPSecondYear = RPFirstYear - 1;
             }
             else
             {
-                VM.YearSelected = true;
-                VM.FirstYear = FirstYear;
-                VM.SecondYear = SecondYear;
+                VM.RPYearSelected = true;
+                VM.RPFirstYear = RPFirstYear;
+                VM.RPSecondYear = RPSecondYear;
+            }
+
+            if (SMFirstYear == 0 && SMSecondYear == 0)
+            {
+                SMFirstYear = DateTime.Now.Year - 1;
+                SMSecondYear = DateTime.Now.Year;
+            }
+            else if (SMFirstYear == 0 && SMSecondYear != 0)
+            {
+                SMFirstYear = SMSecondYear - 1;
+                SMSecondYear = SMFirstYear;
+            }
+            else if (SMFirstYear != 0 && SMSecondYear == 0)
+            {
+                SMSecondYear = SMFirstYear - 1;
+            }
+            else
+            {
+                VM.SMYearSelected = true;
+                VM.SMFirstYear = SMFirstYear;
+                VM.SMSecondYear = SMSecondYear;
             }
 
 
-            //prepere data for analytics Bar Chart 
+            //prepare data for analytics Bar Chart 
             VM.NamesCount = allNames.Count();
             VM.ReceivePaymentsAmountCount = allReceivePayments.Select(allReceivePayments => allReceivePayments.Amount).Sum();
             VM.SpendMoneyAmountCount = allSpendMoney.Select(allSpendMoney => allSpendMoney.Amount).Sum();
 
 
-            List<string> MonthInEn = new List<string>();
+
+
+            //get Names that been added in certain year.
+            if (AddCountYear != 0)
+            {
+                VM.AddCountYear = AddCountYear;
+            }
+            VM.NamesCountInCertainYear = GetNameCountInCertainYear(allNames, AddCountYear);
+            VM.ReasonsCountInCertainYear = GetReasonCountInCertainYear(allReasons, AddCountYear);
+
+
+
+
+            List<string> MonthInAr = new List<string>();
             for (int i = 1; i <= 12; i++)
             {
-                MonthInEn.Add(new DateTime(2023, i, 1).ToString("MMMM", CultureInfo.CreateSpecificCulture("ar-KW")));
+                MonthInAr.Add(new DateTime(2023, i, 1).ToString("MMMM", CultureInfo.CreateSpecificCulture("ar-KW")));
             }
 
-            VM.MonthInEn = MonthInEn;
+            VM.MonthInEn = MonthInAr;
 
 
-            /*{
-                                Year: '2019',
-                                AmountBerMonth: [5, 7, 12, 17, 9, 17, 26, 21, 10, 12, 18, 4]
-                            }*/
-            VM.ReceivePaymentsBerYear = GetYearlyData(allReceivePayments, "Date", "Amount", FirstYear.Value, SecondYear.Value);
-            VM.SpendMoneyBerYear = GetYearlyData(allSpendMoney, "Date", "Amount", FirstYear.Value, SecondYear.Value);
+            VM.ReceivePaymentsBerYear = GetYearlyData(allReceivePayments, "Date", "Amount", RPFirstYear.Value, RPSecondYear.Value);
 
             VM.FromFirstYearToLastYearInReceivePayments = GetListOfYears(allReceivePayments);
             VM.FromFirstYearToLastYearInSpendMoney = GetListOfYears(allSpendMoney);
 
+
+            VM.SpendMoneyBerYear = GetYearlyData(allSpendMoney, "Date", "Amount", RPFirstYear.Value, RPSecondYear.Value);
+
+
+            
+
             return View(VM);
         }
+
+        #region أحصائيات الأضافات السنوية
+        
+        private int GetNameCountInCertainYear(List<MosbName> allNames, int? addCountYear)
+        {
+            //if addCountYear is 0 then return all names count on carrnt year
+            if (addCountYear == 0)
+            {
+                return allNames.Where(allNames => DateTime.Parse(allNames.RegisterDate).Year == DateTime.Now.Year).Count();
+            }
+            else
+            {
+                return allNames.Where(allNames => DateTime.Parse(allNames.RegisterDate).Year == addCountYear).Count();
+            }
+        }
+        private int GetReasonCountInCertainYear(List<MosbReasons> allReasons, int? addCountYear)
+        {
+            //if addCountYear is 0 then return all names count on carrnt year
+            if (addCountYear == 0)
+            {
+                return allReasons.Where(allReasons => DateTime.Parse(allReasons.Date).Year == DateTime.Now.Year).Count();
+            }
+            else
+            {
+                return allReasons.Where(allReasons => DateTime.Parse(allReasons.Date).Year == addCountYear).Count();
+            }
+        }
+        #endregion أحصائيات الأضافات السنوية
+
         private List<int> GetListOfYears<T>(List<T> Data)
         {
             var FirstYear = Data.Select(Data => DateTime.Parse(Data.GetType().GetProperty("Date").GetValue(Data).ToString()).Year).Min();
@@ -119,7 +184,52 @@ namespace Portal.Controllers
             return yearlyData;
         }
 
-       
+        #endregion Index
+
+
+        #region Person
+
+        public async Task<IActionResult> Person(int? PersonId = null)
+        {
+            PersonVM VM = new();
+
+
+            MosbName? PersonDetails = new();
+            if (PersonId != null)
+            {
+                VM.FromQuery = true;
+                PersonDetails = await _context.MosbName
+                                .Include(x => x.PersonReasonMapping)
+                                .ThenInclude(x => x.Reasons)
+                                .Include(x => x.PersonReasonMapping)
+                                .ThenInclude(x => x.Name)
+                                .Include(x => x.MosbReceivePayments)
+                                .ThenInclude(x => x.ReceivePaymentsReasonsMapping)
+                                .ThenInclude(x => x.Reasons)
+
+                                .Include(x => x.MosbSpendMoney)
+                                .ThenInclude(x => x.ReasonsSpendMoneyMapping)
+                                .ThenInclude(x => x.Reasons)
+                                .FirstOrDefaultAsync(x => x.Id == PersonId);
+                VM.FromQearyDetails = PersonDetails;
+                VM.PersonId = PersonId.Value;
+            }
+
+
+
+
+
+
+            return View(VM);
+        }
+
+        #endregion Person
+
+
+
+
+
+
 
 
     }

@@ -8,87 +8,225 @@
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="card p-4">
-        <div class="divider divider-info">
-            <div class="divider-text">الصفحة الرئسية</div>
-        </div>
-        <div class="card-body">
 
+        <div class="card-body">
+            <div class="row">
+                <div class="divider divider-info">
+                    <div class="divider-text">أحصائيات السنة الحالية - @DateTime.Now.Year</div>
+                </div>
+                <div class="col-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar">
+                                        <span class="avatar-initial bg-label-success rounded-circle">
+                                            <i class="bx bx-dollar fs-4"></i>
+                                        </span>
+                                    </div>
+                                    <div class="card-info">
+                                        <h4 class="card-title mb-0 me-2">@Model.ReceivePaymentsAmountCount ريال</h4>
+                                        <small class="text-muted">جميع المبالغ في سنة @DateTime.Now.Year</small>
+                                    </div>
+                                </div>
+                                <div id="incomeChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar">
+                                        <span class="avatar-initial bg-label-danger rounded-circle">
+                                            <i class="bx bx-dollar fs-4"></i>
+                                        </span>
+                                    </div>
+                                    <div class="card-info">
+                                        <h4 class="card-title mb-0 me-2">@Model.ReceivePaymentsAmountCount ريال</h4>
+                                        <small class="text-muted">جميع مروفات سنة @DateTime.Now.Year</small>
+                                    </div>
+                                </div>
+                                <div id="incomeChart2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Latest Update -->
+                <div class="col-md-6 col-lg-6 col-xl-4 col-xl-4 mb-2">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center justify-content-between mb-3">
+                            <h5 class="card-title mb-0">أحصائيات الأضافات</h5>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                        type="button"
+                                        id="orederStatistics"
+                                        data-bs-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false">
+                                    @if (Model.AddCountYear is not null)
+                                    {
+                                        @Model.AddCountYear
+                                    }
+                                    else
+                                    {
+                                        @DateTime.Now.Year
+                                    }
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orederStatistics">
+                                    @for (int i = 2019; i <= 2028; i++)
+                                    {
+                                        <a onclick="AddCount(@i)" class="dropdown-item year-item">@i</a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <ul class="p-0 m-0">
+                                <li class="d-flex mb-4">
+                                    <div class="avatar avatar-sm flex-shrink-0 me-3">
+                                        <span class="avatar-initial rounded-circle bg-label-primary">
+                                            <i class="bx bx-user-plus"></i>
+                                        </span>
+                                    </div>
+                                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                        <div class="me-2">
+                                            <p class="mb-0 lh-1">الأسماء الجديدة</p>
+                                        </div>
+                                        <div class="item-progress">@Model.NamesCountInCertainYear</div>
+                                    </div>
+                                </li>
+                                <li class="d-flex mb-4">
+                                    <div class="avatar avatar-sm flex-shrink-0 me-3">
+                                        <span class="avatar-initial rounded-circle bg-label-info">
+                                            <i class="bx bx-pie-chart-alt"></i>
+                                        </span>
+                                    </div>
+                                    <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                                        <div class="me-2">
+                                            <p class="mb-0 lh-1">الأسباب الجديدة</p>
+                                        </div>
+                                        <div class="item-progress">@Model.ReasonsCountInCertainYear</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!--/ Latest Update -->
+            </div>
             <div class="row">
 
                 <!-- Money incomming and out Analytics-->
                 <div class="col-lg-12 col-md-12 mb-4">
-                    <div class="col-md-3 d-flex">
-                        <h6>من</h6>
-                        <select class="form-select form-select" data-allow-clear="true">
-                            @foreach (var item in @Model.FromFirstYearToLastYearInReceivePayments)
-                            {
-                                <option value="@item">@item</option>
-                            }
-                        </select>
-                        <h6>الى</h6>
-                        <select class="form-select form-select" data-allow-clear="true">
-                            @foreach (var item in @Model.FromFirstYearToLastYearInReceivePayments)
-                            {
-                                <option value="@item">@item</option>
-                            }
-                        </select>
+                    <div class="divider divider-success">
+                        <div class="divider-text">المبالغ المستقبلة</div>
                     </div>
                     <div class="card">
+
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            @if (Model.YearSelected)
+                            @if (Model.RPYearSelected)
                             {
-                                <h5 class="card-title mb-0">الأحصائيات لعام @Model.FirstYear الى @Model.SecondYear</h5>
+                                <h5 class="card-title mb-0 text-bg-light">الأحصائيات المبالغ المستقبلة لعام @Model.RPFirstYear الى @Model.RPSecondYear</h5>
 
                             }
                             else
                             {
-                                <h5 class="card-title mb-0">الأحصائيات لعام @(DateTime.Now.Year - 1) الى @DateTime.Now.Year</h5>
+                            <h5 class="card-title mb-0">الأحصائيات  المبالغ المستقبلة لعام @(DateTime.Now.Year - 1) الى @DateTime.Now.Year</h5>
                             }
-                            
-                            <div class="dropdown">
-                                <button class="btn p-0"
-                                        type="button"
-                                        id="analyticsOptions"
+                            <div class="btn-group">
+                                <button type="button"
+                                        class="btn btn-label-success dropdown-toggle"
                                         data-bs-toggle="dropdown"
                                         aria-haspopup="true"
                                         aria-expanded="false">
-                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                    مقارنة بين سنتين
                                 </button>
-                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="analyticsOptions">
-                                    <a class="dropdown-item" onclick="ShowTwoYearsInput()">مقارنة بين سنتين</a>
+                                <div class="dropdown-menu dropdown-menu-end w-px-300">
+                                    <form class="p-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">من</label>
+                                            <select name="RPFirstYear" class="form-select" data-allow-clear="true">
+                                                @foreach (var item in @Model.FromFirstYearToLastYearInReceivePayments)
+                                                {
+                                                    <option value="@item">@item</option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="exampleDropdownFormPassword1" class="form-label">الى</label>
+                                            <select name="RPSecondYear" class="form-select form-select" data-allow-clear="true">
+                                                @foreach (var item in @Model.FromFirstYearToLastYearInReceivePayments)
+                                                {
+                                                    <option value="@item">@item</option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <button type="submit"  class="btn btn-primary">عرض</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                         <div class="card-body pb-2">
-                            <div class="d-flex justify-content-around align-items-center flex-wrap mb-4">
-                                <div class="user-analytics text-center me-2">
-                                    <i class="bx bx-user me-1"></i>
-                                    <span>الأسماء</span>
-                                    <div class="d-flex align-items-center mt-2">
-                                        <div class="chart-report" data-color="success" data-series="@Model.NamesCount"></div>
-                                        <h3 class="mb-0">@Model.NamesCount</h3>
-                                    </div>
-                                </div>
-                                <div class="sessions-analytics text-center me-2">
-                                    <i class="bx bx-pie-chart-alt me-1"></i>
-                                    <span>المبالغ المصروفة</span>
-                                    <div class="d-flex align-items-center mt-2">
-                                        <div class="chart-report" data-color="warning" data-series="76"></div>
-                                        <h3 class="mb-0">@Model.SpendMoneyAmountCount</h3>
-                                    </div>
-                                </div>
-                                <div class="bounce-rate-analytics text-center">
-                                    <i class="bx bx-trending-up me-1"></i>
-                                    <span>المبالغ المستقبلة</span>
-                                    <div class="d-flex align-items-center mt-2">
-                                        <div class="chart-report" data-color="danger" data-series="65"></div>
-                                        <h3 class="mb-0">@Model.ReceivePaymentsAmountCount</h3>
-                                    </div>
-                                </div>
-                            </div>
                             <div id="analyticsBarChart"></div>
                         </div>
                     </div>
+                    <div class="divider divider-warning">
+                        <div class="divider-text">المبالغ المصروفة</div>
+                    </div>
+                    <div class="card">
+
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            @if (Model.SMYearSelected)
+                            {
+                                <h5 class="card-title mb-0 text-bg-dark">احصائيات االمبالغ المصروفة لعام @Model.SMFirstYear الى @Model.SMSecondYear</h5>
+
+                            }
+                            else
+                            {
+                                <h5 class="card-title mb-0">احصائيات المبالغ المصروفة لعام @(DateTime.Now.Year - 1) الى @DateTime.Now.Year</h5>
+                            }
+                            <div class="btn-group">
+                                <button type="button"
+                                        class="btn btn-label-warning dropdown-toggle"
+                                        data-bs-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false">
+                                    مقارنة بين سنتين
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end w-px-300">
+                                    <form class="p-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">من</label>
+                                            <select name="SMFirstYear" class="form-select" data-allow-clear="true">
+                                                @foreach (var item in @Model.FromFirstYearToLastYearInSpendMoney)
+                                                {
+                                                    <option value="@item">@item</option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">الى</label>
+                                            <select name="SMSecondYear" class="form-select form-select" data-allow-clear="true">
+                                                @foreach (var item in @Model.FromFirstYearToLastYearInSpendMoney)
+                                                {
+                                                    <option value="@item">@item</option>
+                                                }
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">عرض</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pb-2">
+                            <div id="analyticsBarChart2"></div>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
 
@@ -106,7 +244,7 @@
     <!-- Page CSS -->
     <!-- Helpers -->
     <script src="~/assets/vendor/js/helpers.js"></script>
-    }
+        }
 
 @section Scripts{
     <script src="~/assets/vendor/libs/select2/select2.js"></script>
@@ -119,32 +257,37 @@
         $(document).ready(function () {
 
 
-            //array for selected items
-            var selectedItems = []
-            //select2Basic if user are selected 2 item than call redirictd to page.
-            $('#select2Basic').on('select2:select', function (e) {
-                selectedItems.push(e.params.data.id);
-                //if user are selected 2 item than call redirictd to page.
-                if (selectedItems.length == 2) {
-                    var url = '@Url.Action("Index","Statistics")' + '?FirstYear=' + selectedItems[0] + '&SecondYear=' + selectedItems[1];
-                    console.log(url);
-                    // redirect url to page.
-                    window.location.href = url;
-                }
-                
+            function initializeSelect2(id) {
+                $(id).select2({
+                    placeholder: 'اختر السنة',
+                    allowClear: false,
+                });
+            }
 
+            var $receiveFirstYear = $('#ReceiveFirstYear');
+            var $receiveLastYear = $('#ReceiveLastYear');
+
+            initializeSelect2($receiveFirstYear);
+            initializeSelect2($receiveLastYear);
+
+
+            $receiveFirstYear.val(null).trigger('change');
+            $receiveLastYear.val(null).trigger('change');
+
+            $receiveFirstYear.add($receiveLastYear).on('change', function () {
+                var selectedValue = $(this).val();
+                $receiveFirstYear.add($receiveLastYear).find('option').prop('disabled', false);
+                $receiveFirstYear.add($receiveLastYear).find(`option[value="${selectedValue}"]`).prop('disabled', true);
             });
 
-
-
-            if ('@Model.YearSelected') {
-                $('#select2Basic').val([@Model.FirstYear, @Model.SecondYear]).trigger('change');
-            }
-            else {
-                $('#select2Basic').val([@(DateTime.Now.Year - 1), @DateTime.Now.Year]).trigger('change');
-            }
-
-
+            //if both select list ara selected than redirect to action method
+            $('#btnReceiveSubmit').click(function () {
+                if (Validat($receiveFirstYear) && Validat($receiveLastYear)) {
+                    var firstYear = $receiveFirstYear.val();
+                    var lastYear = $receiveLastYear.val();
+                    window.location.href = '@Url.Action("Index", "Statistics")?firstYear=' + firstYear + '&lastYear=' + lastYear;
+                }
+            });
 
             'use strict';
             (function () {
@@ -242,7 +385,7 @@
                         dataLabels: {
                             enabled: false
                         },
-                        colors: [config.colors.primary, config.colors_label.primary],
+                        colors: [config.colors.success, config.colors_label.dark, config.colors.warning],
                         series: @Html.Raw(Json.Serialize(Model.ReceivePaymentsBerYear)),
                         grid: {
                             borderColor: borderColor,
@@ -280,7 +423,7 @@
                         tooltip: {
                             y: {
                                 formatter: function (val) {
-                                    return '$ ' + val + ' thousands';
+                                    return " " + val + " ريال ";
                                 }
                             }
                         }
@@ -289,6 +432,81 @@
                     const analyticsBarChart = new ApexCharts(analyticsBarChartEl, analyticsBarChartConfig);
                     analyticsBarChart.render();
                 }
+
+
+                // Analytics - Bar Chart
+                // --------------------------------------------------------------------
+                const analyticsBarChartEl2 = document.querySelector('#analyticsBarChart2'),
+                    analyticsBarChartConfig2 = {
+                        chart: {
+                            height: 250,
+                            type: 'bar',
+                            toolbar: {
+                                show: false
+                            }
+                        },
+                        plotOptions: {
+                            bar: {
+                                horizontal: false,
+                                columnWidth: '20%',
+                                borderRadius: 3,
+                                startingShape: 'rounded'
+                            }
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        colors: [config.colors.warning, config.colors_label.dark, config.colors.info],
+                        series: @Html.Raw(Json.Serialize(Model.SpendMoneyBerYear)),
+                        grid: {
+                            borderColor: borderColor,
+                            padding: {
+                                bottom: -8
+                            }
+                        },
+                        xaxis: {
+                            categories: @Html.Raw(Json.Serialize(Model.MonthInEn)),
+                            axisBorder: {
+                                show: false
+                            },
+                            axisTicks: {
+                                show: false
+                            },
+                            labels: {
+                                style: {
+                                    colors: labelColor
+                                }
+                            }
+                        },
+                        yaxis: {
+                            min: 0,
+                            max: 10000,
+                            tickAmount: 4,
+                            labels: {
+                                style: {
+                                    colors: labelColor
+                                }
+                            }
+                        },
+                        legend: {
+                            show: false
+                        },
+                        tooltip: {
+                            y: {
+                                formatter: function (val) {
+                                    return " " + val + " ريال ";
+                                }
+                            }
+                        }
+                    };
+                if (typeof analyticsBarChartEl2 !== undefined && analyticsBarChartEl2 !== null) {
+                    const analyticsBarChart2 = new ApexCharts(analyticsBarChartEl2, analyticsBarChartConfig2);
+                    analyticsBarChart2.render();
+                }
+
+
+
+
 
                 // Referral - Line Chart
                 // --------------------------------------------------------------------
@@ -611,7 +829,7 @@
                         },
                         stroke: {
                             curve: 'smooth',
-                            width: 3
+                            width: 5
                         },
                         grid: {
                             show: false,
@@ -622,7 +840,7 @@
                                 bottom: 0
                             }
                         },
-                        colors: [config.colors.warning],
+                        colors: [config.colors.success],
                         fill: {
                             type: 'gradient',
                             gradient: {
@@ -654,6 +872,80 @@
                 if (typeof incomeChartEl !== undefined && incomeChartEl !== null) {
                     const incomeChart = new ApexCharts(incomeChartEl, incomeChartConfig);
                     incomeChart.render();
+                }
+                // Income - Gradient Line Chart
+                // --------------------------------------------------------------------
+                const incomeChartEl2 = document.querySelector('#incomeChart2'),
+                    incomeChartConfig2 = {
+                        series: [
+                            {
+                                data: [40, 70, 38, 90, 40, 65]
+                            }
+                        ],
+                        chart: {
+                            height: 40,
+                            type: 'line',
+                            zoom: {
+                                enabled: false
+                            },
+                            sparkline: {
+                                enabled: true
+                            },
+                            toolbar: {
+                                show: false
+                            }
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        },
+                        stroke: {
+                            curve: 'smooth',
+                            width: 5
+                        },
+                        grid: {
+                            show: false,
+                            padding: {
+                                top: 10,
+                                left: 10,
+                                right: 10,
+                                bottom: 0
+                            }
+                        },
+                        colors: [config.colors.danger],
+                        fill: {
+                            type: 'gradient',
+                            gradient: {
+                                shade: shadeColor,
+                                type: 'horizontal',
+                                gradientToColors: undefined,
+                                opacityFrom: 0,
+                                opacityTo: 0.9,
+                                stops: [0, 30, 70, 100]
+                            }
+                        },
+                        xaxis: {
+                            labels: {
+                                show: false
+                            },
+                            axisBorder: {
+                                show: false
+                            },
+                            axisTicks: {
+                                show: false
+                            }
+                        },
+                        yaxis: {
+                            labels: {
+                                show: false
+                            }
+                        }
+                    };
+                if (typeof incomeChartEl2 !== undefined && incomeChartEl2 !== null) {
+                    const incomeChart2 = new ApexCharts(incomeChartEl2, incomeChartConfig2);
+                    incomeChart2.render();
                 }
 
                 // Registrations Bar Chart
@@ -926,15 +1218,27 @@
 
         });
 
-        function ShowTwoYearsInput() {
-            var x = document.getElementById("TwoYearsInput");
-            if (x.style.display === "none") {
-                x.style.display = "block";
-            } else {
-                x.style.display = "none";
-            }
+
+
+
+        function Validat($element) {
+            return $element.val() !== '' && $element.val() !== null;
         }
+
+        function ShowTwoYearsInput() {
+            //get elecment by class name
+            var element = document.getElementsByClassName("Years-Input");
+
+            
+
+        }
+
+
+        function AddCount(year) {
+            window.location.href = '@Url.Action("Index", "Statistics")?AddCountYear=' + year;
+        }
+
     </script>
 
 
-    }
+        }

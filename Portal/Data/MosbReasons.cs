@@ -16,6 +16,8 @@ namespace Portal.Data
 
         public long Id { get; set; }
         public string Name { get; set; }
+        public string Date1 { get; set; }
+        public string Date { get; set; }
 
         public virtual ICollection<PersonReasonMapping> PersonReasonMapping { get; set; }
         public virtual ICollection<ReasonsSpendMoneyMapping> ReasonsSpendMoneyMapping { get; set; }
