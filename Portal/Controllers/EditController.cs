@@ -37,11 +37,12 @@ namespace Portal.Controllers
                 ReasonsList = name.PersonReasonMapping.Select(x => x.ReasonsId).ToList()
             };
 
-            ViewBag.selectedReasonsList = name.PersonReasonMapping.Select(x => x.ReasonsId).ToList();
-            ViewBag.Id = id;
+            ViewData["SelectedReasonsList"] = name.PersonReasonMapping.Select(x => x.ReasonsId).ToList();
+            ViewData["Id"] = id;
 
             return View(VM);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> EditPerson(EditPersonVM VM)

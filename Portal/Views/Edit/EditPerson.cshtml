@@ -83,7 +83,7 @@
                     $.each(data, function () {
                         options2.append($("<option />").val(this.id).text(this.name));
                     });
-                    var selectedReasonsList = @Html.Raw(Json.Serialize(ViewBag.selectedReasonsList));
+                    var selectedReasonsList = @Html.Raw(Json.Serialize(@ViewBag.selectedReasonsList));
                     $("#select2Primary").val(selectedReasonsList).trigger("change");
 
                 },

@@ -30,12 +30,12 @@ namespace Portal.Controllers
             if (RPFirstYear == 0 && RPSecondYear == 0)
             {
                 RPFirstYear = DateTime.Now.Year - 1;
-                RPSecondYear = DateTime.Now.Year ;
+                RPSecondYear = DateTime.Now.Year;
             }
             else if (RPFirstYear == 0 && RPSecondYear != 0)
             {
                 RPFirstYear = RPSecondYear - 1;
-                RPSecondYear = RPFirstYear ;
+                RPSecondYear = RPFirstYear;
             }
             else if (RPFirstYear != 0 && RPSecondYear == 0)
             {
@@ -107,13 +107,13 @@ namespace Portal.Controllers
             VM.SpendMoneyBerYear = GetYearlyData(allSpendMoney, "Date", "Amount", RPFirstYear.Value, RPSecondYear.Value);
 
 
-            
+
 
             return View(VM);
         }
 
         #region أحصائيات الأضافات السنوية
-        
+
         private int GetNameCountInCertainYear(List<MosbName> allNames, int? addCountYear)
         {
             //if addCountYear is 0 then return all names count on carrnt year
@@ -142,6 +142,10 @@ namespace Portal.Controllers
 
         private List<int> GetListOfYears<T>(List<T> Data)
         {
+            if (Data.Count == 0)
+            {
+                return new List<int>();
+            }
             var FirstYear = Data.Select(Data => DateTime.Parse(Data.GetType().GetProperty("Date").GetValue(Data).ToString()).Year).Min();
             var SecondYear = Data.Select(Data => DateTime.Parse(Data.GetType().GetProperty("Date").GetValue(Data).ToString()).Year).Max();
 
@@ -154,7 +158,7 @@ namespace Portal.Controllers
             return FromFirstYearToLastYear;
 
         }
-        private List<BerYear> GetYearlyData<T>(List<T> data, string datePropertyName, string amountPropertyName, int FirstYear,int SecondYear)
+        private List<BerYear> GetYearlyData<T>(List<T> data, string datePropertyName, string amountPropertyName, int FirstYear, int SecondYear)
         {
             var yearlyData = new List<BerYear>();
 
@@ -177,7 +181,7 @@ namespace Portal.Controllers
             for (int month = 1; month <= 12; month++)
             {
                 //AmountBerMonth: [TotalAmountInJun, TotalAmountInFeb, 12, 17, 9, 17, 26, 21, 10, 12, 18, 4]
-                double AmountInMonth =data.Where(x=> DateTime.Parse(x.GetType().GetProperty(datePropertyName).GetValue(x).ToString()).Year == year && DateTime.Parse(x.GetType().GetProperty(datePropertyName).GetValue(x).ToString()).Month == month).Select(x=> double.Parse(x.GetType().GetProperty(amountPropertyName).GetValue(x).ToString())).Sum();
+                double AmountInMonth = data.Where(x => DateTime.Parse(x.GetType().GetProperty(datePropertyName).GetValue(x).ToString()).Year == year && DateTime.Parse(x.GetType().GetProperty(datePropertyName).GetValue(x).ToString()).Month == month).Select(x => double.Parse(x.GetType().GetProperty(amountPropertyName).GetValue(x).ToString())).Sum();
                 yearlyData.Add(AmountInMonth);
             }
 
@@ -193,39 +197,60 @@ namespace Portal.Controllers
         {
             PersonVM VM = new();
 
-
-            MosbName? PersonDetails = new();
             if (PersonId != null)
             {
                 VM.FromQuery = true;
-                PersonDetails = await _context.MosbName
-                                .Include(x => x.PersonReasonMapping)
-                                .ThenInclude(x => x.Reasons)
-                                .Include(x => x.PersonReasonMapping)
-                                .ThenInclude(x => x.Name)
-                                .Include(x => x.MosbReceivePayments)
-                                .ThenInclude(x => x.ReceivePaymentsReasonsMapping)
-                                .ThenInclude(x => x.Reasons)
 
-                                .Include(x => x.MosbSpendMoney)
-                                .ThenInclude(x => x.ReasonsSpendMoneyMapping)
-                                .ThenInclude(x => x.Reasons)
-                                .FirstOrDefaultAsync(x => x.Id == PersonId);
+                MosbName? PersonDetails = await _context.MosbName
+                    .Include(x => x.MosbReceivePayments)
+                    .ThenInclude(x => x.ReceivePaymentsReasonsMapping)
+                    .Include(x => x.MosbSpendMoney)
+                    .ThenInclude(x => x.ReasonsSpendMoneyMapping)
+                    .Include(x => x.PersonReasonMapping)
+                    .ThenInclude(x => x.Reasons)
+                    .FirstOrDefaultAsync(x => x.Id == PersonId);
+
                 VM.FromQearyDetails = PersonDetails;
                 VM.PersonId = PersonId.Value;
             }
 
+            // Rest of your code
 
-
-
-
-
-            return View(VM);
+            return View(VM); // or however you want to return the result
         }
+
 
         #endregion Person
 
 
+        #region Reason
+
+        public async Task<IActionResult> Reason(int? ReasonId = null)
+        {
+            ReasonVM VM = new();
+
+            if (ReasonId != null)
+            {
+                VM.FromQuery = true;
+
+                MosbReasons? ReasonDetails = await _context.MosbReasons
+                    .Include(x => x.PersonReasonMapping)
+                    .ThenInclude(x => x.Name)
+                    .Include(x => x.ReasonsSpendMoneyMapping)
+                    .Include(x => x.ReceivePaymentsReasonsMapping)
+                    .ThenInclude(x => x.ReceivePayments)
+                    .FirstOrDefaultAsync(x => x.Id == ReasonId);
+
+                VM.FromQearyDetails = ReasonDetails;
+                VM.ReasonId = ReasonId.Value;
+            }
+
+            // Rest of your code
+
+            return View(VM); // or however you want to return the result
+        }
+
+        #endregion Reason
 
 
 

@@ -107,7 +107,7 @@ namespace Portal.Controllers
             }
         }
 
-        public async Task<ActionResult> CreateReason(string Reason)
+        public async Task<ActionResult> CreateReason(string Reason )
         {
             var reason = new MosbReasons { Name = Reason,Date= DateTime.Now.ToString("yyyy-MM-dd") };
             await _context.MosbReasons.AddAsync(reason);
@@ -140,7 +140,7 @@ namespace Portal.Controllers
         }
 
 
-        public IActionResult ReceivePayments()
+        public IActionResult ReceivePayments(long? ReasonId=null)
         {
             return View();
         }

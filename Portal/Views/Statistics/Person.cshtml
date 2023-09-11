@@ -70,11 +70,37 @@
                 <ul class="list-unstyled mb-4 mt-3">
                     <li class="d-flex align-items-center mb-3">
                         <i class="bx bx-trending-down"></i><span class="fw-semibold mx-2">المبلغ المصروف:</span>
-                        <span>@Model.FromQearyDetails.MosbSpendMoney.Select(x=>x.Amount).Sum()</span>
+                        <span>
+                            @{
+                                var SpendMoneyAmount = Model.FromQearyDetails.MosbSpendMoney.Select(x => x.Amount).Sum();
+                                if (SpendMoneyAmount > 0)
+{
+                                    <span class="text-danger">تم صرف مبلغ @SpendMoneyAmount</span>
+                                }
+                                else if (SpendMoneyAmount == 0)
+                                {
+                                    <span class="text-warning">لم يتم صرف اي مبلغ</span>
+                                }
+                                
+
+                            }
+                        </span>
                     </li>
                     <li class="d-flex align-items-center mb-3">
                         <i class="bx bx-trending-up"></i><span class="fw-semibold mx-2">المبلغ المستقبله منه:</span>
-                        <span>@Model.FromQearyDetails.MosbReceivePayments.Select(x=>x.Amount).Sum()</span>
+                        <span>
+                            @{
+                                var ReceiveAmount = Model.FromQearyDetails.MosbReceivePayments.Select(x => x.Amount).Sum();
+                                if (ReceiveAmount > 0)
+                                {
+                                    <span class="text-success">تم استقبال مبلغ @ReceiveAmount</span>
+                                }
+                                else if (ReceiveAmount == 0)
+                                {
+                                    <span class="text-warning">لم يتم استقبال اي مبلغ</span>
+                                }
+                            }
+                        </span>
                     </li>
                     <li class="d-flex align-items-center mb-3">
                         <i class="bx bx-math"></i><span class="fw-semibold mx-2">المبلغ المتبقي:</span>
@@ -91,9 +117,9 @@
                                 {
                                     <span class="text-danger">عليه مبلغ @result</span>
                                 }
-                                else
+                                else if (result == 0)
                                 {
-                                    <span class="text-warning">لا يوجد مبلغ متبقي</span>
+                                    <span class="text-warning">لم يتم صرف اي مبلغ</span>
                                 }
                             }
                         </span>
@@ -103,16 +129,29 @@
                 <ul class="list-unstyled mt-3 mb-0">
                     <li class="d-flex align-items-center mb-3">
                         <i class="bx bxs-hourglass"></i><span class="fw-semibold mx-2">أخر عملية أستقبال مبلغ منه بتاريخ:</span>
-                        <span>@Model.FromQearyDetails.MosbReceivePayments.Select(x=>x.Date).Last()</span>
+                        <span>
+                            @{
+                                var Receivedate = @Model.FromQearyDetails.MosbReceivePayments;
+                                if (Receivedate.Any())
+                                {
+                                    @Receivedate.Last().Date
+                                    ;
+                                }
+                                else
+                                {
+                                    <span>لا يوجد</span>
+                                }
+                            }
+                        </span>
                     </li>
                     <li class="d-flex align-items-center mb-3">
                         <i class="bx bx-error-alt"></i><span class="fw-semibold mx-2">أخر عملة صرف مبلغ له بتاريخ:</span>
                         <span>
                             @{
-                                var date = @Model.FromQearyDetails.MosbSpendMoney;
-                                if (date.Any())
+                                var Spenddate = @Model.FromQearyDetails.MosbSpendMoney;
+                                if (Spenddate.Any())
                                 {
-                                    @date.Last().Date
+                                    @Spenddate.Last().Date
                                     ;
                                 }
                                 else
@@ -127,7 +166,7 @@
                 <ul class="list-unstyled mt-3 mb-0">
                     <li class="d-flex align-items-center mb-3">
                         <i class="bx bx-error-alt"></i>
-                        <span class="fw-semibold mx-2">مبالغ الدفوعة:</span>
+                        <span class="fw-semibold mx-2">مبالغ المستقبلة لأسباب معينة:</span>
                         <span>
                             @if (Model.FromQearyDetails.PersonReasonMapping.Any() && Model.FromQearyDetails.MosbReceivePayments.Any())
                             {
@@ -149,8 +188,17 @@
                                 {
                                     foreach (var resultss in results)
                                     {
+                                        <span>
+                                            السبب:
+                                        </span>
+                                        <span class="text-info">
+                                            @resultss.name
+                                        </span>
+                                        <span>
+                                            بمبلغ:
+                                        </span>
                                         <span class="text-success">
-                                            السبب @resultss.name بمبلغ @resultss.amount
+                                            @resultss.amount
                                         </span>
                                         <br />
                                     }
@@ -162,7 +210,7 @@
                             }
                             else
                             {
-                                <span class="text-danger">لا توجد معلومات عن المبالغ الدفوعة.</span>
+                                <span class="text-danger">لا توجد معلومات عن المبالغ المستقبله بالأسباب.</span>
                             }
                         </span>
                     </li>

@@ -75,9 +75,18 @@ namespace Portal.Controllers
             return View(VM);
         }
         [HttpGet]
-        public async Task<List<MosbReasons>> GetReasons()
+        public async Task<List<MosbReasons>> GetReasons(long? ByNameId =null)
         {
+            if (ByNameId != null)
+            {
+                var reasons = await _context.PersonReasonMapping
+                    .Where(p => p.NameId == ByNameId)
+                    .Select(p => p.Reasons)
+                    .ToListAsync();
+                return reasons;
+            }
             return await _context.MosbReasons.ToListAsync();
+          
         }
         [HttpGet]
         public async Task<List<MosbName>> GetNames()
