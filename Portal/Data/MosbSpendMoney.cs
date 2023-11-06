@@ -16,6 +16,7 @@ namespace Portal.Data
         public long NameId { get; set; }
         public string Date { get; set; }
         public double Amount { get; set; }
+        public long MosbReasonsid { get; set; }
 
         public virtual MosbName Name { get; set; }
         public virtual ICollection<ReasonsSpendMoneyMapping> ReasonsSpendMoneyMapping { get; set; }

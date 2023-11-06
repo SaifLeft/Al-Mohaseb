@@ -1,0 +1,486 @@
+﻿@model SpendMoneyForReasonVM;
+@{
+    ViewData["Title"] = "أحصائيات بسبب معين";
+    string anser = Model.IsHasRecod ? "نعم" : "لا";
+}
+<!-- Content Page -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h5 class="mb-0">صرفم مبلغ لبسبب معين</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <label class="col-sm-2 col-form-label-lg">اختر السبب</label>
+                <div class="col-sm-3">
+                    <select name="ReasonId" id="ReasonList" class="select2 form-select-lg ">
+                    </select>
+                </div>
+            </div>
+            <div class="row mb-3" id="flatpickrDiv" style="display:none">
+                <label class="col-sm-2 col-form-label-lg">الشهر</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control flatpickr-input active" placeholder="YY-MM" id="flatpickr-date" readonly="readonly">
+                </div>
+            </div>
+            @if (Model.AmountSubscribed > 0)
+            {
+                <div class="row mb-3" id="AmountSubscribedDiv">
+                    <label class="col-sm-2 col-form-label-lg">مبلغ الأشتراك</label>
+                    <div class="col-sm-3">
+                        <input type="text" readonly="" value="@Model.AmountSubscribed ريال" class="form-control-plaintext" id="ReasonAmountShow">
+                    </div>
+                </div>
+            }
+            @if (Model.IsSelected)
+            {
+                <div class="row mb-3" id="HasRecordDiv">
+                    <label class="col-sm-2 col-form-label-lg">تم الصرف مسبقا</label>
+                    <div class="col-sm-3">
+                        @{
+                            if (Model.IsHasRecod)
+                            {
+                                <span class="badge bg-success">
+                                    <label style="font-size:larger">
+                                        @anser
+                                    </label>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">
+                                    <label style="font-size:large">
+                                        @anser
+                                    </label>
+                                </span>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            <div class="row mb-3">
+                <div class="col-sm-3">
+                    <button type="button" class="btn btn-primary" disabled id="ShowAllNamesBtn">عرض</button>
+                    <button type="button" class="btn btn-dark" disabled id="ClearAll">تصفية الخانات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card" id="CardDetailsDiv" style="display:none;">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h5 class="mb-0">جميع الأسماء المرتبطة بالسبب</h5>
+            <button type="button" class="btn btn-primary" onclick="CollectData()">حفظ</button>
+
+        </div>
+
+        <div class="card-body">
+            @if (Model.IsSelected)
+            {
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table class="table table-flush-spacing">
+                            <tbody>
+                                @if (Model.PersonConnectedWithReasonId.Any() || Model.SpendMoneySubmitedAmount.Any())
+                                {
+                                    <tr>
+                                        <td class="text-nowrap">
+                                            تم صرف المبلغ للجميع؟
+                                            <i class="bx bx-info-circle bx-xs" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="جميع من بلاقائمة تمك صرف لهم المبالغ الدد بجانب اسهم"></i>
+                                        </td>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" checked
+                                                       id="selectAll">
+                                                <label class="form-check-label" for="selectAll">تحديد الجميع وأعادة توزيع مبلغ الأشتراك</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+
+
+                                    if (Model.SpendMoneySubmitedAmount is not null && Model.SpendMoneySubmitedAmount.Count > 0)
+                                    {
+                                        @foreach (var item in Model.SpendMoneySubmitedAmount)
+                                        {
+                                            <tr>
+                                                <td class="text-nowrap">@item.PersonName</td>
+                                                <td>
+                                                    <div class="d-flex">
+                                                        <div class="d-flex">
+                                                            <div class="form-check col-md-5 form-check-success form-check-inline">
+                                                                @if (item.Amount == 0)
+                                                                {
+                                                                    <input class="form-check-input payment-checkbox" type="checkbox"
+                                                                           data-input-id="@item.PersonId">
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input class="form-check-input payment-checkbox" type="checkbox"
+                                                                           checked
+                                                                           data-input-id="@item.PersonId">
+                                                                }
+                                                                <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
+                                                            </div>
+                                                            <div class="d-flex" id="AmountBoxDiv-@item.PersonId" style="display: none;">
+                                                                <label class="col-md-3 col-form-label-sm">المبلغ</label>
+                                                                <div class="col-md-6">
+                                                                    <input class="form-control form-control-sm amount-input"
+                                                                           value="@item.Amount"
+                                                                           type="number"
+                                                                           data-input-id-amount="@item.PersonId">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @foreach (var item in Model.PersonConnectedWithReasonId)
+                                        {
+                                            <tr>
+                                                <td class="text-nowrap">@item.PersonName</td>
+                                                <td>
+                                                    <div class="d-flex">
+                                                        <div class="d-flex">
+                                                            <div class="form-check col-md-5 form-check-success form-check-inline">
+                                                                <input class="form-check-input payment-checkbox" type="checkbox" checked data-input-id="@item.PersonId">
+                                                                <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
+                                                            </div>
+                                                            <div class="d-flex" id="AmountBoxDiv-@item.PersonId" style="display: none;">
+                                                                <label class="col-md-3 col-form-label-sm">المبلغ</label>
+                                                                <div class="col-md-8">
+                                                                    <input class="form-control form-control-sm amount-input"
+                                                                           value="@item.Amount"
+                                                                           type="number"
+                                                                           data-input-id-amount="@item.PersonId">
+                                                                </div>
+                                                                <label class="col-md-2 col-form-label-sm"> ريال </label>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="2" class="text-center">لا يوجد أسماء مرتبطة بالسبب</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Permission table -->
+                </div>
+
+            }
+        </div>
+    </div>
+</div>
+
+
+@section Stylesheet{
+    <link rel="stylesheet" href="~/assets/vendor/libs/select2/select2.css">
+    <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/typeahead-js/typeahead.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/flatpickr/flatpickr.css">
+    <link rel="stylesheet" href="~/assets/vendor/libs/flatpickr/monthSelect/style.css">
+
+    }
+
+@section Scripts{
+    <script src="~/assets/vendor/libs/select2/select2.js"></script>
+    <script src="~/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+    <script src="~/assets/vendor/libs/flatpickr/monthSelect/index.js"></script>
+    <script src="~/assets/vendor/libs/flatpickr/monthSelect/monthSelect.js"></script>
+
+
+    <script>
+
+
+        $(document).ready(function () {
+
+            // Initialize the select2 plugin for the ReasonList dropdown
+            $("#ReasonList").select2({
+                placeholder: 'اختر اسما لأظهار تفاصيله', // Placeholder text in Arabic
+                allowClear: true,
+                language: "ar", // Set language to Arabic
+
+            });
+
+            // Fetch reasons using jQuery shorthand for $.get
+            $.get('@Url.Action("GetReasons", "List")', function (data) {
+                var options2 = $("#ReasonList");
+                $.each(data, function () {
+                    options2.append(new Option(this.name, this.id));
+                });
+                // Check 'IsSelected' and show the flatpickr date picker if it's true
+                if (IsSelected === 'True') {
+                    $("#ReasonList").val(@Model.ReasonId).trigger('change');
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.error(textStatus, errorThrown);
+            });
+
+            // Check if the 'IsSelected' value is true or false
+            var IsSelected = '@Model.IsSelected';
+
+            // Get the current year and month in the format 'yyyy-MM'
+            var YearMonth = '@Model.YearMonth'; // Example: '2021-01'
+            var year2digit = new Date().getFullYear().toString()
+            var dayNow = year2digit + '-' + (new Date().getMonth() + 1);
+            var dateformat = YearMonth === '' ? dayNow : YearMonth;
+
+            // Initialize the flatpickr date picker
+            flatpickr("#flatpickr-date", {
+                altInput: true,
+                defaultDate: dateformat,
+                plugins: [
+                    new monthSelectPlugin({
+                        shorthand: true, // Use shorthand month names
+                        dateFormat: "Y-m", // Display format 'year-month'
+                        altFormat: "F Y", // Format for the alternative input display
+                        theme: "light" // Set the theme to light
+                    })
+                ],
+                locale: {
+                    // Define Arabic month names
+                    months: {
+                        shorthand: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+                        longhand: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+                    }
+                }
+            });
+
+            // Handle 'select2:unselect' event to hide content when ReasonList is cleared
+            $("#ReasonList").on('select2:unselect', function (e) {
+                hideAll();
+            });
+            $("#ReasonList").on('select2:clear', function (e) {
+                hideAll();
+            });
+
+            // Handle selection change in the ReasonList dropdown
+            $("#ReasonList").change(function () {
+                var value = $(this).val();
+                if (value !== '' && value !== null) {
+                    $("#flatpickrDiv").show();
+                }
+            });
+
+            // Handle change event of the flatpickr date picker
+            $("#flatpickr-date").change(function () {
+                var data = $(this).val();
+                var ReasonId = $("#ReasonList").val();
+                var isValid = data !== '' && ReasonId !== '' && data !== undefined && data !== null;
+                if (isValid) {
+                    $("#ShowAllNamesBtn").prop("disabled", false);
+                    $("#ClearAll").prop("disabled", false);
+                }
+            });
+
+
+
+            // Function to hide all related elements
+            function hideAll() {
+                $("#flatpickr-date").val(null);
+                $("#AmountSubscribedDiv").hide();
+                $("#flatpickrDiv").hide();
+                $("#ShowAllNamesBtn").prop("disabled", true);
+                $("#ClearAll").prop("disabled", true);
+                $("#CardDetailsDiv").hide();
+                $("#HasRecordDiv").hide();
+
+            }
+
+            // Check 'IsSelected' and show the flatpickr date picker if it's true
+            if (IsSelected === 'True') {
+                $("#flatpickrDiv").show();
+                $("#ShowAllNamesBtn").prop("disabled", false);
+                $("#ClearAll").prop("disabled", false);
+                $("#CardDetailsDiv").show();
+
+            }
+
+            // Handle the "ShowAllNamesBtn" click event
+            $("#ShowAllNamesBtn").click(function () {
+                var ReasonId = $("#ReasonList").val();
+                var date = $("#flatpickr-date").val();
+                var isValid = date !== '' && ReasonId !== '' && date !== undefined && date !== null;
+                if (!isValid) {
+                    alert("الرجاء اختيار سبب وتاريخ");
+                    return;
+                } else {
+                    window.location.href = '@Url.Action("SpendMoneyForReason", "Create")?ReasonId=' + ReasonId + '&YearMonth=' + date;
+                }
+            });
+            $("#ClearAll").click(function () {
+                window.location.href = '@Url.Action("SpendMoneyForReason", "Create")';
+            });
+
+
+
+
+
+            // Get references to elements
+            const selectAll = document.querySelector('#selectAll');
+            const checkboxList = document.querySelectorAll('.payment-checkbox');
+            const amountInputList = document.querySelectorAll('.amount-input:not([disabled])');
+
+            // Amount data
+            var AmountSubscribed = @Model.AmountSubscribed; // Replace with your actual value
+            var amountInputCount = amountInputList.length;
+            var initialAmountPerInput = AmountSubscribed / amountInputCount;
+
+            // Event listeners
+            if (selectAll) {
+                selectAll.addEventListener('change', (event) => {
+                    const isChecked = event.target.checked;
+                    checkboxList.forEach((checkbox) => {
+                        checkbox.checked = isChecked;
+                        handleCheckboxChange(checkbox);
+                    });
+                    isChecked ? enableAllAmountInputs() : disableAllAmountInputs();
+                });
+            }
+
+            checkboxList.forEach((checkbox) => {
+                checkbox.addEventListener('change', () => {
+                    handleCheckboxChange(checkbox);
+                });
+            });
+
+            // Initialize amount inputs
+            initializeAmountInputs();
+
+            function initializeAmountInputs() {
+                amountInputList.forEach((input) => {
+                    input.value = initialAmountPerInput;
+                });
+            }
+
+            function handleCheckboxChange(checkbox) {
+                const inputId = checkbox.getAttribute('data-input-id');
+                const inputElement = document.querySelector('[data-input-id-amount="' + inputId + '"]');
+                inputElement.disabled = !checkbox.checked;
+                inputElement.value = checkbox.checked ? initialAmountPerInput : 0;
+            }
+
+            function disableAllAmountInputs() {
+                amountInputList.forEach((input) => {
+                    input.disabled = true;
+                    input.value = 0;
+                });
+            }
+
+            function enableAllAmountInputs() {
+                amountInputList.forEach((input) => {
+                    input.disabled = false;
+                });
+                divideAmountSubscribedToEnabledInputs();
+            }
+
+            function divideAmountSubscribedToEnabledInputs() {
+                amountInputList.forEach((input) => {
+                    if (!input.disabled) {
+                        input.value = initialAmountPerInput;
+                    }
+                });
+            }
+
+
+
+
+
+
+
+        });
+        function ClearAll() {
+            $("#ReasonList").val(null).trigger('change');
+            $("#flatpickr-date").val(null);
+            $("#AmountSubscribedDiv").hide();
+            $("#flatpickrDiv").hide();
+            $("#ShowAllNamesBtn").prop("disabled", true);
+            $("#CardDetailsDiv").hide();
+            $("#HasRecordDiv").hide();
+
+        }
+        function CollectData() {
+            const PersonIdAmount = [];
+            const checkboxList = document.querySelectorAll('.payment-checkbox');
+            $.each(checkboxList, function (index, value) {
+                const personId = value.getAttribute('data-input-id');
+                var inputElement = document.querySelector('[data-input-id-amount="' + personId + '"]')
+                PersonIdAmount.push(
+                    {
+                        'PersonId': personId,
+                        'IsPaid': value.checked,
+                        'Amount': parseFloat(inputElement.value)
+                    }
+                );
+            });
+            var IsRecord = '@Model.IsHasRecod';
+            var MonthYear = '@Model.YearMonth';
+            var ReasonId = '@Model.ReasonId';
+
+            var data = {
+                'ReasonId': ReasonId,
+                'PersonIdAmount': PersonIdAmount,
+                'IsRecord': IsRecord,
+                'MonthYear': MonthYear
+            };
+
+            console.log(data);
+
+            SaveData(data);
+
+            // clear PersonIdAmount
+            PersonIdAmount.length = 0;
+        }
+        function SaveData(data) {
+            $.ajax({
+                url: '@Url.Action("ModifySpendMoneyForReasonAjax", "Create")',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    if (response.success) {
+                        alert("تم الحفظ بنجاح");
+                        window.location.href = '@Url.Action("SpendMoneyForReason", "Create")';
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function (response) {
+                    alert("حدث خطأ أثناء الحفظ");
+                }
+            });
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+
+
+
+    }
+

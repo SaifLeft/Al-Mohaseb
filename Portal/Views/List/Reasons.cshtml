@@ -23,7 +23,8 @@
                             <thead>
                                 <tr>
                                     <th scope="col">الرقم</th>
-                                    <th scope="col">الأسباب</th>
+                                    <th scope="col">السبب</th>
+                                    <th scope="col">مبلغ الأشتراك</th>
                                     <th scope="col">التحكم</th>
                                 </tr>
                             </thead>
@@ -35,6 +36,7 @@
                                         <tr>
                                             <th scope="row">@item.Item1</th>
                                             <td>@item.Item2</td>
+                                            <td>@item.Item3</td>
                                             <td>
                                                 <a style="color:azure" onclick="Delete('@item.Item1')" class="btn btn-danger">حذف</a>
                                             </td>
@@ -44,7 +46,7 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="3" class="text-center">لا يوجد أسباب</td>
+                                        <td colspan="4" class="text-center">لا يوجد أسباب</td>
                                     </tr>
                                 }
 
@@ -63,6 +65,8 @@
                     <div class="card-body demo-vertical-spacing demo-only-element">
                         <label class="form-label" for="Reason">السبب</label>
                         <input type="search" class="form-control" id="Reason">
+                        <label class="form-label" for="Reason">مبلغ الأشتراك</label>
+                        <input type="search" class="form-control" id="Amount">
                         <button type="submit" id="ReasonBtn" class="btn btn-primary">أضافة</button>
                     </div>
                 </div>
@@ -97,10 +101,19 @@
                     alert("الرجاء ادخال السبب");
                     return;
                 }
+                var Amount = $("#Amount").val();
+                if (Amount == "") {
+                    alert("الرجاء ادخال مبلغ الأشتراك");
+                    return;
+                }
+
                 $.ajax({
                     url: "@Url.Action("CreateReason","Create")",
                     type: "POST",
-                    data: { Reason: Reason },
+                    data: { 
+                        Reason: Reason,
+                        Amount: Amount
+                    },
                     success: function (data) {
                         if (data == "1") {
                             alert("تمت الاضافة بنجاح");

@@ -16,6 +16,14 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "MONTHLY_RECEIVE_PAYMENTS",
+         "ObjectType": 0
+      },
+      {
+         "Name": "MONTHLY_RECEIVE_REASON",
+         "ObjectType": 0
+      },
+      {
          "Name": "MOSB_NAME",
          "ObjectType": 0
       },
@@ -29,6 +37,10 @@
       },
       {
          "Name": "MOSB_SPEND_MONEY",
+         "ObjectType": 0
+      },
+      {
+         "Name": "MOSB_SPEND_MONEY_FOR_REASON",
          "ObjectType": 0
       },
       {

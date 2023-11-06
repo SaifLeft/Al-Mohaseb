@@ -70,7 +70,7 @@ namespace Portal.Controllers
             var reasons = _context.MosbReasons.ToList();
             var VM = new ReasonVM
             {
-                Reasons = reasons.Select(r => (r.Id, r.Name)).ToList()
+                Reasons = reasons.Select(r => (r.Id, r.Name,r.Amount)).ToList()
             };
             return View(VM);
         }
@@ -86,8 +86,20 @@ namespace Portal.Controllers
                 return reasons;
             }
             return await _context.MosbReasons.ToListAsync();
-          
         }
+        public async Task<double> GetReasonAmount(long? reasonId = null)
+        {
+            if (reasonId != null)
+            {
+                var reason = await _context.MosbReasons
+                    .Where(p => p.Id == reasonId)
+                    .Select(p => p.Amount)
+                    .FirstOrDefaultAsync();
+                return reason;
+            }
+            return 0;
+        }
+
         [HttpGet]
         public async Task<List<MosbName>> GetNames()
         {

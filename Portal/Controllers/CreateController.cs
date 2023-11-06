@@ -4,6 +4,8 @@ using Portal.Data;
 using Portal.Models;
 using Portal.Models.ViewModels;
 using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
 
 namespace Portal.Controllers
 {
@@ -107,9 +109,14 @@ namespace Portal.Controllers
             }
         }
 
-        public async Task<ActionResult> CreateReason(string Reason )
+        public async Task<ActionResult> CreateReason(string Reason, double Amount)
         {
-            var reason = new MosbReasons { Name = Reason,Date= DateTime.Now.ToString("yyyy-MM-dd") };
+            var reason = new MosbReasons
+            {
+                Name = Reason,
+                Amount = Amount,
+                Date = DateTime.Now.ToString("yyyy-MM-dd")
+            };
             await _context.MosbReasons.AddAsync(reason);
             int add = await _context.SaveChangesAsync();
             if (add == 0)
@@ -140,7 +147,7 @@ namespace Portal.Controllers
         }
 
 
-        public IActionResult ReceivePayments(long? ReasonId=null)
+        public IActionResult ReceivePayments(long? ReasonId = null)
         {
             return View();
         }
@@ -260,7 +267,177 @@ namespace Portal.Controllers
         }
 
 
+        #region SpendMoneyForReason
+        public async Task<IActionResult> SpendMoneyForReason(long? ReasonId = null, string? YearMonth = null)
 
+        {
+            if (ReasonId == null || YearMonth == null)
+            {
+                return View(new SpendMoneyForReasonVM());
+            }
+            // YearMonth format Y-M (23-01) parse to DateTime
+            var YearMonthDate = DateTime.Parse(YearMonth);
+
+            var spendMoneyForReason = await _context.MosbSpendMoneyForReason.Include(x => x.Person)
+                .Where(x => x.ReasonsId == ReasonId && x.Date == YearMonthDate.ToString("yyyy-MM-dd"))
+                .ToListAsync();
+
+            var VM = new SpendMoneyForReasonVM
+            {
+                ReasonId = ReasonId.Value,
+                YearMonth = YearMonth,
+                IsSelected = true,
+                AmountSubscribed = await _context.MosbReasons.Where(x => x.Id == ReasonId).Select(x => x.Amount).FirstOrDefaultAsync(),
+                PersonConnectedWithReasonId = new List<ShowSpendMoney>(),
+                SpendMoneySubmitedAmount = new List<ShowSpendMoney>(),
+                IsHasRecod = false
+            };
+
+            if (spendMoneyForReason.Count > 0)
+            {
+                VM.SpendMoneySubmitedAmount = spendMoneyForReason
+                    .Select(x => new ShowSpendMoney
+                    {
+                        SpendMoneyId = x.Id,
+                        PersonId = x.Person.Id,
+                        PersonName = x.Person.Name,
+                        Amount = x.Amount
+                    })
+                    .ToList();
+                VM.IsHasRecod = true;
+            }
+            else
+            {
+                VM.PersonConnectedWithReasonId = await _context.PersonReasonMapping
+                    .Include(x => x.Reasons)
+                    .Include(x => x.Reasons)
+                    .Where(x => x.ReasonsId == ReasonId)
+                    .Select(x => new ShowSpendMoney
+                    {
+                        PersonId = x.Name.Id,
+                        PersonName = x.Name.Name,
+                        Amount = 0
+                    })
+                    .ToListAsync();
+            }
+
+            return View(VM);
+        }
+        [HttpPost]
+        public async Task<IActionResult> ModifySpendMoneyForReasonAjax(SpendMoneyForReasonRecord record)
+        {
+            // YearMonth format Y-M ( 2023-01) parse to DateTime
+            var YearMonthDate = DateTime.Parse(record.MonthYear);
+
+            var spendMoneyForReason = await _context.MosbSpendMoneyForReason.Include(x => x.Person)
+                .Where(x => x.ReasonsId == record.ReasonId && x.Date == YearMonthDate.ToString("yyyy-MM-dd"))
+                .ToListAsync();
+
+            bool ModifyStatus = false;
+            if (spendMoneyForReason.Count > 0)
+            {
+                ModifyStatus = await EditRecordOnSpendMoneyForReason(record);
+            }
+            else
+            {
+                List<SpendMoneyForReasonDTO> DTO = record.PersonIdAmount.Select(x => new SpendMoneyForReasonDTO
+                {
+                    PersonId = x.PersonId,
+                    ReasonsId = record.ReasonId,
+                    Date = YearMonthDate.ToString("yyyy-MM-dd"),
+                    Amount = x.IsPaid ? x.Amount : 0,
+                    IsPaid = x.IsPaid
+                }).ToList();
+                ModifyStatus = await NewRecordOnSpendMoneyForReason(DTO);
+            }
+            if (ModifyStatus)
+            {
+                return Json(new
+                {
+                    status = true,
+                    message = "تم أجراء التعديل بنجاح"
+                });
+            }
+            else
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = "حدث خطأ أثناء تعديل البيانات"
+                });
+            }
+
+
+        }
+        public async Task<bool> NewRecordOnSpendMoneyForReason(List<SpendMoneyForReasonDTO> DTO)
+        {
+            try
+            {
+                _context.Database.BeginTransaction();
+                foreach (var item in DTO)
+                {
+                    var newRecord = new MosbSpendMoneyForReason
+                    {
+                        PersonId = item.PersonId,
+                        ReasonsId = item.ReasonsId,
+                        Date = item.Date,
+                        Amount = item.Amount,
+                        IsPaid = item.IsPaid.GetHashCode()
+                    };
+                    await _context.MosbSpendMoneyForReason.AddAsync(newRecord);
+                    await _context.SaveChangesAsync();
+                }
+
+                await _context.Database.CommitTransactionAsync();
+                return true;
+
+            }
+            catch
+            {
+                _context.Database.RollbackTransaction();
+                return false;
+            }
+        }
+        public async Task<bool> EditRecordOnSpendMoneyForReason(SpendMoneyForReasonRecord record)
+        {
+            try
+            {
+                _context.Database.BeginTransaction();
+                foreach (var item in record.PersonIdAmount)
+                {
+                    var YearMonthDate = DateTime.Parse(record.MonthYear);
+
+                    var recordToEdit = await _context.MosbSpendMoneyForReason
+                        .Where(x => x.ReasonsId == record.ReasonId && x.PersonId == item.PersonId && x.Date == YearMonthDate.ToString("yyyy-MM-dd"))
+                        .FirstOrDefaultAsync();
+
+                    if (recordToEdit == null)
+                    {
+                        return false;
+                    }
+
+                    recordToEdit.Amount = item.IsPaid ? item.Amount : 0;
+                    recordToEdit.IsPaid = item.IsPaid.GetHashCode();
+
+                    _context.MosbSpendMoneyForReason.Update(recordToEdit);
+                    await _context.SaveChangesAsync();
+                }
+
+                await _context.Database.CommitTransactionAsync();
+                return true;
+
+            }
+            catch
+            {
+                _context.Database.RollbackTransaction();
+                return false;
+            }
+
+
+        }
+
+
+        #endregion SpendMoneyForReason
 
     }
 }
