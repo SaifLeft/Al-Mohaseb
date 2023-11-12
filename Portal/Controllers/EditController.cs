@@ -33,7 +33,7 @@ namespace Portal.Controllers
                 Id = name.Id,
                 Name = name.Name,
                 CivilNumber = name.CivilNumber,
-                Phone = name.PhoneNumber.Value,
+                Phone = name.PhoneNumber,
                 ReasonsList = name.PersonReasonMapping.Select(x => x.ReasonsId).ToList()
             };
 

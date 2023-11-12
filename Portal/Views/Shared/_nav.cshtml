@@ -21,6 +21,76 @@
     <div class="menu-inner-shadow"></div>
 
     <ul class="menu-inner py-1">
+        <li class="menu-header small text-uppercase d-flex">
+            <a class=" style-switcher-toggle hide-arrow" href="javascript:void(0);">
+                <span class="menu-header-text">الوضع الليلي | النهاري</span>
+                <i class="bx bx-sm"></i>
+            </a>
+        </li>
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">الأساسي</span>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="List" asp-action="Names" class="menu-link">
+                <i class='menu-icon bx bx-bullseye'></i>
+                <div>البيانات الأساسية للأعضاء</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Create" asp-action="Names" class="menu-link">
+                <i class='menu-icon bx bxs-universal-access'></i>
+                <div>أضافة عضو جديد</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="List" asp-action="Reasons" class="menu-link">
+                <i class='menu-icon bx bxs-universal-access'></i>
+                <div>جميع الأسباب</div>
+            </a>
+        </li>
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">الايداعات</span>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="List" asp-action="ReceivePayments" class="menu-link">
+                <i class='menu-icon bx bxl-paypal'></i>
+                <div>جميع الايداعات</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Create" asp-action="MonthlyReceivePayments" class="menu-link">
+                <i class='menu-icon bx bxs-map-pin'></i>
+                <div>الايداعات الشهرية</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Create" asp-action="ReceivePayments" class="menu-link">
+                <i class='menu-icon bx bxs-map-pin'></i>
+                <div>ايداع شخصي</div>
+            </a>
+        </li>
+        
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">المصروفات</span>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="List" asp-action="SpendMoney" class="menu-link">
+                <i class='menu-icon bx bx-bug-alt'></i>
+                <div>جميع المصروفات</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Create" asp-action="SpendMoney" class="menu-link">
+                <i class='menu-icon bx bxl-slack-old'></i>
+                <div>الصرف الشخصي</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Create" asp-action="SpendMoneyForReason" class="menu-link">
+                <i class='menu-icon bx bx-bug-alt'></i>
+                <div>صرف لـ سبب معين</div>
+            </a>
+        </li>
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">أحصائيات</span>
         </li>
@@ -33,7 +103,7 @@
         <li class="menu-item">
             <a asp-controller="Statistics" asp-action="Person" class="menu-link">
                 <i class='menu-icon bx bx-user'></i>
-                <div>أحصائيات أسم محدد</div>
+                <div>أحصائيات عضو محدد</div>
             </a>
         </li>
         <li class="menu-item">
@@ -42,62 +112,6 @@
                 <div>أحصائيات لسبب محدد</div>
             </a>
         </li>
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">قسم الأضافات</span>
-        </li>
-        <li class="menu-item">
-            <a asp-controller="Create" asp-action="ReceivePayments" class="menu-link">
-                <i class='menu-icon bx bxs-map-pin'></i>
-                <div>أستقبال مبلغ جديد</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a asp-controller="Create" asp-action="Names" class="menu-link">
-                <i class='menu-icon bx bxs-universal-access'></i>
-                <div>أضافة شخص جديد</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a asp-controller="Create" asp-action="SpendMoney" class="menu-link">
-                <i class='menu-icon bx bxl-slack-old'></i>
-                <div >صرف مبلغ لشخص</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a asp-controller="Create" asp-action="SpendMoneyForReason" class="menu-link">
-                <i class='menu-icon bx bx-bug-alt'></i>
-                <div>صرف لسبب معين</div>
-            </a>
-        </li>
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">جداول البيانات</span>
-        </li>
-        <li class="menu-item">
-            <a asp-controller="List" asp-action="SpendMoney" class="menu-link">
-                <i class='menu-icon bx bx-bug-alt'></i>
-                <div >جميع المصروفات</div>
-            </a>
-        </li>
-
-        <li class="menu-item">
-            <a asp-controller="List" asp-action="Reasons" class="menu-link">
-                <i class='menu-icon bx bxs-universal-access'></i>
-                <div>جميع الأسباب</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a asp-controller="List" asp-action="Names" class="menu-link">
-                <i class='menu-icon bx bx-bullseye'></i>
-                <div>جميع الأشخاص</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a asp-controller="List" asp-action="ReceivePayments" class="menu-link">
-                <i class='menu-icon bx bxl-paypal'></i>
-                <div>جميع المدفوعات</div>
-            </a>
-        </li>
-       
     </ul>
 </aside>
 <!-- / Menu -->

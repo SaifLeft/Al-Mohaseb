@@ -11,7 +11,6 @@ namespace Portal.Data
         {
             MonthlyReceiveReason = new HashSet<MonthlyReceiveReason>();
             MosbSpendMoneyForReason = new HashSet<MosbSpendMoneyForReason>();
-            PersonReasonMapping = new HashSet<PersonReasonMapping>();
             ReasonsSpendMoneyMapping = new HashSet<ReasonsSpendMoneyMapping>();
             ReceivePaymentsReasonsMapping = new HashSet<ReceivePaymentsReasonsMapping>();
         }
@@ -23,7 +22,6 @@ namespace Portal.Data
 
         public virtual ICollection<MonthlyReceiveReason> MonthlyReceiveReason { get; set; }
         public virtual ICollection<MosbSpendMoneyForReason> MosbSpendMoneyForReason { get; set; }
-        public virtual ICollection<PersonReasonMapping> PersonReasonMapping { get; set; }
         public virtual ICollection<ReasonsSpendMoneyMapping> ReasonsSpendMoneyMapping { get; set; }
         public virtual ICollection<ReceivePaymentsReasonsMapping> ReceivePaymentsReasonsMapping { get; set; }
     }

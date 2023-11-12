@@ -10,6 +10,6 @@ namespace Portal.Models
         public double AmountSubscribed { get;  set; }
         public List<ShowSpendMoney> SpendMoneySubmitedAmount { get; set; }
         public string YearMonth { get; internal set; }
-        public bool IsHasRecod { get; internal set; }
+        public bool IsHasRecodes { get; internal set; }
     }
 }

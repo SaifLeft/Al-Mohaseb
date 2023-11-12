@@ -4,21 +4,20 @@
 
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h3>قائمة بجميع الأسماء</h3>
+    <h3>قائمة بيانات الأساسية للأعضاء المنتسبة</h3>
     <div class="card p-4">
 
         <div class="card-body">
             <a class="btn btn-dark" asp-controller="Create" asp-action="Names"><i class="bx bx-plus me-0 me-lg-2"></i><span class="d-none d-lg-inline-block">أضافة شخص جديد</span></a>
             <div class="table-responsive mt-5">
-                <table id="userTable" class="table table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
+                <table id="userTable" class="table  table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
                     <thead>
                         <tr>
-                            <th>رقم المعرف في قاعدة البيانات</th>
                             <th>الاسم</th>
                             <th>رقم الهاتف</th>
                             <th>الرقم المدني</th>
                             <th>تاريخ التسجيل</th>
-                            <th>السبب</th>
+                            <th>مبلغ الأشتراك</th>
                             <th>الأجراء</th>
                         </tr>
                     </thead>
@@ -116,6 +115,10 @@
                         "sLast": "الأخير"
                     }
                 },
+                columnDefs: [
+                    // Center align both header and body content of columns 1, 2 & 3
+                    { className: "dt-center", targets: [0, 1, 2,3,4,5] }
+                ],
                 buttons: [
                     {
                         extend: 'collection',
@@ -127,7 +130,7 @@
                                 text: '<i class="bx bx-printer me-2" ></i>طباعة',
                                 className: 'dropdown-item',
                                 exportOptions: {
-                                    columns: [1, 2, 3, 4, 5],
+                                    columns: [1, 2, 3, 4],
                                     // prevent avatar to be print
                                     format: {
                                         body: function (inner, coldex, rowdex) {
@@ -135,7 +138,7 @@
                                             var el = $.parseHTML(inner);
                                             var result = '';
                                             $.each(el, function (index, item) {
-                                                if (item.classList !== undefined && item.classList.contains('name')) {
+                                                if (item.classList !== undefined && item.classList.contains('Name')) {
                                                     result = result + item.lastChild.firstChild.textContent;
                                                 } else if (item.innerText === undefined) {
                                                     result = result + item.textContent;
@@ -166,7 +169,7 @@
                                 text: '<i class="bx bx-file me-2" ></i>CSV',
                                 className: 'dropdown-item',
                                 exportOptions: {
-                                    columns: [1, 2, 3, 4, 5],
+                                    columns: [1, 2, 3, 4],
                                     // prevent avatar to be display
                                     format: {
                                         body: function (inner, coldex, rowdex) {
@@ -190,7 +193,7 @@
                                 text: 'Excel',
                                 className: 'dropdown-item',
                                 exportOptions: {
-                                    columns: [1, 2, 3, 4, 5],
+                                    columns: [1, 2, 3, 4],
                                     // prevent avatar to be display
                                     format: {
                                         body: function (inner, coldex, rowdex) {
@@ -234,7 +237,7 @@
                                     customize: function (doc) {
                                         doc.defaultStyle.font = 'Arial';
                                         doc.styles.tableHeader.font = 'Arial';
-                                        doc.content[1].table.widths = ['*', '*', '*', '*', '*'];
+                                        doc.content[1].table.widths = ['*','*', '*', '*', '*'];
                                     }
 
 
@@ -270,25 +273,12 @@
                     }
                 ],
                 "columns": [
-                    { "data": "id", "name": "Id", "autoWidth": true },
-                    { "data": "name", "name": "Name", "autoWidth": true },
-                    { "data": "phone", "name": "Phone", "autoWidth": true },
-                    { "data": "civilnumber", "name": "CivilNumber", "autoWidth": true },
-                    { "data": "date", "date": "date", "autoWidth": true },
-                    {
-                        "render": function (data, type, full, meta) {
-                            console.log(full.reasons);
-                            var colors = ["primary", "secondary", "success", "danger", "warning", "info", "dark"];
-
-                            var result = '';
-                            $.each(full.reasons, function (index, item) {
-                                result = result + '<span class="badge p-1 bg-label-' + colors[Math.floor(Math.random() * colors.length)] + '">' + item + '</span>';
-                            });
-                            return result;
-
-
-                        }
-                    },
+                    {"data": "name", "name": "Name", "autoWidth": true, "className": 'dt-body-center'},
+                    { "data": "phone", "name": "Phone", "autoWidth": true, "className": 'dt-body-center' },
+                    { "data": "civilnumber", "name": "CivilNumber", "autoWidth": true, "className": 'dt-body-center' },
+                    { "data": "date", "date": "date", "autoWidth": true, "className": 'dt-body-center' },
+                    { "data": "amount", "date": "amount", "autoWidth": true, "className": 'dt-body-center' },
+                    
                     {
                         "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="/Edit/EditPerson?id=' + full.id + '">تعديل</a>'; }
                     }

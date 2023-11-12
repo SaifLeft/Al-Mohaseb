@@ -289,8 +289,7 @@ namespace Portal.Controllers
                 IsSelected = true,
                 AmountSubscribed = await _context.MosbReasons.Where(x => x.Id == ReasonId).Select(x => x.Amount).FirstOrDefaultAsync(),
                 PersonConnectedWithReasonId = new List<ShowSpendMoney>(),
-                SpendMoneySubmitedAmount = new List<ShowSpendMoney>(),
-                IsHasRecod = false
+                SpendMoneySubmitedAmount = new List<ShowSpendMoney>()
             };
 
             if (spendMoneyForReason.Count > 0)
@@ -304,7 +303,8 @@ namespace Portal.Controllers
                         Amount = x.Amount
                     })
                     .ToList();
-                VM.IsHasRecod = true;
+                VM.IsHasRecodes = true;
+
             }
             else
             {
@@ -439,5 +439,177 @@ namespace Portal.Controllers
 
         #endregion SpendMoneyForReason
 
+
+        #region MonthlyReceivePayments
+        public async Task<IActionResult> MonthlyReceivePayments(string? YearMonth = null)
+        {
+            if (YearMonth == null)
+            {
+                return View(new MonthlyReceivePaymentsVM());
+            }
+            // YearMonth format Y-M (23-01) parse to DateTime
+            var YearMonthDate = DateTime.Parse(YearMonth);
+
+            var monthlyReceivePayments = await _context.MonthlyReceivePayments.Include(x => x.Person)
+                .Where(x => x.Date == YearMonthDate.ToString("yyyy-MM-dd"))
+                .ToListAsync();
+
+            var VM = new MonthlyReceivePaymentsVM
+            {
+                YearMonth = YearMonth,
+                IsSelected = true,
+                IsHasRecodes = false
+            };
+
+            if (monthlyReceivePayments.Any())
+            {
+                VM.SumitedMonthlyPayments = monthlyReceivePayments
+                    .Select(x => new ShowMonthlyReceivePayments
+                    {
+                        MonthlyReceivePaymentsId = x.Id,
+                        Amount = x.Amount,
+                        PersonName = x.Person.Name,
+                        PersonId = x.PersonId,
+                        IsPaid = x.IsPaid == 1 ? true : false
+
+                    }).ToList();
+                VM.IsHasRecodes = true;
+            }
+            else
+            {
+                VM.SumitedMonthlyPayments = await _context.MosbName
+                    .Select(x => new ShowMonthlyReceivePayments
+                    {
+                        PersonId = x.Id,
+                        PersonName = x.Name,
+                        Amount = x.SubscriptionAmount,
+                        IsPaid = false
+                    })
+                    .ToListAsync();
+                VM.IsHasRecodes = false;
+            }
+
+            return View(VM);
+        }
+        public async Task<IActionResult> ModifyMonthlyReceiveRecordAjax(MonthlyReceiveRecord record)
+        {
+            if (record is null)
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = "حدث خطأ أثناء تعديل البيانات"
+                });
+            }
+            // YearMonth format Y-M ( 2023-01) parse to DateTime
+            var YearMonthDate = DateTime.Parse(record.YearMonth);
+
+            var monthlyReceivePayments = await _context.MonthlyReceivePayments.Include(x => x.Person)
+                .Where(x => x.Date == YearMonthDate.ToString("yyyy-MM-dd"))
+                .ToListAsync();
+
+            bool ModifyStatus = false;
+
+            if (monthlyReceivePayments.Any())
+            {
+                ModifyStatus = await EditRecordOnMonthlyReceivePayments(record);
+            }
+            else
+            {
+                var DTO = record.MonthlyPaidData.Select(x => new PersonIdAmount
+                {
+                    PersonId = x.PersonId,
+                    Amount = x.IsPaid ? x.Amount : 0,
+                    IsPaid = x.IsPaid
+                }).ToList();
+
+                ModifyStatus = await NewRecordOnMonthlyReceivePayments(DTO, YearMonthDate.ToString("yyyy-MM-dd"));
+            }
+            if (ModifyStatus)
+            {
+                return Json(new
+                {
+                    status = true,
+                    message = "تم أجراء التعديل بنجاح"
+                });
+            }
+            else
+            {
+                return Json(new
+                {
+                    status = false,
+                    message = "حدث خطأ أثناء تعديل البيانات"
+                });
+            }
+
+        }
+        private async Task<bool> NewRecordOnMonthlyReceivePayments(List<PersonIdAmount> DTO, string YearMonthDate)
+        {
+            try
+            {
+                _context.Database.BeginTransaction();
+                foreach (var item in DTO)
+                {
+                    var newRecord = new MonthlyReceivePayments
+                    {
+                        PersonId = item.PersonId,
+                        Date = YearMonthDate,
+                        Amount = item.Amount,
+                        IsPaid = item.IsPaid.GetHashCode()
+                    };
+                    await _context.MonthlyReceivePayments.AddAsync(newRecord);
+                }
+                int status = await _context.SaveChangesAsync();
+                if (status <= 0)
+                {
+                    return false;
+                }
+                await _context.Database.CommitTransactionAsync();
+                return true;
+
+            }
+            catch
+            {
+                await _context.Database.RollbackTransactionAsync();
+                return false;
+            }
+
+        }
+        private async Task<bool> EditRecordOnMonthlyReceivePayments(MonthlyReceiveRecord record)
+        {
+            try
+            {
+                _context.Database.BeginTransaction();
+                foreach (var item in record.MonthlyPaidData)
+                {
+                    var YearMonthDate = DateTime.Parse(record.YearMonth);
+
+                    var recordToEdit = await _context.MonthlyReceivePayments
+                        .Where(x => x.PersonId == item.PersonId && x.Date == YearMonthDate.ToString("yyyy-MM-dd"))
+                        .SingleAsync();
+
+                    if (recordToEdit == null)
+                    {
+                        return false;
+                    }
+
+                    recordToEdit.Amount = item.IsPaid ? item.Amount : 0;
+                    recordToEdit.IsPaid = item.IsPaid.GetHashCode();
+
+                    _context.MonthlyReceivePayments.Update(recordToEdit);
+                    await _context.SaveChangesAsync();
+                }
+
+                await _context.Database.CommitTransactionAsync();
+                return true;
+
+            }
+            catch
+            {
+                _context.Database.RollbackTransaction();
+                return false;
+            }
+        }
+        #endregion MonthlyReceivePayments
     }
 }

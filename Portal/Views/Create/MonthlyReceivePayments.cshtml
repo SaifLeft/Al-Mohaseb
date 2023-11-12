@@ -1,0 +1,305 @@
+﻿@model MonthlyReceivePaymentsVM;
+@{
+    ViewData["Title"] = "الإيداع الشهري";
+    string anser = Model.IsHasRecodes ? "نعم" : "لا";
+
+}
+<!-- Content Page -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card mb-4">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h5 class="mb-0">أيداع مبالغ بشكل شهري</h5>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3" id="flatpickrDiv">
+                <label class="col-sm-2 col-form-label-lg">شهر الأيداع</label>
+                <div class="col-sm-3">
+                    <input type="text" class="form-control flatpickr-input active" placeholder="YY-MM" id="flatpickr-date" readonly="readonly">
+                </div>
+            </div>
+            @if (Model.IsSelected)
+            {
+                <div class="row mb-3" id="HasRecordDiv">
+                    <label class="col-sm-2 col-form-label-lg">تم إداع المالغ مسبقا؟</label>
+                    <div class="col-sm-3">
+                        @{
+                            if (Model.IsHasRecodes)
+                            {
+                                <span class="badge bg-success">
+                                    <label style="font-size:larger">
+                                        @anser
+                                    </label>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">
+                                    <label style="font-size:large">
+                                        @anser
+                                    </label>
+                                </span>
+                            }
+                        }
+                    </div>
+                </div>
+            }
+            @*<div class="row mb-3">
+                <div class="col-sm-3">
+                    <button type="button" class="btn btn-primary" disabled id="ShowAllNamesBtn">عرض</button>
+                    <button type="button" class="btn btn-dark" disabled id="ClearAll">تصفية الخانات</button>
+                </div>
+            </div>*@
+        </div>
+    </div>
+    <div class="card" id="CardDetailsDiv" style="display:none;">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h5 class="mb-0">جميع الأسماء للإيداع الشهري</h5>
+            <button type="button" class="btn btn-primary" onclick="CollectData()">حفظ</button>
+        </div>
+
+        <div class="card-body">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-flush-spacing">
+                        <tbody>
+                            
+                            @if (Model.SumitedMonthlyPayments.Any())
+                            {
+                                <tr>
+                                    <td class="text-nowrap">
+                                        تم صرف المبلغ للجميع؟
+                                        <i class="bx bx-info-circle bx-xs" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="جميع من بلاقائمة تمك صرف لهم المبالغ الدد بجانب اسهم"></i>
+                                    </td>
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" checked
+                                                   id="selectAll">
+                                            <label class="form-check-label" for="selectAll">تحديد الجميع وأعادة توزيع مبلغ الأشتراك</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                foreach (var item in Model.SumitedMonthlyPayments)
+                                {
+                                    <tr>
+                                        <td class="text-nowrap">@item.PersonName</td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <div class="d-flex">
+                                                    <div class="form-check col-md-5 form-check-success form-check-inline">
+                                                        @if (!item.IsPaid)
+                                                        {
+                                                            <input class="form-check-input IsPaid-checkbox" type="checkbox"
+                                                                   data-input-id="@item.PersonId">
+                                                        }
+                                                        else
+                                                        {
+                                                            <input class="form-check-input IsPaid-checkbox" type="checkbox"
+                                                                   checked
+                                                                   data-input-id="@item.PersonId">
+                                                        }
+                                                        <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
+                                                    </div>
+                                                    <div class="d-flex" id="AmountBoxDiv-*@item.PersonId" style="display: none;">
+                                                        <label class="col-md-3 col-form-label-sm">المبلغ</label>
+                                                        <div class="col-md-8">
+                                                            @if (!item.IsPaid)
+                                                            {
+                                                                <input class="form-control form-control-sm Amount-inputs"
+                                                                       value="@item.Amount"
+                                                                       type="number"
+                                                                       disabled
+                                                                       data-PersonId="@item.PersonId">
+                                                            }
+                                                            else
+                                                            {
+                                                                <input class="form-control form-control-sm Amount-inputs"
+                                                                       value="@item.Amount"
+                                                                       type="number"
+                                                                       data-PersonId="@item.PersonId">
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="2" class="text-center text-bg-warning">لم يتم أدخال أي عضو منتسب للنظام</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Permission table -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Stylesheet{
+    <link rel="stylesheet" href="~/assets/vendor/libs/select2/select2.css">
+    <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/typeahead-js/typeahead.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/flatpickr/flatpickr.css">
+    <link rel="stylesheet" href="~/assets/vendor/libs/flatpickr/monthSelect/style.css">
+    <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/typeahead-js/typeahead.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/pickr/pickr-themes.css" />
+    }
+
+@section Scripts{
+    <script src="~/assets/vendor/libs/select2/select2.js"></script>
+    <script src="~/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+    <script src="~/assets/vendor/libs/flatpickr/monthSelect/index.js"></script>
+    <script src="~/assets/vendor/libs/flatpickr/monthSelect/monthSelect.js"></script>
+    <script src="~/assets/vendor/libs/moment/moment.js"></script>
+    <script src="~/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+    <script src="~/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="~/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js"></script>
+    <script src="~/assets/vendor/libs/jquery-timepicker/jquery-timepicker.js"></script>
+    <script src="~/assets/vendor/libs/pickr/pickr.js"></script>
+
+
+
+    <script>
+        var IsDark = !document.documentElement.classList.contains("light-style");
+        var IsSelected = '@Model.IsSelected';
+        if (IsSelected != '' && IsSelected === 'True')
+        {
+            $('#CardDetailsDiv').show();
+        }
+        else
+        {
+            $('#CardDetailsDiv').hide();
+        }
+        // Get the current year and month in the format 'yyyy-MM'
+        var YearMonth = '@Model.YearMonth'; // Example: '2021-01'
+        var year2digit = new Date().getFullYear().toString()
+        var dayNow = year2digit + '-' + (new Date().getMonth() + 1);
+        var dateformat = YearMonth === '' ? dayNow : YearMonth;
+        var flatpickrDate = flatpickr('#flatpickr-date', {
+            altInput: true,
+            defaultDate: dateformat,
+            plugins: [
+                new monthSelectPlugin({
+                    shorthand: true, // Use shorthand month names
+                    dateFormat: "Y-m", // Display format 'year-month'
+                    altFormat: "F Y", // Format for the alternative input display
+                    theme: IsDark ? "dark" : "light" // Set the theme to light
+                })
+            ],
+            locale: {
+                // Define Arabic month names
+                months: {
+                    shorthand: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+                    longhand: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+                }
+            },
+            onChange: function (selectedDates, dateStr, instance) {
+                var date = new Date(dateStr);
+                var month = date.getMonth() + 1;
+                var year = date.getFullYear();
+                var monthStr = month < 10 ? '0' + month : month;
+                var dateStr = year + '-' + monthStr;
+                var isValid = date !== '' && date !== undefined && date !== null;
+                if (!isValid) {
+                    alert("الرجاء اختيار التاريخ");
+                    return;
+                } else {
+                    window.location.href = '@Url.Action("MonthlyReceivePayments", "Create")?YearMonth=' + dateStr;
+                }
+            },
+
+        });
+
+        const selectAll = document.querySelector('#selectAll');
+        const IsPaidCheckboxList = document.querySelectorAll('.IsPaid-checkbox');
+        // Event listeners
+        if (selectAll) {
+            selectAll.addEventListener('change', (event) => {
+                const isChecked = event.target.checked;
+                IsPaidCheckboxList.forEach((checkbox) => {
+                    checkbox.checked = isChecked;
+                    handleCheckboxChange(checkbox);
+                });
+            });
+        }
+        IsPaidCheckboxList.forEach((checkbox) => {
+            checkbox.addEventListener('change', () => {
+                handleCheckboxChange(checkbox);
+            });
+        });
+        function handleCheckboxChange(checkbox) {
+            const PersonId = checkbox.getAttribute('data-input-id');
+            // get all Amount-inputs Elements where data-PersonId = PersonId
+            const AmountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${PersonId}"]`);
+            AmountPersonElement.disabled = !checkbox.checked;
+            //inputElement.value = checkbox.checked ? initialAmountPerInput : 0;
+        }
+        function CollectData() {
+            var MonthlyPaidData = [];
+            var IsPaidCheckboxList = document.querySelectorAll('.IsPaid-checkbox');
+            IsPaidCheckboxList.forEach((checkbox) => {
+                var PersonId = checkbox.getAttribute('data-input-id');
+                var AmountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${PersonId}"]`);
+                var Amount = AmountPersonElement.value;
+                if (checkbox.checked) {
+                    MonthlyPaidData.push(
+                        { 
+                            PersonId: PersonId,
+                            Amount: Amount,
+                            IsPaid: checkbox.checked
+                        }
+                    );
+                }
+                else{
+                    MonthlyPaidData.push(
+                        {
+                            PersonId: PersonId,
+                            Amount: 0,
+                            IsPaid: checkbox.checked
+                        }
+                    );
+
+                }
+            });
+            console.log(MonthlyPaidData);
+            SendAjaxData(MonthlyPaidData);
+        }
+        function SendAjaxData(MonthlyPaidData) {
+            
+            var data = {
+                MonthlyPaidData : MonthlyPaidData,
+                YearMonth: '@Model.YearMonth'
+            }
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("ModifyMonthlyReceiveRecordAjax", "Create")',
+                data: data,
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        window.location.href = '@Url.Action("MonthlyReceivePayments", "Create")?YearMonth=' + '@Model.YearMonth';
+                    }
+                    else {
+                        alert(response.message);
+                    }
+                }
+            });
+
+        }
+
+    </script>
+
+
+    }
+

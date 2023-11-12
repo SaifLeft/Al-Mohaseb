@@ -52,7 +52,7 @@ namespace Portal.Controllers
                     phone = p.PhoneNumber,
                     civilnumber = p.CivilNumber,
                     date = p.RegisterDate,
-                    reasons = p.PersonReasonMapping.Select(x => x.Reasons.Name).ToList()
+                    amount = p.SubscriptionAmount
                 })
                 .ToListAsync();
 

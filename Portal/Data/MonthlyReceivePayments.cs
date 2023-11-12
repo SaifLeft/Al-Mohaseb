@@ -16,6 +16,7 @@ namespace Portal.Data
         public long PersonId { get; set; }
         public double Amount { get; set; }
         public string Date { get; set; }
+        public long IsPaid { get; set; }
 
         public virtual MosbName Person { get; set; }
         public virtual ICollection<MonthlyReceiveReason> MonthlyReceiveReason { get; set; }
