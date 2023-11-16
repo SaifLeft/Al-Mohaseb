@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Portal.Data;
 using Portal.Models;
@@ -6,6 +7,8 @@ using Portal.Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq.Expressions;
+using System.Xml.Linq;
 
 namespace Portal.Controllers
 {
@@ -205,7 +208,6 @@ namespace Portal.Controllers
                     .Include(x => x.MosbReceivePayments)
                     .ThenInclude(x => x.ReceivePaymentsReasonsMapping)
                     .Include(x => x.MosbSpendMoney)
-                    .ThenInclude(x => x.ReasonsSpendMoneyMapping)
                     .Include(x => x.PersonReasonMapping)
                     .ThenInclude(x => x.Reasons)
                     .FirstOrDefaultAsync(x => x.Id == PersonId);
@@ -236,7 +238,6 @@ namespace Portal.Controllers
                 MosbReasons? ReasonDetails = await _context.MosbReasons
                     .Include(x => x.PersonReasonMapping)
                     .ThenInclude(x => x.Name)
-                    .Include(x => x.ReasonsSpendMoneyMapping)
                     .Include(x => x.ReceivePaymentsReasonsMapping)
                     .ThenInclude(x => x.ReceivePayments)
                     .FirstOrDefaultAsync(x => x.Id == ReasonId);
@@ -253,6 +254,97 @@ namespace Portal.Controllers
         #endregion Reason
 
 
+        #region Semple
+        public async Task<IActionResult> Semple(long? NameId, int? Year)
+        {
+            try
+            {
+                var VM = new SempleVM();
+
+                var ReceivePayments = await _context.MosbReceivePayments
+                    .Include(x => x.Name)
+                    .Include(x => x.ReceivePaymentsReasonsMapping)
+                    .ToListAsync();
+
+                var SpendMoney = await _context.MosbSpendMoney
+                    .Include(x => x.Person)
+                    .Include(x => x.Reasons)
+                    .ToListAsync();
+
+                var Names = await _context.MosbName.ToListAsync();
+
+                VM.AllReceivePaymentsAmount = ReceivePayments.Sum(x => x.Amount);
+                VM.AllSpendMoneyAmount = SpendMoney.Sum(x => x.Amount);
+                VM.GeneralBalance = VM.AllReceivePaymentsAmount - VM.AllSpendMoneyAmount;
+
+
+                VM.NamesList = Names.Select(x => new SelectListModel { Text = x.Name, Value = x.Id, IsSelected = x.Id == NameId }).ToList();
+
+                VM.PersonalBalanceIsAvailable = false;
+
+                if (NameId != null)
+                {
+                    VM.PersonalBalanceIsAvailable = true;
+                    VM.PersonalReceivePayment = ReceivePayments.Where(x => x.NameId == NameId).Sum(x => x.Amount);
+                    VM.PersonalSpendMoney = SpendMoney.Where(x => x.PersonId == NameId).Sum(x => x.Amount);
+                    VM.PersonalTotalAmount = VM.PersonalReceivePayment - VM.PersonalSpendMoney;
+                }
+
+
+                List<SelectListModel> AllYears = new();
+                AddYearsToListModel(ReceivePayments, ref AllYears, x => DateTime.Parse(x.Date).Year, Year);
+                AddYearsToListModel(SpendMoney, ref AllYears, x => DateTime.Parse(x.Date).Year, Year);
+                VM.YearsList = AllYears.GroupBy(x => x.Value).Select(x => x.First()).ToList();
+
+                VM.YearIsAvailable = false;
+                if (Year != null)
+                {
+                    var YearlyDateTime = new DateTime(Year.Value, 1, 1);
+                    VM.SelectedYear = Year.Value;
+                    VM.YearIsAvailable = true;
+                    var SpendMoneyDate = SpendMoney.Where(x => DateTime.Parse(x.Date).Year == YearlyDateTime.Year).ToList();
+                    VM.SpendMoneyYearlyData = SpendMoney.Sum(x => x.Amount);
+                    VM.ReceivePaymentsYearlyData = ReceivePayments.Where(x => DateTime.Parse(x.Date).Year == YearlyDateTime.Year).Sum(x => x.Amount);
+                    VM.TotalAmountYearlyData = VM.ReceivePaymentsYearlyData - VM.SpendMoneyYearlyData;
+                }
+
+
+                VM.PersonsBalance = Names.Select(x => new ShowPersonsTotal
+                {
+                    PhoneNumber = x.PhoneNumber,
+                    Name = x.Name,
+                    ReceivePayment = x.MosbReceivePayments.Sum(x => x.Amount),
+                    SpendMoney = x.MosbSpendMoney.Sum(x => x.Amount),
+                    TotalAmount = x.MosbReceivePayments.Sum(x => x.Amount) - x.MosbSpendMoney.Sum(x => x.Amount)
+                }).ToList();
+
+
+
+
+
+
+
+
+                return View(VM);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private void AddYearsToListModel<T>(List<T> data, ref List<SelectListModel> yearsList, Func<T, int> yearExtractor, int? selectedYear)
+        {
+            yearsList.AddRange(data.Select(x => new SelectListModel
+            {
+                Text = yearExtractor(x).ToString(),
+                Value = yearExtractor(x),
+                IsSelected = selectedYear != null && yearExtractor(x) == selectedYear
+            }));
+        }
+
+
+        #endregion Semple
 
 
 

@@ -126,52 +126,6 @@
 
                     }
                 }
-                <div class="divider divider-danger">
-                    <div class="divider-text">احصائيات المبالغ المنفقة لهذا السبب فقط</div>
-                </div>
-                @{
-                    var SpendPaymentsForThisReason = @Model.FromQearyDetails.ReasonsSpendMoneyMapping.Select(re => re.SpendMoney);
-                    if (SpendPaymentsForThisReason.Any())
-                    {
-
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">الأسم</th>
-                                        <th scope="col">مجموع المبالغ</th>
-                                        <th scope="col">تاريخ أخر أستقبال للمبلغ لهذا الشخص</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var item in SpendPaymentsForThisReason.GroupBy(x => x.NameId))
-                                    {
-                                        <tr>
-                                            <td onclick="NameDetails('@item.Key')">@SpendPaymentsForThisReason.Where(x=>x.NameId == item.Key).Select(xx=>xx.Name.Name).First()</td>
-                                            <td>@SpendPaymentsForThisReason.Where(x=>x.NameId == item.Key).Sum(x=>x.Amount)</td>
-                                            <td>@SpendPaymentsForThisReason.Where(x => x.NameId == item.Key).OrderByDescending(x => x.Date).FirstOrDefault().Date</td>
-                                        </tr>
-                                    }
-
-                            </table>
-
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="alert alert-danger" role="alert">
-                            لا يوجد مبالغ مصرفة لهذا السبب
-                            <a asp-action="SpendMoney" asp-controller="Create" class="btn btn-label-secondary">
-                                صرف مبالغ جديدة
-                            </a>
-                        </div>
-                       
-
-                    }
-
-                }
-
-
             </div>
         }
     </div>

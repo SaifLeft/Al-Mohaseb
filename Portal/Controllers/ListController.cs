@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Portal.Data;
+using Portal.Models;
 using Portal.Models.ViewModels;
 
 namespace Portal.Controllers
@@ -24,7 +26,7 @@ namespace Portal.Controllers
         {
             return View();
         }
-        public IActionResult Names()
+        public async Task<IActionResult> Names()
         {
             return View();
         }
@@ -34,17 +36,39 @@ namespace Portal.Controllers
 
             int totalRecord = 0;
             int filterRecord = 0;
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
+            var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+            var searchValue = Request.Form["search[value]"].FirstOrDefault();
+            int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
+            int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
+
 
             var data = _context.MosbName
                 .Include(n => n.PersonReasonMapping)
                 .AsQueryable();
 
-            
+            // Filter the data based on the searchValue if applicable
+            if (!string.IsNullOrEmpty(searchValue.ToString()))
+            {
+                searchValue = searchValue.Trim();
+                data = data.Where(p =>
+                    p.Name.Contains(searchValue.ToString()) ||
+                    p.CivilNumber.ToString().Contains(searchValue.ToString()) ||
+                    p.RegisterDate.Contains(searchValue.ToString()) ||
+                    p.PhoneNumber.ToString().Contains(searchValue.ToString())
+                );
+            }
+
+           
 
             totalRecord = await data.CountAsync();
             filterRecord = totalRecord;
 
             var phoneList = await data
+                .OrderBy(x => sortColumn + " " + sortColumnDirection)
+                .Skip(skip)
+                .Take(pageSize)
                 .Select(p => new
                 {
                     id = p.Id,
@@ -106,35 +130,63 @@ namespace Portal.Controllers
             return await _context.MosbName.ToListAsync();
         }
 
-        public IActionResult ReceivePayments()
+        public async Task<IActionResult> ReceivePayments()
         {
+            ViewData["NamesList"] = await _context.MosbName
+                .Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
+                .ToListAsync();
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> GetReceivePaymentsDetails()
+        public async Task<IActionResult> GetReceivePaymentsDetailsV1()
         {
-            var search = Request.Form["search[value]"].FirstOrDefault();
-
             int totalRecord = 0;
             int filterRecord = 0;
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
+            var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+            var searchValue = Request.Form["search[value]"].FirstOrDefault();
+            int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
+            int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
 
             var data = _context.MosbReceivePayments
                 .Include(n => n.ReceivePaymentsReasonsMapping)
                 .AsQueryable();
 
+            string? NameIdSearch = Request.Form["columns[1][search][value]"].FirstOrDefault().Trim();
 
+            if (!string.IsNullOrEmpty(NameIdSearch) || NameIdSearch != "")
+            {
+                data = data.Where(p => p.Name.Id == long.Parse(NameIdSearch));
+            }
 
+            // Filter the data based on the searchValue if applicable
+            if (!string.IsNullOrEmpty(searchValue.ToString()))
+            {
+                searchValue = searchValue.Trim();
+                data = data.Where(p =>
+                    p.Name.Name.Contains(searchValue.ToString()) ||
+                    p.Description.ToString().Contains(searchValue.ToString()) ||
+                    p.Date.Contains(searchValue.ToString()) ||
+                    p.Name.PhoneNumber.ToString().Contains(searchValue.ToString()) ||
+                    p.Name.CivilNumber.ToString().Contains(searchValue.ToString())
+                );
+            }
             totalRecord = await data.CountAsync();
             filterRecord = totalRecord;
 
+
             var phoneList = await data
+                .OrderBy(x => sortColumn + " " + sortColumnDirection)
+                .Skip(skip)
+                .Take(pageSize)
                 .Select(p => new
                 {
                     id = p.Id,
                     name = p.Name.Name,
                     amount = p.Amount,
                     date = p.Date,
-                    reasons = p.ReceivePaymentsReasonsMapping.Select(x => x.Reasons.Name).ToList()
+                    description = p.Description
                 })
                 .ToListAsync();
 
@@ -150,35 +202,120 @@ namespace Portal.Controllers
             return Ok(returnObj);
         }
 
-        public IActionResult SpendMoney()
-        {
-            return View();
-        }
         [HttpPost]
-        public async Task<IActionResult> GetSpendMoneyDetails()
+        public async Task<IActionResult> GetReceivePaymentsDetails()
         {
-            var search = Request.Form["search[value]"].FirstOrDefault();
-
             int totalRecord = 0;
             int filterRecord = 0;
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
+            var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+            var searchValue = Request.Form["search[value]"].FirstOrDefault();
+            int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
+            int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
 
-            var data = _context.MosbSpendMoney
-                .Include(n => n.ReasonsSpendMoneyMapping)
+            var data = _context.MosbReceivePayments
+                .Include(n => n.ReceivePaymentsReasonsMapping)
                 .AsQueryable();
 
+            string? NameIdSearch = Request.Form["columns[1][search][value]"].FirstOrDefault().Trim();
 
+            if (!string.IsNullOrEmpty(NameIdSearch) && long.TryParse(NameIdSearch, out long parsedId))
+            {
+                data = data.Where(p => p.Name.Id == parsedId);
+            }
 
+            // Filter the data based on the searchValue if applicable
+            if (!string.IsNullOrEmpty(searchValue.ToString()))
+            {
+                searchValue = searchValue.Trim();
+                data = data.Where(p =>
+                    p.Name.Name.Contains(searchValue.ToString()) ||
+                    p.Description.ToString().Contains(searchValue.ToString()) ||
+                    p.Date.Contains(searchValue.ToString()) ||
+                    p.Name.PhoneNumber.ToString().Contains(searchValue.ToString()) ||
+                    p.Name.CivilNumber.ToString().Contains(searchValue.ToString())
+                );
+            }
             totalRecord = await data.CountAsync();
             filterRecord = totalRecord;
 
             var phoneList = await data
+                .Skip(skip)
+                .Take(pageSize)
                 .Select(p => new
                 {
                     id = p.Id,
                     name = p.Name.Name,
                     amount = p.Amount,
                     date = p.Date,
-                    reasons = p.ReasonsSpendMoneyMapping.Select(x => x.Reasons.Name).ToList()
+                    description = p.Description
+                })
+                .ToListAsync();
+
+            var returnObj = new
+            {
+                recordsTotal = totalRecord,
+                recordsFiltered = filterRecord,
+                Data = phoneList
+            };
+
+            return Ok(returnObj);
+        }
+        public async Task<IActionResult> SpendMoney()
+        {
+            ViewData["NamesList"] = await _context.MosbName
+                .Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
+                .ToListAsync();
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> GetSpendMoneyDetails()
+        {
+
+            int totalRecord = 0;
+            int filterRecord = 0;
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
+            var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+            var searchValue = Request.Form["search[value]"].FirstOrDefault();
+            int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
+            int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
+
+            var data = _context.MosbSpendMoney.AsQueryable();
+            totalRecord = await data.CountAsync();
+            filterRecord = totalRecord;
+
+            string? NameIdSearch = Request.Form["columns[1][search][value]"].FirstOrDefault().Trim();
+
+            if (!string.IsNullOrEmpty(NameIdSearch) && long.TryParse(NameIdSearch, out long parsedId))
+            {
+                data = data.Where(p => p.Person.Id == parsedId);
+            }
+
+            // Filter the data based on the searchValue if applicable
+            if (!string.IsNullOrEmpty(searchValue.ToString()))
+            {
+                searchValue = searchValue.Trim();
+                data = data.Where(p =>
+                    p.Person.Name.Contains(searchValue.ToString()) ||
+                    p.Description.ToString().Contains(searchValue.ToString()) ||
+                    p.Date.Contains(searchValue.ToString()) ||
+                    p.Person.PhoneNumber.ToString().Contains(searchValue.ToString()) ||
+                    p.Person.CivilNumber.ToString().Contains(searchValue.ToString())
+                );
+            }
+            var phoneList = await data
+                .OrderBy(x => sortColumn + " " + sortColumnDirection)
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(p => new
+                {
+                    id = p.Id,
+                    name = p.Person.Name,
+                    amount = p.Amount,
+                    date = p.Date,
+                    description = p.Description
                 })
                 .ToListAsync();
 

@@ -6,9 +6,21 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     <h3>قائمة بأستقبال المبالغ من الأشخاص</h3>
     <div class="card p-4">
-
-        <div class="card-body">
+        <div class="card-header">
             <a class="btn btn-dark" asp-controller="Create" asp-action="ReceivePayments"><i class="bx bx-plus me-0 me-lg-2"></i><span class="d-none d-lg-inline-block">أضافة مبلغ من شخص</span></a>
+        </div>
+
+        <div class="row float-end">
+            <div class="col-md-5">
+                <select id="NamesList" class="select2 form-select">
+                    @foreach (var item in ViewData["NamesList"] as List<SelectListItem>)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="card-body">
             <div class="table-responsive mt-5">
                 <table id="userTable" class="table table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
                     <thead>
@@ -69,6 +81,8 @@
     <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js"></script>
     <script src="~/assets/vendor/libs/cleavejs/cleave.js"></script>
     <script src="~/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+<script src="~/assets/vendor/libs/jsPDF/jspdf.js"></script>
+
 
 
     <script>
@@ -77,14 +91,17 @@
                 "processing": true,
                 "serverSide": true,
                 "filter": true,
-                "pageLength": 50,
-                "lengthMenu": [20, 30, 40, 50, 100],
+                "paging": false,
                 "orderMulti": false,
                 "ajax": {
                     "url": "@Url.Action("GetReceivePaymentsDetails","List")",
                     "type": "POST",
                     "datatype": "json"
                 },
+                columnDefs: [
+                    // Center align both header and body content of columns 1, 2 & 3
+                    { className: "dt-center", targets: [0, 1, 2, 3, 4] }
+                ],
                 dom:
                     '<"row mx-2"' +
                     '<"col-md-2"<"me-3"l>>' +
@@ -270,26 +287,34 @@
                     {
                         "render": function (data, type, full, meta) { return full.amount + ' ريال'; }
                     },
-                    {
-                        "render": function (data, type, full, meta) {
-                            console.log(full.reasons);
-                            var colors = ["primary", "secondary", "success", "danger", "warning", "info", "dark"];
-
-                            var result = '';
-                            $.each(full.reasons, function (index, item) {
-                                result = result + '<span class="badge p-1 bg-label-' + colors[Math.floor(Math.random() * colors.length)] + '">' + item + '</span>';
-                            });
-                            return result;
-
-                        }
-                    },
+                    { "data": "description", "name": "description", "width": "35%" },
                     {
                         "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="/Edit/EditReceivePayments?id=' + full.id + '">تعديل</a>'; }
                     }
                 ]
             });
 
-
+            $('.select2').select2({
+                allowClear: true,
+                placeholder: "اختر اسم المستخدم",
+            });
+            $('#NamesList').on('change', function () {
+                var selected = $(this).find("option:selected").val();
+                if (selected == '') {
+                    return;
+                }
+                $('#userTable').DataTable()
+                    .columns([1])
+                    .search(selected)
+                    .draw();
+            });
+            //$('#NamesList') on clear selection
+            $('#NamesList').on('select2:unselecting', function () {
+                $('#userTable').DataTable()
+                    .columns([1])
+                    .search('')
+                    .draw();
+            });
 
             var AddStatus = '@TempData["AddStatus"]';
             if (AddStatus == "Success") {

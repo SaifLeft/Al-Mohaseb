@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = "الإيداع الشهري";
     string anser = Model.IsHasRecodes ? "نعم" : "لا";
-
 }
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -20,7 +19,7 @@
             @if (Model.IsSelected)
             {
                 <div class="row mb-3" id="HasRecordDiv">
-                    <label class="col-sm-2 col-form-label-lg">تم إداع المالغ مسبقا؟</label>
+                    <label class="col-sm-2 col-form-label-lg">تم ايداع المالغ مسبقا؟</label>
                     <div class="col-sm-3">
                         @{
                             if (Model.IsHasRecodes)
@@ -43,12 +42,6 @@
                     </div>
                 </div>
             }
-            @*<div class="row mb-3">
-                <div class="col-sm-3">
-                    <button type="button" class="btn btn-primary" disabled id="ShowAllNamesBtn">عرض</button>
-                    <button type="button" class="btn btn-dark" disabled id="ClearAll">تصفية الخانات</button>
-                </div>
-            </div>*@
         </div>
     </div>
     <div class="card" id="CardDetailsDiv" style="display:none;">
@@ -62,18 +55,16 @@
                 <div class="table-responsive">
                     <table class="table table-flush-spacing">
                         <tbody>
-                            
+
                             @if (Model.SumitedMonthlyPayments.Any())
                             {
                                 <tr>
                                     <td class="text-nowrap">
                                         تم صرف المبلغ للجميع؟
-                                        <i class="bx bx-info-circle bx-xs" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="جميع من بلاقائمة تمك صرف لهم المبالغ الدد بجانب اسهم"></i>
                                     </td>
                                     <td>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" checked
-                                                   id="selectAll">
+                                            <input class="form-check-input" type="checkbox" checked id="selectAll">
                                             <label class="form-check-label" for="selectAll">تحديد الجميع وأعادة توزيع مبلغ الأشتراك</label>
                                         </div>
                                     </td>
@@ -81,45 +72,41 @@
                                 foreach (var item in Model.SumitedMonthlyPayments)
                                 {
                                     <tr>
-                                        <td class="text-nowrap">@item.PersonName</td>
-                                        <td>
-                                            <div class="d-flex">
-                                                <div class="d-flex">
-                                                    <div class="form-check col-md-5 form-check-success form-check-inline">
-                                                        @if (!item.IsPaid)
-                                                        {
-                                                            <input class="form-check-input IsPaid-checkbox" type="checkbox"
-                                                                   data-input-id="@item.PersonId">
-                                                        }
-                                                        else
-                                                        {
-                                                            <input class="form-check-input IsPaid-checkbox" type="checkbox"
-                                                                   checked
-                                                                   data-input-id="@item.PersonId">
-                                                        }
-                                                        <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
-                                                    </div>
-                                                    <div class="d-flex" id="AmountBoxDiv-*@item.PersonId" style="display: none;">
-                                                        <label class="col-md-3 col-form-label-sm">المبلغ</label>
-                                                        <div class="col-md-8">
-                                                            @if (!item.IsPaid)
-                                                            {
-                                                                <input class="form-control form-control-sm Amount-inputs"
-                                                                       value="@item.Amount"
-                                                                       type="number"
-                                                                       disabled
-                                                                       data-PersonId="@item.PersonId">
-                                                            }
-                                                            else
-                                                            {
-                                                                <input class="form-control form-control-sm Amount-inputs"
-                                                                       value="@item.Amount"
-                                                                       type="number"
-                                                                       data-PersonId="@item.PersonId">
-                                                            }
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                        <td class="text-nowrap">
+                                            @item.PersonName  - <span>مبلغ الأشتراك: <label class="badge bg-dark">@item.Amount ريال</label></span>
+                                        </td>
+                                        <td class="d-flex">
+                                            <div class="form-check col-md-2 form-check-success form-check-inline">
+                                                @if (!item.IsPaid)
+                                                {
+                                                    <input class="form-check-input IsPaid-checkbox" type="checkbox"
+                                                           data-input-id="@item.PersonId">
+                                                }
+                                                else
+                                                {
+                                                    <input class="form-check-input IsPaid-checkbox" type="checkbox"
+                                                           checked
+                                                           data-input-id="@item.PersonId">
+                                                }
+                                                <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
+                                            </div>
+                                            <label class="col-md-1 col-form-label-sm">المبلغ</label>
+                                            <div class="col-md-1">
+                                                @if (!item.IsPaid)
+                                                {
+                                                    <input class="form-control form-control-sm Amount-inputs"
+                                                           value="@item.Amount"
+                                                           type="number"
+                                                           disabled
+                                                           data-PersonId="@item.PersonId">
+                                                }
+                                                else
+                                                {
+                                                    <input class="form-control form-control-sm Amount-inputs"
+                                                           value="@item.Amount"
+                                                           type="number"
+                                                           data-PersonId="@item.PersonId">
+                                                }
                                             </div>
                                         </td>
                                     </tr>
@@ -173,12 +160,10 @@
     <script>
         var IsDark = !document.documentElement.classList.contains("light-style");
         var IsSelected = '@Model.IsSelected';
-        if (IsSelected != '' && IsSelected === 'True')
-        {
+        if (IsSelected != '' && IsSelected === 'True') {
             $('#CardDetailsDiv').show();
         }
-        else
-        {
+        else {
             $('#CardDetailsDiv').hide();
         }
         // Get the current year and month in the format 'yyyy-MM'
@@ -254,14 +239,14 @@
                 var Amount = AmountPersonElement.value;
                 if (checkbox.checked) {
                     MonthlyPaidData.push(
-                        { 
+                        {
                             PersonId: PersonId,
                             Amount: Amount,
                             IsPaid: checkbox.checked
                         }
                     );
                 }
-                else{
+                else {
                     MonthlyPaidData.push(
                         {
                             PersonId: PersonId,
@@ -276,9 +261,9 @@
             SendAjaxData(MonthlyPaidData);
         }
         function SendAjaxData(MonthlyPaidData) {
-            
+
             var data = {
-                MonthlyPaidData : MonthlyPaidData,
+                MonthlyPaidData: MonthlyPaidData,
                 YearMonth: '@Model.YearMonth'
             }
             $.ajax({
@@ -289,6 +274,7 @@
                     if (response.success) {
                         alert(response.message);
                         window.location.href = '@Url.Action("MonthlyReceivePayments", "Create")?YearMonth=' + '@Model.YearMonth';
+
                     }
                     else {
                         alert(response.message);

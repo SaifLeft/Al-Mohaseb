@@ -39,13 +39,10 @@
                             <input asp-for="Amount" type="text" class="form-control">
                             <span asp-validation-for="Amount" class="text-danger"></span>
                         </div>
-
                         <div class="mb-3">
-                            <label for="select2Primary" class="form-label">تم صرف المبلغ لسبب</label>
-                            <div class="select2-primary">
-                                <select asp-for="ReasonsList" id="ReasonsListselect2" class="select2 form-select" multiple>
-                                </select>
-                            </div>
+                            <label class="form-label" for="Description">مبلغ الصرف</label>
+                            <input asp-for="Description" type="text" class="form-control">
+                            <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
                         <button type="submit" class="btn btn-primary">حفظ</button>
 

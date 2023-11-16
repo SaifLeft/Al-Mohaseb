@@ -6,9 +6,22 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     <h3>قائمة المصروفات</h3>
     <div class="card p-4">
-
-        <div class="card-body">
+        <div class="card-header">
             <a class="btn btn-dark" asp-controller="Create" asp-action="SpendMoney"><i class="bx bx-plus me-0 me-lg-2"></i><span class="d-none d-lg-inline-block">صرف مبلغ لشخص</span></a>
+        </div>
+
+        <div class="row float-end">
+            <div class="col-md-5">
+                <select id="NamesList" class="select2 form-select">
+                    <option value="">بحث بأسم</option>
+                    @foreach (var item in ViewData["NamesList"] as List<SelectListItem>)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="card-body">
             <div class="table-responsive mt-5">
                 <table id="userTable" class="table table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
                     <thead>
@@ -80,8 +93,7 @@
                 "processing": true,
                 "serverSide": true,
                 "filter": true,
-                "pageLength": 50,
-                "lengthMenu": [20, 30, 40, 50, 100],
+                "paging": false,
                 "orderMulti": false,
                 "ajax": {
                     "url": "@Url.Action("GetSpendMoneyDetails","List")",
@@ -273,25 +285,37 @@
                     {
                         "render": function (data, type, full, meta) { return full.amount + ' ريال'; }
                     },
+                    { "data": "description", "name": "description", "width": "25%" },
                     {
-                        "render": function (data, type, full, meta) {
-                            console.log(full.reasons);
-                            var colors = ["primary", "secondary", "success", "danger", "warning", "info", "dark"];
-
-                            var result = '';
-                            $.each(full.reasons, function (index, item) {
-                                result = result + '<span class="badge p-1 bg-label-' + colors[Math.floor(Math.random() * colors.length)] + '">' + item + '</span>';
-                            });
-                            return result;
-
-                        }
-                    },
-                    {
-                        "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="/Edit/EditSpendMoney?id=' + full.id + '">تعديل</a>'; }
+                        "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="@Url.Action("EditSpendMoney","Edit")?id=' + full.id + '">تعديل</a>'; }
                     }
-                ]
+                ],
+                columnDefs: [
+                    // Center align both header and body content of columns 1, 2 & 3
+                    { className: "dt-center", targets: [0, 1, 2, 3, 4] }
+                ],
             });
-
+            $('.select2').select2({
+                allowClear: true,
+                placeholder: "اختر اسم المستخدم",
+            });
+            $('#NamesList').on('change', function () {
+                var selected = $(this).find("option:selected").val();
+                if (selected == '') {
+                    return;
+                }
+                $('#userTable').DataTable()
+                    .columns([1])
+                    .search(selected)
+                    .draw();
+            });
+            //$('#NamesList') on clear selection
+            $('#NamesList').on('select2:unselecting', function () {
+                $('#userTable').DataTable()
+                    .columns([1])
+                    .search('')
+                    .draw();
+            });
 
 
             var AddStatus = '@TempData["AddStatus"]';
@@ -316,7 +340,7 @@
             if (UpdateStatus == "Success") {
                 Swal.fire({
                     title: 'تمت العملية بنجاح',
-                    text: 'تم تعديل المبلغ الصرف بنجاح',
+                    text: 'تم تعديل الصرف بنجاح',
                     icon: 'success',
                     confirmButtonText: 'حسنا'
                 });

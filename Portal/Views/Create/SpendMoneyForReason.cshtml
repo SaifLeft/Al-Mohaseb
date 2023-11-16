@@ -80,7 +80,7 @@
                     <div class="table-responsive">
                         <table class="table table-flush-spacing">
                             <tbody>
-                                @if (Model.PersonConnectedWithReasonId.Any() || Model.SpendMoneySubmitedAmount.Any())
+                                @if (Model.AllPersonInSystem.Any() || Model.SpendMoneySubmitedAmount.Any())
                                 {
                                     <tr>
                                         <td class="text-nowrap">
@@ -138,7 +138,7 @@
                                     }
                                     else
                                     {
-                                        @foreach (var item in Model.PersonConnectedWithReasonId)
+                                        @foreach (var item in Model.AllPersonInSystem)
                                         {
                                             <tr>
                                                 <td class="text-nowrap">@item.PersonName</td>
@@ -209,10 +209,8 @@
 
             // Initialize the select2 plugin for the ReasonList dropdown
             $("#ReasonList").select2({
-                placeholder: 'اختر اسما لأظهار تفاصيله', // Placeholder text in Arabic
                 allowClear: true,
-                language: "ar", // Set language to Arabic
-
+                placeholder: 'اختر'
             });
 
             // Fetch reasons using jQuery shorthand for $.get

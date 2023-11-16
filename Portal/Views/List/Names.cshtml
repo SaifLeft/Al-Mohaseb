@@ -6,9 +6,13 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     <h3>قائمة بيانات الأساسية للأعضاء المنتسبة</h3>
     <div class="card p-4">
-
-        <div class="card-body">
-            <a class="btn btn-dark" asp-controller="Create" asp-action="Names"><i class="bx bx-plus me-0 me-lg-2"></i><span class="d-none d-lg-inline-block">أضافة شخص جديد</span></a>
+        <div class="card-header">
+            <a class="btn btn-dark mb-3" asp-controller="Create" asp-action="Names">
+                <i class="bx bx-plus me-0 me-lg-2"></i>
+                <span class="d-none d-lg-inline-block">أضافة شخص جديد</span>
+            </a>
+        </div>
+        <div class="card-body ">
             <div class="table-responsive mt-5">
                 <table id="userTable" class="table  table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
                     <thead>
@@ -82,7 +86,7 @@
                 "serverSide": true,
                 "filter": true,
                 "pageLength": 50,
-                "lengthMenu": [20, 30, 40, 50, 100],
+                "paging": false,
                 "orderMulti": false,
                 "ajax": {
                     "url": "@Url.Action("GetUserDetails","List")",
@@ -117,7 +121,7 @@
                 },
                 columnDefs: [
                     // Center align both header and body content of columns 1, 2 & 3
-                    { className: "dt-center", targets: [0, 1, 2,3,4,5] }
+                    { className: "dt-center", targets: [0, 1, 2, 3, 4, 5] }
                 ],
                 buttons: [
                     {
@@ -237,7 +241,7 @@
                                     customize: function (doc) {
                                         doc.defaultStyle.font = 'Arial';
                                         doc.styles.tableHeader.font = 'Arial';
-                                        doc.content[1].table.widths = ['*','*', '*', '*', '*'];
+                                        doc.content[1].table.widths = ['*', '*', '*', '*', '*'];
                                     }
 
 
@@ -273,19 +277,18 @@
                     }
                 ],
                 "columns": [
-                    {"data": "name", "name": "Name", "autoWidth": true, "className": 'dt-body-center'},
+                    { "data": "name", "name": "Name", "autoWidth": true, "className": 'dt-body-center' },
                     { "data": "phone", "name": "Phone", "autoWidth": true, "className": 'dt-body-center' },
                     { "data": "civilnumber", "name": "CivilNumber", "autoWidth": true, "className": 'dt-body-center' },
                     { "data": "date", "date": "date", "autoWidth": true, "className": 'dt-body-center' },
                     { "data": "amount", "date": "amount", "autoWidth": true, "className": 'dt-body-center' },
-                    
+
                     {
                         "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="/Edit/EditPerson?id=' + full.id + '">تعديل</a>'; }
                     }
                 ]
             });
-
-
+           
 
             var AddStatus = '@TempData["AddStatus"]';
             if (AddStatus == "Success") {

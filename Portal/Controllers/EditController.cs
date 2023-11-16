@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Portal.Data;
 using Portal.Models.ViewModels;
+using System.ComponentModel.Design;
 using System.Xml.Linq;
 
 namespace Portal.Controllers
@@ -129,7 +130,8 @@ namespace Portal.Controllers
             {
                 Id = receivePayment.Id,
                 Amount = receivePayment.Amount,
-                Date = receivePayment.Date
+                Date = receivePayment.Date,
+                Description = receivePayment.Description,
             };
             ViewBag.Date = DateTime.Parse(receivePayment.Date).ToString("yyyy-MM-dd");
             ViewBag.SelectedName = receivePayment.NameId;
@@ -162,41 +164,14 @@ namespace Portal.Controllers
                 if (receivePayment.NameId != VM.NameId) receivePayment.NameId = VM.NameId;
                 if (receivePayment.Amount != VM.Amount) receivePayment.Amount = VM.Amount;
                 if (receivePayment.Date != VM.Date) receivePayment.Date = VM.Date;
+                if (receivePayment.Description != VM.Description) receivePayment.Description = VM.Description;
 
                 _dbContext.Update(receivePayment);
 
                 await _dbContext.SaveChangesAsync();
 
-                // Handle reason mappings
-                var newSelectedReasonsList = VM.ReasonsList;
-                var oldSelectedReasonsList = receivePayment.ReceivePaymentsReasonsMapping.Select(x => x.ReasonsId).ToList();
-
-                var addedReasonsList = newSelectedReasonsList.Except(oldSelectedReasonsList).ToList();
-                var removedReasonsList = oldSelectedReasonsList.Except(newSelectedReasonsList).ToList();
-
-                foreach (var reasonId in addedReasonsList)
-                {
-                    _dbContext.ReceivePaymentsReasonsMapping.Add(new ReceivePaymentsReasonsMapping
-                    {
-                        ReasonsId = reasonId,
-                        ReceivePaymentsId = VM.Id
-                    });
-                }
-
-                await _dbContext.SaveChangesAsync();
-
-                foreach (var reasonId in removedReasonsList)
-                {
-                    var reason = await _dbContext.ReceivePaymentsReasonsMapping.FirstOrDefaultAsync(x => x.ReasonsId == reasonId && x.ReceivePaymentsId == VM.Id);
-                    if (reason != null)
-                    {
-                        _dbContext.ReceivePaymentsReasonsMapping.Remove(reason);
-                    }
-                }
-
-                await _dbContext.SaveChangesAsync();
-
                 transaction.Commit();
+
                 ViewBag.UpdateStatus = "Success";
 
                 return RedirectToAction("ReceivePayments", "List");
@@ -212,7 +187,6 @@ namespace Portal.Controllers
         public async Task<IActionResult> EditSpendMoney(long id)
         {
             var spendMoney = await _dbContext.MosbSpendMoney
-                .Include(x => x.ReasonsSpendMoneyMapping)
                 .FirstOrDefaultAsync(n => n.Id == id);
 
             if (spendMoney == null)
@@ -224,11 +198,11 @@ namespace Portal.Controllers
             {
                 NameId = spendMoney.Id,
                 Amount = spendMoney.Amount,
-                Date = spendMoney.Date
+                Date = spendMoney.Date,
+                Description = spendMoney.Description,
             };
             ViewBag.Date = DateTime.Parse(spendMoney.Date).ToString("yyyy-MM-dd");
-            ViewBag.SelectedName = spendMoney.NameId;
-            ViewBag.selectedReasonsList = spendMoney.ReasonsSpendMoneyMapping.Select(x => x.ReasonsId).ToList();
+            ViewBag.SelectedName = spendMoney.PersonId;
             ViewBag.Id = id;
 
             return View(VM);
@@ -239,14 +213,14 @@ namespace Portal.Controllers
         {
             try
             {
-                VM.NameId = long.Parse(Request.Form["Id"]);
                 if (!ModelState.IsValid)
                 {
                     return View(VM);
                 }
 
                 using var transaction = _dbContext.Database.BeginTransaction();
-                var spendMoney = await _dbContext.MosbSpendMoney.Include(x => x.ReasonsSpendMoneyMapping).FirstOrDefaultAsync(n => n.Id == VM.NameId);
+                
+                var spendMoney = await _dbContext.MosbSpendMoney.FirstOrDefaultAsync(n => n.Id == VM.NameId);
 
                 if (spendMoney == null)
                 {
@@ -254,51 +228,26 @@ namespace Portal.Controllers
                 }
 
                 // Update spendMoney properties
-                if (spendMoney.NameId != VM.NameId) spendMoney.NameId = VM.NameId;
+                if (spendMoney.PersonId != VM.NameId) spendMoney.PersonId = VM.NameId;
                 if (spendMoney.Amount != VM.Amount) spendMoney.Amount = VM.Amount;
                 if (spendMoney.Date != VM.Date) spendMoney.Date = VM.Date;
+                if (spendMoney.Description != VM.Description) spendMoney.Description = VM.Description;
 
                 _dbContext.Update(spendMoney);
 
-                await _dbContext.SaveChangesAsync();
-
-                // Handle reason mappings
-                var newSelectedReasonsList = VM.ReasonsList;
-                var oldSelectedReasonsList = spendMoney.ReasonsSpendMoneyMapping.Select(x => x.ReasonsId).ToList();
-
-                var addedReasonsList = newSelectedReasonsList.Except(oldSelectedReasonsList).ToList();
-                var removedReasonsList = oldSelectedReasonsList.Except(newSelectedReasonsList).ToList();
-
-                foreach (var reasonId in addedReasonsList)
+                var Status = await _dbContext.SaveChangesAsync();
+                if (Status == 0)
                 {
-                    _dbContext.ReasonsSpendMoneyMapping.Add(new ReasonsSpendMoneyMapping
-                    {
-                        ReasonsId = reasonId,
-                        SpendMoneyId = VM.NameId
-                    });
+                    TempData["UpdateStatus"] = "Error";
                 }
-
-                await _dbContext.SaveChangesAsync();
-
-                foreach (var reasonId in removedReasonsList)
-                {
-                    var reason = await _dbContext.ReasonsSpendMoneyMapping.FirstOrDefaultAsync(x => x.ReasonsId == reasonId && x.SpendMoneyId == VM.NameId);
-                    if (reason != null)
-                    {
-                        _dbContext.ReasonsSpendMoneyMapping.Remove(reason);
-                    }
-                }
-
-                await _dbContext.SaveChangesAsync();
-
                 transaction.Commit();
-                ViewBag.UpdateStatus = "Success";
+                TempData["UpdateStatus"] = "Success";
 
                 return RedirectToAction("SpendMoney", "List");
             }
             catch (Exception ex)
             {
-                ViewBag.UpdateStatus = "Error: " + ex.Message;
+                TempData["UpdateStatus"] = "Error";
                 return View(VM);
             }
         }

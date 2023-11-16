@@ -1,0 +1,325 @@
+﻿@model SempleVM;
+@{
+    ViewData["Title"] = "أحصائيات بأسم معين";
+    string display = Model.PersonalBalanceIsAvailable ? "block" : "none";
+    string display2 = Model.YearIsAvailable ? "block" : "none";
+}
+<!-- Content Page -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="card-title mb-3">الرصيد العام</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-5">
+                <div class="d-flex align-items-center mb-3 form-inline" style="font-size:x-large">
+                    <div>
+                        <span>جميع الايداعات العامة</span>
+                        <span class="badge rounded-pill bg-info">@Model.AllReceivePaymentsAmount</span>
+                    </div>
+                    <span class="mx-5 mt-2">-</span>
+                    <div>
+                        <span>جميع الصرفيات العامة</span>
+                        <span class="badge rounded-pill bg-warning">@Model.AllSpendMoneyAmount</span>
+                    </div>
+                    <span class="mx-5 mt-2">=</span>
+                    <div class="mx-1">
+                        <span>الرصيد العام</span>
+                        <span class="badge rounded-pill bg-success">@Model.GeneralBalance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-3">
+        <div class="d-flex card-header">
+            <h5 class="card-title col-md-6">الرصيد السنوي</h5>
+            <label class="mb-3 text-uppercase col-md-2" style="font-size:x-large">بحث في سنة المعنية</label>
+            <div class="col-md-4">
+                <select id="YearList" class="select2 form-select">
+                    @foreach (var item in Model.YearsList)
+                    {
+                        if (item.IsSelected)
+                        {
+                            <option selected value="@item.Value">@item.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="card-body" style="display:@display2">
+            <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-5">
+                <div class="d-flex align-items-center mb-3 form-inline" style="font-size:x-large">
+                    <div>
+                        <span>جميع الايداعات السنة</span>
+                        <span class="badge rounded-pill bg-info">@Model.ReceivePaymentsYearlyData</span>
+                    </div>
+                    <span class="mx-5 mt-2">-</span>
+                    <div>
+                        <span>جميع الصرفيات السنة</span>
+                        <span class="badge rounded-pill bg-warning">@Model.SpendMoneyYearlyData</span>
+                    </div>
+                    <span class="mx-5 mt-2">=</span>
+                    <div class="mx-1">
+                        <span>الرصيد السنوي</span>
+                        <span class="badge rounded-pill bg-success">@Model.TotalAmountYearlyData</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-3">
+        <div class="d-flex card-header">
+            <h5 class="card-title col-md-6">الرصيد الشخصي</h5>
+            <label class="mb-3 text-uppercase col-md-2" style="font-size:x-large">أسم الشخص</label>
+            <div class="col-md-4">
+                <select id="NamesList" class="select2 form-select">
+                    @foreach (var item in Model.NamesList)
+                    {
+                        if (item.IsSelected)
+                        {
+                            <option selected value="@item.Value">@item.Text</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="card-body" style="display:@display">
+            <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-5">
+                <div class="d-flex align-items-center mb-3 form-inline" style="font-size:x-large">
+                    <div>
+                        <span>جميع ايداعات الشخص</span>
+                        <span class="badge rounded-pill bg-info">@Model.PersonalReceivePayment</span>
+                    </div>
+                    <span class="mx-5 mt-2">-</span>
+                    <div>
+                        <span>جميع مصروفات الشخص</span>
+                        <span class="badge rounded-pill bg-warning">@Model.PersonalSpendMoney</span>
+                    </div>
+                    <span class="mx-5 mt-2">=</span>
+                    <div class="mx-1">
+                        <span>الرصيد الشخصي</span>
+                        <span class="badge rounded-pill bg-success">@Model.PersonalTotalAmount</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-3 ">
+        <div class="d-flex card-header">
+            <h5 class="card-title col-md-10">رصيد جميع الأشخاص</h5>
+            <label class="mb-3 text-uppercase">
+                طباعة الجدول كـ : <a href="#" class="btn btn-outline-primary btn-sm" id="PrintTableBtn">PDF</a>
+            </label>
+
+        </div>
+        <div class="card-body">
+            <div class="align-items-center justify-content-center ">
+                <div class="table-responsive">
+                    <table id="PersonsBalanceDataTable" class="table table-striped table-bordered" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>رقم الهاتف</th>
+                                <th>الشخص</th>
+                                <th>جميع الايداعات</th>
+                                <th>جميع المصروفات</th>
+                                <th>الرصيد الشخصي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.PersonsBalance)
+                            {
+                                <tr>
+                                    <td>@item.PhoneNumber</td>
+                                    <td>@item.Name</td>
+                                    <td>@item.ReceivePayment</td>
+                                    <td>@item.SpendMoney</td>
+                                    <td>@item.TotalAmount</td>
+                                </tr>
+                            }
+                    </table>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Content Page -->
+@section Stylesheet{
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/typeahead-js/typeahead.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/select2/select2.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/formvalidation/dist/css/formValidation.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/sweetalert2/sweetalert2.css">
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+
+    }
+
+@section Scripts{
+    <script src="~/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="~/assets/vendor/libs/datatables/jquery.dataTables.js"></script>
+    <script src="~/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive/datatables.responsive.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/moment/moment.js"></script>
+    <script src="~/assets/vendor/libs/datatables/jquery.dataTables.js"></script>
+    <script src="~/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive/datatables.responsive.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/datatables-buttons/datatables-buttons.js"></script>
+    <script src="~/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/jszip/jszip.js"></script>
+    <script src="~/lib/datatablesRTL/pdfmake.js"></script>
+    <script src="~/lib/datatablesRTL/vfs_fonts.js"></script>
+    <script src="~/assets/vendor/libs/select2/select2.js"></script>
+    <script src="~/assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js"></script>
+    <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js"></script>
+    <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js"></script>
+    <script src="~/assets/vendor/libs/cleavejs/cleave.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.16/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+
+
+    <script>
+        $(document).ready(function () {
+
+            $('.select2').select2({
+                allowClear: true,
+                placeholder: "أختيار من القائمة"
+            });
+
+            $('#NamesList').on('change', function () {
+                var selectedName = $(this).val();
+                var url = '@Url.Action("Semple", "Statistics")?nameId=' + selectedName;
+                window.location.href = url;
+            });
+            $('#NamesList').on('select2:unselecting', function () {
+                var url = '@Url.Action("Semple", "Statistics")';
+                window.location.href = url
+            });
+            $('#YearList').on('change', function () {
+                var selectedYear = $(this).val();
+                var url = '@Url.Action("Semple", "Statistics")?Year=' + selectedYear;
+                window.location.href = url;
+            });
+            $('#YearList').on('select2:unselecting', function () {
+                var url = '@Url.Action("Semple", "Statistics")';
+                window.location.href = url
+            });
+
+
+            //PersonsBalanceDataTable
+            var table = $('#PersonsBalanceDataTable').DataTable({
+                lengthChange: false,
+                buttons: [
+                    {
+                        extend: 'csv',
+                        split: ['pdf', 'excel'],
+                    }
+                ],
+                responsive: true,
+                autoWidth: false,
+                paging: false,
+                language: {
+                    "sProcessing": "جاري التحميل...",
+                    "sLengthMenu": "إظهار _MENU_ المدخلات",
+                    "sZeroRecords": "لا يوجد سجلات مطابقة",
+                    "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                    "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+                    "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                    "sInfoPostFix": "",
+                    "sSearch": "ابحث:",
+                    "sUrl": "",
+                    "oPaginate": {
+                        "sFirst": "الأول",
+                        "sPrevious": "السابق",
+                        "sNext": "التالي",
+                        "sLast": "الأخير"
+                    }
+                },
+                columnDefs: [{ className: "dt-center", targets: [0, 1, 2, 3, 4] }]
+            });
+            $('#PrintTableBtn').on('click', function () {
+                // Get the DataTable instance
+                var table = $('#PersonsBalanceDataTable').DataTable();
+
+                // Export data with column header formatting
+                var data = table.buttons.exportData({
+                    format: {
+                        header: function (data, columnIdx) {
+                            return data;
+                        }
+                    }
+                });
+
+                // Open a new window for printing
+                var printWin = window.open('', '', 'width=1000,height=600');
+
+                // Print the data on the page after a short delay
+                printWin.onload = function () {
+                    setTimeout(function () {
+                        printWin.document.write('<html dir="rtl"><head>');
+                        printWin.document.write('<title>جميع الأسماء في النظام</title>');
+                        printWin.document.write('<link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />');
+
+                        printWin.document.write('<h1>جميع الأسماء في النظام</h1>');
+                        printWin.document.write('<table border="1" dir="rtl" class="table table-striped table-bordered" style="width:100%">');
+                        printWin.document.write('<thead>');
+                        printWin.document.write('<tr>');
+                        // Use the column headers from DataTable
+                        $.each(data.header, function (i, header) {
+                            printWin.document.write('<th>' + header + '</th>');
+                        });
+                        printWin.document.write('</tr>');
+                        printWin.document.write('</thead>');
+                        printWin.document.write('<tbody>');
+                        // Iterate over the data body and print each row
+                        $.each(data.body, function (i, row) {
+                            printWin.document.write('<tr>');
+                            $.each(row, function (j, cell) {
+                                printWin.document.write('<td>' + cell + '</td>');
+                            });
+                            printWin.document.write('</tr>');
+                        });
+                        printWin.document.write('</tbody>');
+                        printWin.document.write('</table>');
+
+                        printWin.document.close();
+
+                        // Focus on the print window and initiate the print
+                        printWin.focus();
+                        printWin.print();
+                        printWin.close();
+                    }, 500); // Adjust the delay time as needed
+                };
+            });
+
+
+
+
+
+
+        });
+
+    </script>
+    }

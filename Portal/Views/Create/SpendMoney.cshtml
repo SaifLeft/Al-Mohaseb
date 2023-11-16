@@ -38,13 +38,10 @@
                             <input asp-for="Amount" type="text" class="form-control">
                             <span asp-validation-for="Amount" class="text-danger"></span>
                         </div>
-
-                        <div class="mb-3" style="display:none;" id="ReasonsDiv">
-                            <label for="select2Primary" class="form-label">تم صرف المبلغ لسبب</label>
-                            <div class="select2-primary">
-                                <select asp-for="ReasonsList" id="ReasonsListselect2" class="select2 form-select" multiple>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="Description">وصف السبب</label>
+                            <input asp-for="Description" type="text" class="form-control">
+                            <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
                         <button type="submit" class="btn btn-primary">حفظ</button>
 
@@ -114,7 +111,8 @@
                 $(this)
                     .wrap('<div class="position-relative"></div>')
                     .select2({
-                        dropdownParent: $(this).parent()
+                        dropdownParent: $(this).parent(),
+                        placeholder: 'اختر',
                     });
             });
             $.ajax({
@@ -136,34 +134,7 @@
                 }
             });
 
-            //if person is selected, show the reason list for that person only
-            $("#NamesList").change(function () {
-                //hide the reason list ReasonsDiv
-                $("#ReasonsDiv").hide();
-                //clear the reason list.
-                $("#ReasonsListselect2").empty();
-                var selectedPerson = $(this).children("option:selected").val();
-                console.log(selectedPerson);
-                $.ajax({
-                    url: '@Url.Action("GetReasons", "List")?ByNameId=' + selectedPerson,
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function (data) {
-                        //show the reason list ReasonsDiv
-                        $("#ReasonsDiv").show();
-                        console.log(data);
-                        var options2 = $("#ReasonsListselect2");
-                        $.each(data, function () {
-                            options2.append($("<option />").val(this.id).text(this.name));
-                        });
-                        options2.val(null).trigger("change");
-
-                    },
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        console.log(textStatus, errorThrown);
-                    }
-                });
-            });
+           
 
 
 

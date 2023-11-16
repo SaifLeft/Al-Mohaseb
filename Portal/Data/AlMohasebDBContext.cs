@@ -18,73 +18,15 @@ namespace Portal.Data
         {
         }
 
-        public virtual DbSet<MonthlyReceivePayments> MonthlyReceivePayments { get; set; }
-        public virtual DbSet<MonthlyReceiveReason> MonthlyReceiveReason { get; set; }
         public virtual DbSet<MosbName> MosbName { get; set; }
         public virtual DbSet<MosbReasons> MosbReasons { get; set; }
         public virtual DbSet<MosbReceivePayments> MosbReceivePayments { get; set; }
         public virtual DbSet<MosbSpendMoney> MosbSpendMoney { get; set; }
-        public virtual DbSet<MosbSpendMoneyForReason> MosbSpendMoneyForReason { get; set; }
-        public virtual DbSet<ReasonsSpendMoneyMapping> ReasonsSpendMoneyMapping { get; set; }
+        public virtual DbSet<PersonReasonMapping> PersonReasonMapping { get; set; }
         public virtual DbSet<ReceivePaymentsReasonsMapping> ReceivePaymentsReasonsMapping { get; set; }
-        public virtual DbSet<User> User { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<MonthlyReceivePayments>(entity =>
-            {
-                entity.ToTable("MONTHLY_RECEIVE_PAYMENTS");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Amount)
-                    .HasColumnType("double(10)")
-                    .HasColumnName("AMOUNT");
-
-                entity.Property(e => e.Date)
-                    .IsRequired()
-                    .HasColumnType("varchar(255)")
-                    .HasColumnName("DATE");
-
-                entity.Property(e => e.IsPaid)
-                    .HasColumnType("integer(1)")
-                    .HasColumnName("IS_PAID");
-
-                entity.Property(e => e.PersonId)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("PERSON_ID");
-
-                entity.HasOne(d => d.Person)
-                    .WithMany(p => p.MonthlyReceivePayments)
-                    .HasForeignKey(d => d.PersonId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
-            });
-
-            modelBuilder.Entity<MonthlyReceiveReason>(entity =>
-            {
-                entity.ToTable("MONTHLY_RECEIVE_REASON");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.MonthlyReceivePaymentsId)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("MONTHLY_RECEIVE_PAYMENTS_ID");
-
-                entity.Property(e => e.ReasonId)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("REASON_ID");
-
-                entity.HasOne(d => d.MonthlyReceivePayments)
-                    .WithMany(p => p.MonthlyReceiveReason)
-                    .HasForeignKey(d => d.MonthlyReceivePaymentsId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
-
-                entity.HasOne(d => d.Reason)
-                    .WithMany(p => p.MonthlyReceiveReason)
-                    .HasForeignKey(d => d.ReasonId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
-            });
-
             modelBuilder.Entity<MosbName>(entity =>
             {
                 entity.ToTable("MOSB_NAME");
@@ -150,6 +92,19 @@ namespace Portal.Data
                     .HasColumnType("varchar(50)")
                     .HasColumnName("DATE");
 
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasColumnType("varchar(255)")
+                    .HasColumnName("DESCRIPTION");
+
+                entity.Property(e => e.IsMonthly)
+                    .HasColumnType("integer(1)")
+                    .HasColumnName("IS_MONTHLY");
+
+                entity.Property(e => e.IsPaid)
+                    .HasColumnType("integer(1)")
+                    .HasColumnName("IS_PAID");
+
                 entity.Property(e => e.NameId)
                     .HasColumnType("integer(10)")
                     .HasColumnName("NAME_ID");
@@ -179,34 +134,13 @@ namespace Portal.Data
                     .HasColumnType("varchar(50)")
                     .HasColumnName("DATE");
 
-                entity.Property(e => e.MosbReasonsid)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("MOSB_REASONSID");
+                entity.Property(e => e.Description)
+                    .HasColumnType("varchar(255)")
+                    .HasColumnName("DESCRIPTION");
 
-                entity.Property(e => e.NameId)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("NAME_ID");
-
-                entity.HasOne(d => d.Name)
-                    .WithMany(p => p.MosbSpendMoney)
-                    .HasForeignKey(d => d.NameId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
-            });
-
-            modelBuilder.Entity<MosbSpendMoneyForReason>(entity =>
-            {
-                entity.ToTable("MOSB_SPEND_MONEY_FOR_REASON");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Amount)
-                    .HasColumnType("double(10)")
-                    .HasColumnName("AMOUNT");
-
-                entity.Property(e => e.Date)
-                    .IsRequired()
-                    .HasColumnType("varchar(50)")
-                    .HasColumnName("DATE");
+                entity.Property(e => e.IsForReason)
+                    .HasColumnType("integer(1)")
+                    .HasColumnName("IS_FOR_REASON");
 
                 entity.Property(e => e.IsPaid)
                     .HasColumnType("integer(1)")
@@ -221,38 +155,37 @@ namespace Portal.Data
                     .HasColumnName("REASONS_ID");
 
                 entity.HasOne(d => d.Person)
-                    .WithMany(p => p.MosbSpendMoneyForReason)
+                    .WithMany(p => p.MosbSpendMoney)
                     .HasForeignKey(d => d.PersonId)
                     .OnDelete(DeleteBehavior.ClientSetNull);
 
                 entity.HasOne(d => d.Reasons)
-                    .WithMany(p => p.MosbSpendMoneyForReason)
-                    .HasForeignKey(d => d.ReasonsId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
+                    .WithMany(p => p.MosbSpendMoney)
+                    .HasForeignKey(d => d.ReasonsId);
             });
 
-            modelBuilder.Entity<ReasonsSpendMoneyMapping>(entity =>
+            modelBuilder.Entity<PersonReasonMapping>(entity =>
             {
-                entity.ToTable("REASONS_SPEND_MONEY_MAPPING");
+                entity.ToTable("PERSON_REASON_MAPPING");
 
                 entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.NameId)
+                    .HasColumnType("integer(10)")
+                    .HasColumnName("NAME_ID");
 
                 entity.Property(e => e.ReasonsId)
                     .HasColumnType("integer(10)")
                     .HasColumnName("REASONS_ID");
 
-                entity.Property(e => e.SpendMoneyId)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("SPEND_MONEY_ID");
-
-                entity.HasOne(d => d.Reasons)
-                    .WithMany(p => p.ReasonsSpendMoneyMapping)
-                    .HasForeignKey(d => d.ReasonsId)
+                entity.HasOne(d => d.Name)
+                    .WithMany(p => p.PersonReasonMapping)
+                    .HasForeignKey(d => d.NameId)
                     .OnDelete(DeleteBehavior.ClientSetNull);
 
-                entity.HasOne(d => d.SpendMoney)
-                    .WithMany(p => p.ReasonsSpendMoneyMapping)
-                    .HasForeignKey(d => d.SpendMoneyId)
+                entity.HasOne(d => d.Reasons)
+                    .WithMany(p => p.PersonReasonMapping)
+                    .HasForeignKey(d => d.ReasonsId)
                     .OnDelete(DeleteBehavior.ClientSetNull);
             });
 
@@ -279,21 +212,6 @@ namespace Portal.Data
                     .WithMany(p => p.ReceivePaymentsReasonsMapping)
                     .HasForeignKey(d => d.ReceivePaymentsId)
                     .OnDelete(DeleteBehavior.ClientSetNull);
-            });
-
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.ToTable("USER");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Password)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("PASSWORD");
-
-                entity.Property(e => e.Username)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("USERNAME");
             });
 
             OnModelCreatingPartial(modelBuilder);

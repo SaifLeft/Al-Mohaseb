@@ -9,11 +9,10 @@ namespace Portal.Models.ViewModels
 
         [Required(ErrorMessage = "التاريخ مطلوب")]
         public string Date { get; set; }
+        [Required(ErrorMessage = "السبب مطلوب")]
+        public string Description { get; set; }
 
         [Required(ErrorMessage = "المبلغ مطلوب")]
         public double Amount { get; set; }
-
-        [Required(ErrorMessage = "السبب مطلوب")]
-        public List<long> ReasonsList { get; set; }
     }
 }

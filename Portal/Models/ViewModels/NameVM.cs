@@ -13,7 +13,7 @@ namespace Portal.Models.ViewModels
         [Display(Name = "الرقم المدني")]
 
         public long CivilNumber { get; set; }
-        [Required(ErrorMessage = "السبب مطلوب")]
-        public List<long> ReasonsList { get; set; }
+        
+        public double SubscriptionAmount { get; set; }
     }
 }

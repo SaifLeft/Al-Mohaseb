@@ -4,7 +4,7 @@ namespace Portal.Models
 {
     public class SpendMoneyForReasonVM
     {
-        public List<ShowSpendMoney> PersonConnectedWithReasonId { get; set; }
+        public List<ShowSpendMoney> AllPersonInSystem { get; set; }
         public bool IsSelected { get;  set; } = false;
         public long ReasonId { get;  set; }
         public double AmountSubscribed { get;  set; }
