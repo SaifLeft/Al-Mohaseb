@@ -37,11 +37,9 @@
                             <span asp-validation-for="Phone" class="text-danger"></span>
                         </div>
                         <div class="mb-3">
-                            <label for="select2Primary" class="form-label">Primary</label>
-                            <div class="select2-primary">
-                                <select asp-for="ReasonsList" id="select2Primary" class="select2 form-select" multiple>
-                                </select>
-                            </div>
+                            <label class="form-label" for="SubscriptionAmount">مبلغ الأشتراك</label>
+                            <input asp-for="SubscriptionAmount" maxlength="8" type="text" class="form-control">
+                            <span asp-validation-for="SubscriptionAmount" class="text-danger"></span>
                         </div>
                         <button type="submit" class="btn btn-primary">حفظ</button>
 

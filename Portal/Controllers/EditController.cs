@@ -35,10 +35,9 @@ namespace Portal.Controllers
                 Name = name.Name,
                 CivilNumber = name.CivilNumber,
                 Phone = name.PhoneNumber,
-                ReasonsList = name.PersonReasonMapping.Select(x => x.ReasonsId).ToList()
+                SubscriptionAmount = name.SubscriptionAmount,
             };
 
-            ViewData["SelectedReasonsList"] = name.PersonReasonMapping.Select(x => x.ReasonsId).ToList();
             ViewData["Id"] = id;
 
             return View(VM);
@@ -68,37 +67,9 @@ namespace Portal.Controllers
                 if (name.Name != VM.Name) name.Name = VM.Name;
                 if (name.CivilNumber != VM.CivilNumber) name.CivilNumber = VM.CivilNumber;
                 if (name.PhoneNumber != VM.Phone) name.PhoneNumber = VM.Phone;
+                if (name.SubscriptionAmount != VM.SubscriptionAmount) name.SubscriptionAmount = VM.SubscriptionAmount;
 
                 _dbContext.Update(name);
-
-                await _dbContext.SaveChangesAsync();
-
-                // Handle reason mappings
-                var newSelectedReasonsList = VM.ReasonsList;
-                var oldSelectedReasonsList = name.PersonReasonMapping.Select(x => x.ReasonsId).ToList();
-
-                var addedReasonsList = newSelectedReasonsList.Except(oldSelectedReasonsList).ToList();
-                var removedReasonsList = oldSelectedReasonsList.Except(newSelectedReasonsList).ToList();
-
-                foreach (var reasonId in addedReasonsList)
-                {
-                    _dbContext.PersonReasonMapping.Add(new PersonReasonMapping
-                    {
-                        ReasonsId = reasonId,
-                        NameId = VM.Id
-                    });
-                }
-
-                await _dbContext.SaveChangesAsync();
-
-                foreach (var reasonId in removedReasonsList)
-                {
-                    var reason = await _dbContext.PersonReasonMapping.FirstOrDefaultAsync(x => x.ReasonsId == reasonId && x.NameId == VM.Id);
-                    if (reason != null)
-                    {
-                        _dbContext.PersonReasonMapping.Remove(reason);
-                    }
-                }
 
                 await _dbContext.SaveChangesAsync();
 

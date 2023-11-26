@@ -241,11 +241,20 @@ namespace Portal.Controllers
 
         #region SpendMoneyForReason
         public async Task<IActionResult> SpendMoneyForReason(long? ReasonId = null, string? YearMonth = null)
-
         {
             if (ReasonId == null || YearMonth == null)
             {
-                return View(new SpendMoneyForReasonVM());
+                var VMnew = new SpendMoneyForReasonVM
+                {
+                    Reasons = await _context.MosbReasons.Select(x => new SelectListModel
+                    {
+                        Value = x.Id,
+                        IsSelected = false,
+                        Text = x.Name
+                    }).ToListAsync(),
+                    YearMonth = DateTime.Now.ToString("yyyy-MM")
+                };
+                return View(VMnew);
             }
             // YearMonth format Y-M (23-01) parse to DateTime
             var YearMonthDate = DateTime.Parse(YearMonth);
@@ -260,6 +269,12 @@ namespace Portal.Controllers
             var VM = new SpendMoneyForReasonVM
             {
                 ReasonId = ReasonId.Value,
+                Reasons = await _context.MosbReasons.Select(x=> new SelectListModel { 
+                    Value = x.Id,
+                    IsSelected = x.Id == ReasonId.Value ? true : false,
+                    Text = x.Name 
+                }
+                ).ToListAsync(),
                 YearMonth = YearMonth,
                 IsSelected = true,
                 AmountSubscribed = await _context.MosbReasons.Where(x => x.Id == ReasonId).Select(x => x.Amount).FirstOrDefaultAsync(),
@@ -275,11 +290,11 @@ namespace Portal.Controllers
                         SpendMoneyId = x.Id,
                         PersonId = x.Person.Id,
                         PersonName = x.Person.Name,
-                        Amount = Math.Round(x.Amount, 2)
+                        Amount = Math.Round(x.Amount, 2),
+                        IsPaid = x.IsPaid == true.GetHashCode() ? true : false
                     })
                     .ToList();
                 VM.IsHasRecodes = true;
-
             }
             else
             {
@@ -288,7 +303,8 @@ namespace Portal.Controllers
                     {
                         PersonId = x.Id,
                         PersonName = x.Name,
-                        Amount = 0
+                        Amount = 0,
+                        IsPaid = false
                     })
                     .ToListAsync();
             }
@@ -447,6 +463,7 @@ namespace Portal.Controllers
                     {
                         MonthlyReceivePaymentsId = x.Id,
                         Amount = Math.Round(x.Amount, 2),
+                        SubscriptionAmount = x.Name.SubscriptionAmount,
                         PersonName = x.Name.Name,
                         PersonId = x.NameId,
                         IsPaid = x.IsPaid == 1 ? true : false
@@ -461,6 +478,7 @@ namespace Portal.Controllers
                         PersonId = x.Id,
                         PersonName = x.Name,
                         Amount = Math.Round(x.SubscriptionAmount, 2),
+                        SubscriptionAmount = x.SubscriptionAmount,
                         IsPaid = false
                     })
                     .ToListAsync();

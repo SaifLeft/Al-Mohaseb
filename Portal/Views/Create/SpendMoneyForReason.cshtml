@@ -14,6 +14,17 @@
                 <label class="col-sm-2 col-form-label-lg">اختر السبب</label>
                 <div class="col-sm-3">
                     <select name="ReasonId" id="ReasonList" class="select2 form-select-lg ">
+                        @foreach (var item in Model.Reasons)
+                        {
+                            if (item.IsSelected)
+                            {
+                                <option value="@item.Value" selected>@item.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
                     </select>
                 </div>
             </div>
@@ -25,10 +36,10 @@
             </div>
             @if (Model.AmountSubscribed > 0)
             {
-                <div class="row mb-3" id="AmountSubscribedDiv">
-                    <label class="col-sm-2 col-form-label-lg">مبلغ الأشتراك</label>
-                    <div class="col-sm-3">
-                        <input type="text" readonly="" value="@Model.AmountSubscribed ريال" class="form-control-plaintext" id="ReasonAmountShow">
+                <div class="row mb-3">
+                    <label class="col-sm-2 col-form-label-lg">مبلغ الصرف</label>
+                    <div class=" col-sm-3">
+                        <input type="number" id="AmountSubscribedInput" value="@Model.AmountSubscribed" class="form-control col-md-5">
                     </div>
                 </div>
             }
@@ -103,31 +114,46 @@
                                         @foreach (var item in Model.SpendMoneySubmitedAmount)
                                         {
                                             <tr>
+                                                <td class="na-person" data-PersonId="@item.PersonId" hidden>
+                                                    @item.PersonName
+                                                </td>
                                                 <td class="text-nowrap">@item.PersonName</td>
                                                 <td>
                                                     <div class="d-flex">
                                                         <div class="d-flex">
                                                             <div class="form-check col-md-5 form-check-success form-check-inline">
-                                                                @if (item.Amount == 0)
+                                                                @if (!item.IsPaid)
                                                                 {
-                                                                    <input class="form-check-input payment-checkbox" type="checkbox"
+                                                                    <input class="form-check-input IsPaid-checkbox" type="checkbox"
                                                                            data-input-id="@item.PersonId">
                                                                 }
                                                                 else
                                                                 {
-                                                                    <input class="form-check-input payment-checkbox" type="checkbox"
+                                                                    <input class="form-check-input IsPaid-checkbox" type="checkbox"
                                                                            checked
                                                                            data-input-id="@item.PersonId">
                                                                 }
                                                                 <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
                                                             </div>
-                                                            <div class="d-flex" id="AmountBoxDiv-@item.PersonId" style="display: none;">
+                                                            <div class="d-flex" style="display: none;">
                                                                 <label class="col-md-3 col-form-label-sm">المبلغ</label>
-                                                                <div class="col-md-6">
-                                                                    <input class="form-control form-control-sm amount-input"
-                                                                           value="@item.Amount"
-                                                                           type="number"
-                                                                           data-input-id-amount="@item.PersonId">
+                                                                <div class="col-md-10">
+                                                                    @if (!item.IsPaid)
+                                                                    {
+                                                                        <input class="form-control form-control-sm Amount-inputs"
+                                                                               value="@item.Amount"
+                                                                               type="number"
+                                                                               disabled
+                                                                               data-PersonId="@item.PersonId">
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <input class="form-control form-control-sm Amount-inputs"
+                                                                               value="@item.Amount"
+                                                                               type="number"
+                                                                               data-PersonId="@item.PersonId">
+                                                                    }
+
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -142,20 +168,44 @@
                                         {
                                             <tr>
                                                 <td class="text-nowrap">@item.PersonName</td>
+                                                <td class="na-person" data-PersonId="@item.PersonId" hidden>
+                                                    @item.PersonName
+                                                </td>
                                                 <td>
                                                     <div class="d-flex">
                                                         <div class="d-flex">
                                                             <div class="form-check col-md-5 form-check-success form-check-inline">
-                                                                <input class="form-check-input payment-checkbox" type="checkbox" checked data-input-id="@item.PersonId">
+                                                                @if (!item.IsPaid)
+                                                                {
+                                                                    <input class="form-check-input IsPaid-checkbox checkbox-group" type="checkbox"
+                                                                           data-input-id="@item.PersonId">
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input class="form-check-input IsPaid-checkbox checkbox-group" type="checkbox"
+                                                                           checked
+                                                                           data-input-id="@item.PersonId">
+                                                                }
                                                                 <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
                                                             </div>
-                                                            <div class="d-flex" id="AmountBoxDiv-@item.PersonId" style="display: none;">
+                                                            <div class="d-flex" style="display: none;">
                                                                 <label class="col-md-3 col-form-label-sm">المبلغ</label>
-                                                                <div class="col-md-8">
-                                                                    <input class="form-control form-control-sm amount-input"
-                                                                           value="@item.Amount"
-                                                                           type="number"
-                                                                           data-input-id-amount="@item.PersonId">
+                                                                <div class="col-md-9">
+                                                                    @if (!item.IsPaid)
+                                                                    {
+                                                                        <input class="form-control form-control-sm Amount-inputs PersonId-@item.PersonId"
+                                                                               value="@item.Amount"
+                                                                               type="number"
+                                                                               disabled
+                                                                               data-PersonId="@item.PersonId">
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <input class="form-control form-control-sm Amount-inputs "
+                                                                               value="@item.Amount"
+                                                                               type="number"
+                                                                               data-PersonId="@item.PersonId">
+                                                                    }
                                                                 </div>
                                                                 <label class="col-md-2 col-form-label-sm"> ريال </label>
 
@@ -186,6 +236,56 @@
 </div>
 
 
+<div class="modal fade" id="ConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-add-new-address">
+        <div class="modal-content p-3 p-md-5">
+            <div class="modal-body">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="text-center mb-4">
+                    <h3 class="address-title">التأكيد على حفظ الاسماء</h3>
+                </div>
+                <form id="ConfirmModalForm" class="row g-3" onsubmit="return false">
+                    <div class="text-center mb-4">
+                        <h5 class="address-title">
+                            جميع الأسماء الأشخاص الذين تم تحديدهم للدفع مع المبلغ المحدد
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-success " id="WillPaidTable">
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-danger table-flush-spacing" id="WillNotSelectedTable">
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-info table-flush-spacing" id="BicStatestic">
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-12 text-center mt-4">
+                        <button type="submit" id="ConfirmModalFormSubmit" class="btn btn-warning me-sm-3 me-1">حفظ مع التأكيد</button>
+                        <button type="reset"
+                                class="btn btn-label-secondary"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                            إلغاء الأمر
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 @section Stylesheet{
     <link rel="stylesheet" href="~/assets/vendor/libs/select2/select2.css">
     <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
@@ -206,26 +306,14 @@
 
 
         $(document).ready(function () {
-
+            var IsDark = !document.documentElement.classList.contains("light-style");
             // Initialize the select2 plugin for the ReasonList dropdown
             $("#ReasonList").select2({
                 allowClear: true,
                 placeholder: 'اختر'
             });
 
-            // Fetch reasons using jQuery shorthand for $.get
-            $.get('@Url.Action("GetReasons", "List")', function (data) {
-                var options2 = $("#ReasonList");
-                $.each(data, function () {
-                    options2.append(new Option(this.name, this.id));
-                });
-                // Check 'IsSelected' and show the flatpickr date picker if it's true
-                if (IsSelected === 'True') {
-                    $("#ReasonList").val(@Model.ReasonId).trigger('change');
-                }
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                console.error(textStatus, errorThrown);
-            });
+
 
             // Check if the 'IsSelected' value is true or false
             var IsSelected = '@Model.IsSelected';
@@ -245,7 +333,7 @@
                         shorthand: true, // Use shorthand month names
                         dateFormat: "Y-m", // Display format 'year-month'
                         altFormat: "F Y", // Format for the alternative input display
-                        theme: "light" // Set the theme to light
+                        theme: IsDark ? "dark" : "light" // Set the theme to light
                     })
                 ],
                 locale: {
@@ -324,36 +412,67 @@
             });
 
 
-
-
-
             // Get references to elements
             const selectAll = document.querySelector('#selectAll');
-            const checkboxList = document.querySelectorAll('.payment-checkbox');
-            const amountInputList = document.querySelectorAll('.amount-input:not([disabled])');
+            const IsPaidCheckboxList = document.querySelectorAll('.IsPaid-checkbox');
+            const amountInputList = document.querySelectorAll('.Amount-inputs');
 
             // Amount data
-            var AmountSubscribed = @Model.AmountSubscribed; // Replace with your actual value
+            var AmountSubscribed = $('#AmountSubscribedInput').val();
             var amountInputCount = amountInputList.length;
             var initialAmountPerInput = AmountSubscribed / amountInputCount;
+            // math around the amount inputs to 3 decimal places like 1.235 OMR
+            initialAmountPerInput = Math.round(initialAmountPerInput * 1000) / 1000;
+
+
+            // if AmountSubscribedInput has iput value
+            $('#AmountSubscribedInput').change('change', (event) => {
+                debugger;
+                AmountSubscribed = parseFloat($('#AmountSubscribedInput').val());
+                initialAmountPerInput = parseFloat(AmountSubscribed / amountInputCount);
+                initialAmountPerInput = Math.round(initialAmountPerInput * 1000) / 1000;
+                amountInputList.forEach((input) => {
+                    input.value = initialAmountPerInput;
+                });
+                initializeAmountInputs();
+            });
+
 
             // Event listeners
             if (selectAll) {
                 selectAll.addEventListener('change', (event) => {
                     const isChecked = event.target.checked;
-                    checkboxList.forEach((checkbox) => {
+                    IsPaidCheckboxList.forEach((checkbox) => {
                         checkbox.checked = isChecked;
-                        handleCheckboxChange(checkbox);
+                        disabledAmountPersonInput(checkbox);
                     });
-                    isChecked ? enableAllAmountInputs() : disableAllAmountInputs();
                 });
             }
-
-            checkboxList.forEach((checkbox) => {
+            IsPaidCheckboxList.forEach((checkbox) => {
                 checkbox.addEventListener('change', () => {
-                    handleCheckboxChange(checkbox);
+                    if (!checkbox.checked) {
+                        divideAmountPersonToRestOfPersons(checkbox);
+                        disabledAmountPersonInput(checkbox);
+                    }
+                    else {
+                        RestoreAmountPersonToRestOfPersons(checkbox);
+                        const PersonId = checkbox.getAttribute('data-input-id');
+                        const AmountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${PersonId}"]`);
+                        AmountPersonElement.disabled = !checkbox.checked;
+                    }
+
                 });
             });
+
+
+            function disabledAmountPersonInput(checkbox) {
+                const PersonId = checkbox.getAttribute('data-input-id');
+                // get all Amount-inputs Elements where data-PersonId = PersonId
+                const AmountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${PersonId}"]`);
+                AmountPersonElement.disabled = !checkbox.checked;
+                AmountPersonElement.value = checkbox.checked ? initialAmountPerInput : 0; // set the value to 0 if the checkbox is unchecked (is not paid)
+            }
+
 
             // Initialize amount inputs
             initializeAmountInputs();
@@ -363,35 +482,91 @@
                     input.value = initialAmountPerInput;
                 });
             }
+            function divideAmountPersonToRestOfPersons(checkbox) {
+                const PersonId = checkbox.getAttribute('data-input-id');
+                const AmountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${PersonId}"]`);
+                const AmountPersonValue = parseFloat(AmountPersonElement.value);
 
-            function handleCheckboxChange(checkbox) {
-                const inputId = checkbox.getAttribute('data-input-id');
-                const inputElement = document.querySelector('[data-input-id-amount="' + inputId + '"]');
-                inputElement.disabled = !checkbox.checked;
-                inputElement.value = checkbox.checked ? initialAmountPerInput : 0;
+                if (AmountPersonValue === 0) {
+                    return;
+                }
+
+                let EnabledAmountInputCount = 0;
+                const EnabledamountInputList = document.querySelectorAll('.Amount-inputs:not([disabled])');
+
+                if (EnabledamountInputList.length > 0) {
+                    EnabledAmountInputCount = EnabledamountInputList.length - 1;
+                }
+
+                let AmountPerPerson = 0;
+
+                if (EnabledAmountInputCount !== 0) {
+                    AmountPerPerson = AmountPersonValue / EnabledAmountInputCount;
+                }
+
+                let AmountPerPersonRounded = 0.000;
+
+                if (AmountPerPerson !== 0) {
+                    AmountPerPersonRounded = Math.round(AmountPerPerson * 1000) / 1000;
+                }
+
+                if (AmountPerPersonRounded !== 0) {
+                    EnabledamountInputList.forEach((input) => {
+                        if (input.getAttribute('data-PersonId') !== PersonId) {
+                            input.value = Math.round((parseFloat(input.value) + AmountPerPersonRounded) * 1000) / 1000;
+                        }
+                    });
+                }
             }
 
-            function disableAllAmountInputs() {
-                amountInputList.forEach((input) => {
-                    input.disabled = true;
-                    input.value = 0;
+
+            function RestoreAmountPersonToRestOfPersons(checkbox) {
+                debugger;
+                // Set the amount of the person that enabled the checkbox to 0
+                const personId = checkbox.getAttribute('data-input-id');
+                const amountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${personId}"]`);
+
+                let enabledAmountInputCount = 0;
+                const enabledAmountInputList = document.querySelectorAll('.Amount-inputs:not([disabled])');
+
+                if (enabledAmountInputList.length > 0) {
+                    enabledAmountInputCount = enabledAmountInputList.length;
+                    enabledAmountInputCount++;
+                } else {
+                    var AmountSubscribed = $('#AmountSubscribedInput').val();
+                    amountPersonElement.value = Math.round(AmountSubscribed * 1000) / 1000;
+                    return;
+                }
+
+                // get total amount of all enabled amount inputs
+                let enabledTotalAmount = 0;
+                enabledAmountInputList.forEach((input) => {
+                    enabledTotalAmount += parseFloat(input.value);
                 });
-            }
 
-            function enableAllAmountInputs() {
-                amountInputList.forEach((input) => {
-                    input.disabled = false;
-                });
-                divideAmountSubscribedToEnabledInputs();
-            }
+                InputListValue = 0;
+                if (enabledTotalAmount > 0) {
+                    InputListValue = Math.round((enabledTotalAmount * 1000) / 1000) / enabledAmountInputCount;
+                }
 
-            function divideAmountSubscribedToEnabledInputs() {
-                amountInputList.forEach((input) => {
-                    if (!input.disabled) {
-                        input.value = initialAmountPerInput;
+
+                var amountResult = Math.round(InputListValue * 1000) / 1000;
+
+                // Subtract the amount of the person from all enabled amount inputs
+                enabledAmountInputList.forEach((input) => {
+                    var inputPersonValue = parseFloat(input.value);
+                    var round = 0;
+                    if (inputPersonValue > 0) {
+                        round = Math.round((inputPersonValue - amountResult) * 1000) / 1000;
                     }
+                    input.value = inputPersonValue - round;
                 });
+
+
+                amountPersonElement.value = amountResult;
             }
+
+
 
 
 
@@ -412,15 +587,17 @@
         }
         function CollectData() {
             const PersonIdAmount = [];
-            const checkboxList = document.querySelectorAll('.payment-checkbox');
-            $.each(checkboxList, function (index, value) {
-                const personId = value.getAttribute('data-input-id');
-                var inputElement = document.querySelector('[data-input-id-amount="' + personId + '"]')
+
+            var IsPaidCheckboxList = document.querySelectorAll('.IsPaid-checkbox');
+            IsPaidCheckboxList.forEach((checkbox) => {
+                var PersonId = checkbox.getAttribute('data-input-id');
+                var AmountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${PersonId}"]`);
+                var Amount = AmountPersonElement.value;
                 PersonIdAmount.push(
                     {
-                        'PersonId': personId,
-                        'IsPaid': value.checked,
-                        'Amount': parseFloat(inputElement.value)
+                        'PersonId': PersonId,
+                        'IsPaid': checkbox.checked,
+                        'Amount': parseFloat(Amount)
                     }
                 );
             });
@@ -434,13 +611,16 @@
                 'IsRecord': IsRecord,
                 'MonthYear': MonthYear
             };
-
+            debugger;
             console.log(data);
 
-            SaveData(data);
+            FillTruePaid(data.PersonIdAmount);
 
-            // clear PersonIdAmount
-            PersonIdAmount.length = 0;
+            $('#ConfirmModal').modal('show');
+            $('#ConfirmModalFormSubmit').click(function () {
+                //PersonIdAmount.length = 0;
+                SaveData(data);
+            });
         }
         function SaveData(data) {
             $.ajax({
@@ -448,9 +628,12 @@
                 type: 'POST',
                 data: data,
                 success: function (response) {
-                    if (response.success) {
+                    if (response.status) {
                         alert("تم الحفظ بنجاح");
-                        window.location.href = '@Url.Action("SpendMoneyForReason", "Create")';
+                        var url = '@Url.Action("SpendMoneyForReason", "Create")';
+                        url += '?ReasonId=' + '@Model.ReasonId';
+                        url += '&YearMonth=' + '@Model.YearMonth';
+                        window.location.href = url;
                     } else {
                         alert(response.message);
                     }
@@ -463,7 +646,55 @@
         }
 
 
+        function FillTruePaid(MonthlyPaidData) {
+            var WillPaidTable = $('#WillPaidTable');
+            var WillNotSelectedTable = $('#WillNotSelectedTable');
+            var WillPaidTableBody = WillPaidTable.find('tbody');
+            var WillNotSelectedTableBody = WillNotSelectedTable.find('tbody');
 
+            // BicStatestic
+            var BicStatestic = $('#BicStatestic');
+            var BicStatesticBody = BicStatestic.find('tbody');
+            BicStatesticBody.empty();
+            // عدد  الأشخاص الذين دفعوا
+            var WillPaidCount = 0;
+            // عدد الأشخاص الذين لم يدفعوا
+            var WillNotSelectedCount = 0;
+            // مجموع المبالغ التي تم دفعها
+            let WillPaidAmount = 0;
+
+            WillPaidTableBody.empty();
+            WillNotSelectedTableBody.empty();
+
+            var WillPaidTableBodyHtml = '';
+            var WillNotSelectedTableBodyHtml = '';
+            MonthlyPaidData.forEach((item) => {
+                var Amount = parseFloat(item.Amount);
+                if (item.IsPaid) {
+                    WillPaidCount++;
+                    WillPaidAmount += Amount;
+                    var Name = $('.na-person[data-PersonId="' + item.PersonId + '"]').text();
+                    WillPaidTableBodyHtml += '<tr><td>' + Name + '</td><td>' + Amount + ' ريال</td></tr>';
+                }
+                else {
+                    var Name = $('.na-person[data-PersonId="' + item.PersonId + '"]').text();
+                    WillNotSelectedTableBodyHtml += '<tr><td>' + Name + '</td></tr>';
+                    WillNotSelectedCount++;
+                }
+
+            });
+            WillPaidTableBody.append(WillPaidTableBodyHtml);
+            WillNotSelectedTableBody.append(WillNotSelectedTableBodyHtml);
+
+            WillPaidAmount = WillPaidAmount.toFixed(3);
+            var WillPaidCountTaxt = 'عدد الأشخاص الذين دفعوا : ' + WillPaidCount + ' أشخاص';
+            var WillNotSelectedCountTaxt = 'عدد الأشخاص الذين لم يدفعوا : ' + WillNotSelectedCount + ' أشخاص'
+            var WillPaidAmountTaxt = 'مجموع المبالغ التي تم دفعها : ' + WillPaidAmount + ' ريال';
+            var BicStatesticBodyHtml = '<tr><td>' + WillPaidCountTaxt + '</td></tr><tr><td>' + WillNotSelectedCountTaxt + '</td></tr><tr><td>' + WillPaidAmountTaxt + '</td></tr>';
+            BicStatesticBody.append(BicStatesticBodyHtml);
+
+
+        }
 
 
 

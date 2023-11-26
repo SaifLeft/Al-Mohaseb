@@ -92,12 +92,13 @@
     <script>
 
         $(document).ready(function () {
-
+            var IsDark = !document.documentElement.classList.contains("light-style");
             //flatpickr-date with date only format and range from today to 30 days later
             $('#flatpickr-date').flatpickr({
                 dateFormat: 'Y-m-d',
                 monthSelectorType: 'static',
-                maxDate: 'today'
+                maxDate: 'today',
+                theme: IsDark ? "dark" : "light" // Set the theme to light
             });
             // Select2 init
             $('.select2').each(function () {

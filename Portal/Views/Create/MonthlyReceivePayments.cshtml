@@ -73,13 +73,16 @@
                                 {
                                     <tr>
                                         <td class="text-nowrap">
-                                            @item.PersonName  - <span>مبلغ الأشتراك: <label class="badge bg-dark">@item.Amount ريال</label></span>
+                                            @item.PersonName  - <span>مبلغ الأشتراك: <label class="badge bg-dark">@item.SubscriptionAmount ريال</label></span>
+                                        </td>
+                                        <td class="na-person" data-PersonId="@item.PersonId" hidden>
+                                            @item.PersonName
                                         </td>
                                         <td class="d-flex">
-                                            <div class="form-check col-md-2 form-check-success form-check-inline">
+                                            <div class="form-check col-md-2  form-check-success form-check-inline">
                                                 @if (!item.IsPaid)
                                                 {
-                                                    <input class="form-check-input IsPaid-checkbox" type="checkbox"
+                                                    <input class="form-check-input  IsPaid-checkbox" type="checkbox"
                                                            data-input-id="@item.PersonId">
                                                 }
                                                 else
@@ -91,7 +94,7 @@
                                                 <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
                                             </div>
                                             <label class="col-md-1 col-form-label-sm">المبلغ</label>
-                                            <div class="col-md-1">
+                                            <div class="col-md-2">
                                                 @if (!item.IsPaid)
                                                 {
                                                     <input class="form-control form-control-sm Amount-inputs"
@@ -123,6 +126,55 @@
                     </table>
                 </div>
                 <!-- Permission table -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- / Content Page -->
+
+<div class="modal fade" id="ConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-add-new-address">
+        <div class="modal-content p-3 p-md-5">
+            <div class="modal-body">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="text-center mb-4">
+                    <h3 class="address-title">التأكيد على حفظ الاسماء</h3>
+                </div>
+                <form id="ConfirmModalForm" class="row g-3" onsubmit="return false">
+                    <div class="text-center mb-4">
+                        <h5 class="address-title">
+                            جميع الأسماء الأشخاص الذين تم تحديدهم للدفع مع المبلغ المحدد
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-success " id="WillPaidTable">
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-danger table-flush-spacing" id="WillNotSelectedTable">
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-info table-flush-spacing" id="BicStatestic">
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-12 text-center mt-4">
+                        <button type="submit" id="ConfirmModalFormSubmit" class="btn btn-warning me-sm-3 me-1">حفظ مع التأكيد</button>
+                        <button type="reset"
+                                class="btn btn-label-secondary"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                            إلغاء الأمر
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -257,8 +309,19 @@
 
                 }
             });
-            console.log(MonthlyPaidData);
-            SendAjaxData(MonthlyPaidData);
+            // Show Model Confirm
+            FillTruePaid(MonthlyPaidData);
+
+            $('#ConfirmModal').modal('show');
+            //Fill Modal Data
+
+
+
+            //SendAjaxData(MonthlyPaidData);
+            //
+            $('#ConfirmModalFormSubmit').click(function () {
+                SendAjaxData(MonthlyPaidData);
+            });
         }
         function SendAjaxData(MonthlyPaidData) {
 
@@ -271,9 +334,11 @@
                 url: '@Url.Action("ModifyMonthlyReceiveRecordAjax", "Create")',
                 data: data,
                 success: function (response) {
-                    if (response.success) {
+                    if (response.status) {
                         alert(response.message);
-                        window.location.href = '@Url.Action("MonthlyReceivePayments", "Create")?YearMonth=' + '@Model.YearMonth';
+                        var url = '@Url.Action("MonthlyReceivePayments", "Create")';
+                        url += '?YearMonth=' + '@Model.YearMonth';
+                        window.location.href = url;
 
                     }
                     else {
@@ -281,6 +346,56 @@
                     }
                 }
             });
+
+        }
+        function FillTruePaid(MonthlyPaidData) {
+
+            var WillPaidTable = $('#WillPaidTable');
+            var WillNotSelectedTable = $('#WillNotSelectedTable');
+            var WillPaidTableBody = WillPaidTable.find('tbody');
+            var WillNotSelectedTableBody = WillNotSelectedTable.find('tbody');
+
+            // BicStatestic
+            var BicStatestic = $('#BicStatestic');
+            var BicStatesticBody = BicStatestic.find('tbody');
+            BicStatesticBody.empty();
+            // عدد  الأشخاص الذين دفعوا
+            var WillPaidCount = 0;
+            // عدد الأشخاص الذين لم يدفعوا
+            var WillNotSelectedCount = 0;
+            // مجموع المبالغ التي تم دفعها
+            let WillPaidAmount = 0;
+
+            WillPaidTableBody.empty();
+            WillNotSelectedTableBody.empty();
+
+            var WillPaidTableBodyHtml = '';
+            var WillNotSelectedTableBodyHtml = '';
+            MonthlyPaidData.forEach((item) => {
+                var Amount = parseFloat(item.Amount);
+                if (item.IsPaid) {
+                    WillPaidCount++;
+                    WillPaidAmount += Amount;
+                    var Name = $('.na-person[data-PersonId="' + item.PersonId + '"]').text();
+                    WillPaidTableBodyHtml += '<tr><td>' + Name + '</td><td>' + Amount + ' ريال</td></tr>';
+                }
+                else {
+                    var Name = $('.na-person[data-PersonId="' + item.PersonId + '"]').text();
+                    WillNotSelectedTableBodyHtml += '<tr><td>' + Name + '</td><td>' + Amount + ' ريال</td></tr>';
+                    WillNotSelectedCount++;
+                }
+
+            });
+            WillPaidTableBody.append(WillPaidTableBodyHtml);
+            WillNotSelectedTableBody.append(WillNotSelectedTableBodyHtml);
+
+            WillPaidAmount = WillPaidAmount.toFixed(3);
+            var WillPaidCountTaxt = 'عدد الأشخاص الذين دفعوا : ' + WillPaidCount + ' أشخاص';
+            var WillNotSelectedCountTaxt = 'عدد الأشخاص الذين لم يدفعوا : ' + WillNotSelectedCount + ' أشخاص'
+            var WillPaidAmountTaxt = 'مجموع المبالغ التي تم دفعها : ' + WillPaidAmount + ' ريال';
+            var BicStatesticBodyHtml = '<tr><td>' + WillPaidCountTaxt + '</td></tr><tr><td>' + WillNotSelectedCountTaxt + '</td></tr><tr><td>' + WillPaidAmountTaxt + '</td></tr>';
+            BicStatesticBody.append(BicStatesticBodyHtml);
+
 
         }
 

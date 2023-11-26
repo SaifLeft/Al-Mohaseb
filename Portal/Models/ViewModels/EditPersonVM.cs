@@ -14,7 +14,8 @@ namespace Portal.Models.ViewModels
 
         public long CivilNumber { get; set; }
         public long Id { get; internal set; }
+
         [Required(ErrorMessage = "السبب مطلوب")]
-        public List<long> ReasonsList { get; set; }
+        public double SubscriptionAmount { get; set; }
     }
 }

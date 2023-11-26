@@ -7,5 +7,6 @@
         public string PersonName { get;  set; }
         public long PersonId { get;  set; }
         public bool IsPaid { get;  set; }
+        public double SubscriptionAmount { get; internal set; }
     }
 }

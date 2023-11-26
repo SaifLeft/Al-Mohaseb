@@ -115,9 +115,9 @@
     </div>
     <div class="card mb-3 ">
         <div class="d-flex card-header">
-            <h5 class="card-title col-md-10">رصيد جميع الأشخاص</h5>
-            <label class="mb-3 text-uppercase">
-                طباعة الجدول كـ : <a href="#" class="btn btn-outline-primary btn-sm" id="PrintTableBtn">PDF</a>
+            <h5 class="card-title col-md-11">رصيد جميع الأشخاص</h5>
+            <label class="mb-3 text-uppercase btn btn-outline-primary btn-sm" id="PrintTableBtn">
+                طباعة الجدول
             </label>
 
         </div>
@@ -127,8 +127,8 @@
                     <table id="PersonsBalanceDataTable" class="table table-striped table-bordered" style="width:100%">
                         <thead>
                             <tr>
-                                <th>رقم الهاتف</th>
                                 <th>الشخص</th>
+                                <th>رقم الهاتف</th>
                                 <th>جميع الايداعات</th>
                                 <th>جميع المصروفات</th>
                                 <th>الرصيد الشخصي</th>
@@ -138,8 +138,8 @@
                             @foreach (var item in Model.PersonsBalance)
                             {
                                 <tr>
-                                    <td>@item.PhoneNumber</td>
                                     <td>@item.Name</td>
+                                    <td>@item.PhoneNumber</td>
                                     <td>@item.ReceivePayment</td>
                                     <td>@item.SpendMoney</td>
                                     <td>@item.TotalAmount</td>
@@ -278,9 +278,9 @@
                 // Print the data on the page after a short delay
                 printWin.onload = function () {
                     setTimeout(function () {
-                        printWin.document.write('<html dir="rtl"><head>');
+                        printWin.document.write('<html st dir="rtl" style="font-family:Adobe Arabic;">');
+
                         printWin.document.write('<title>جميع الأسماء في النظام</title>');
-                        printWin.document.write('<link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />');
 
                         printWin.document.write('<h1>جميع الأسماء في النظام</h1>');
                         printWin.document.write('<table border="1" dir="rtl" class="table table-striped table-bordered" style="width:100%">');
@@ -301,8 +301,13 @@
                             });
                             printWin.document.write('</tr>');
                         });
+
                         printWin.document.write('</tbody>');
                         printWin.document.write('</table>');
+                        // عدد الأسماء في النظام
+                        printWin.document.write('<h3>عدد الأسماء في النظام : ' + data.body.length + '</h3>');
+
+
 
                         printWin.document.close();
 

@@ -6,51 +6,46 @@
 
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="card p-4">
-        <div class="divider divider-info">
-            <div class="divider-text">صرف جديد</div>
+    <div class="card mb-4 col-5 ">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">صرف مبلغ لصالح شخص</h5>
+            <h5 class="float-end"><a class="text-danger" asp-action="Names" asp-controller="List">جميع الأسماء</a></h5>
         </div>
-        <div class="col-6">
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">صرف مبلغ لصالح شخص</h5>
-                    <h5 class="float-end"><a class="text-danger" asp-action="Names" asp-controller="List">جميع الأسماء</a></h5>
+        <div class="card-body">
+            <form asp-area="" asp-controller="Create" asp-action="SpendMoney" method="POST">
+                <div class="mb-3">
+                    <label class="form-label" for="fullname">اسم الشخص</label>
+                    <div class="select2-primary">
+                        <select asp-for="NameId" id="NamesList" class="select2 form-select">
+                        </select>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form asp-area="" asp-controller="Create" asp-action="SpendMoney" method="POST">
-                        <div class="mb-3">
-                            <label class="form-label" for="fullname">اسم الشخص</label>
-                            <div class="select2-primary">
-                                <select asp-for="NameId" id="NamesList" class="select2 form-select">
-                                </select>
-                            </div>
-                        </div>
-                        <span asp-validation-for="NameId" class="text-danger"></span>
+                <span asp-validation-for="NameId" class="text-danger"></span>
 
-                        <div class="mb-3">
-                            <label class="form-label" for="civil-number">تاريخ الصرف</label>
-                            <input asp-for="Date" type="text" class="form-control flatpickr-input" placeholder="yyyy-MM-dd" id="flatpickr-date" readonly="readonly">
-                            <span asp-validation-for="Date" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label" for="Amount">صرف بقيمة</label>
-                            <input asp-for="Amount" type="text" class="form-control">
-                            <span asp-validation-for="Amount" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="Description">وصف السبب</label>
-                            <input asp-for="Description" type="text" class="form-control">
-                            <span asp-validation-for="Description" class="text-danger"></span>
-                        </div>
-                        <button type="submit" class="btn btn-primary">حفظ</button>
-
-                    </form>
+                <div class="mb-3">
+                    <label class="form-label" for="civil-number">تاريخ الصرف</label>
+                    <input asp-for="Date" type="text" class="form-control flatpickr-input" placeholder="yyyy-MM-dd" id="flatpickr-date" readonly="readonly">
+                    <span asp-validation-for="Date" class="text-danger"></span>
                 </div>
-            </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="Amount">صرف بقيمة</label>
+                    <input asp-for="Amount" type="text" class="form-control">
+                    <span asp-validation-for="Amount" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="Description">وصف السبب</label>
+                    <input asp-for="Description" type="text" class="form-control">
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">حفظ</button>
+
+            </form>
         </div>
     </div>
 </div>
+
+
 
 @section Stylesheet{
     <link rel="stylesheet" href="~/assets/vendor/libs/sweetalert2/sweetalert2.css">
@@ -134,7 +129,7 @@
                 }
             });
 
-           
+
 
 
 

@@ -11,5 +11,6 @@ namespace Portal.Models
         public List<ShowSpendMoney> SpendMoneySubmitedAmount { get; set; }
         public string YearMonth { get; internal set; }
         public bool IsHasRecodes { get; internal set; }
+        public List<SelectListModel> Reasons { get; internal set; }
     }
 }

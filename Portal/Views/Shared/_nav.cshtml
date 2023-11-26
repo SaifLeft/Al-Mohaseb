@@ -45,12 +45,7 @@
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">الايداعات</span>
         </li>
-        <li class="menu-item">
-            <a asp-controller="List" asp-action="ReceivePayments" class="menu-link">
-                <i class='menu-icon bx bxl-paypal'></i>
-                <div>جميع الايداعات</div>
-            </a>
-        </li>
+        
         <li class="menu-item">
             <a asp-controller="Create" asp-action="MonthlyReceivePayments" class="menu-link">
                 <i class='menu-icon bx bxs-map-pin'></i>
@@ -67,12 +62,7 @@
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">المصروفات</span>
         </li>
-        <li class="menu-item">
-            <a asp-controller="List" asp-action="SpendMoney" class="menu-link">
-                <i class='menu-icon bx bx-bug-alt'></i>
-                <div>جميع المصروفات</div>
-            </a>
-        </li>
+        
         <li class="menu-item">
             <a asp-controller="Create" asp-action="SpendMoney" class="menu-link">
                 <i class='menu-icon bx bxl-slack-old'></i>
@@ -95,21 +85,15 @@
             </a>
         </li>
         <li class="menu-item">
-            <a asp-controller="Statistics" asp-action="Index" class="menu-link">
-                <i class='menu-icon  bx bx-station'></i>
-                <div>الأحصائيات العامة</div>
+            <a asp-controller="List" asp-action="SpendMoney" class="menu-link">
+                <i class='menu-icon bx bx-bug-alt'></i>
+                <div>جميع المصروفات</div>
             </a>
         </li>
         <li class="menu-item">
-            <a asp-controller="Statistics" asp-action="Person" class="menu-link">
-                <i class='menu-icon bx bx-user'></i>
-                <div>أحصائيات عضو محدد</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a asp-controller="Statistics" asp-action="Reason" class="menu-link">
-                <i class='menu-icon bx bx-ball'></i>
-                <div>أحصائيات لسبب محدد</div>
+            <a asp-controller="List" asp-action="ReceivePayments" class="menu-link">
+                <i class='menu-icon bx bxl-paypal'></i>
+                <div>جميع الايداعات</div>
             </a>
         </li>
     </ul>

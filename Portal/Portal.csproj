@@ -7,16 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Views\List\Index.cshtml" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Data\" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Views\Create\Index.cshtml" />
-    <None Include="Views\List\Index.cshtml" />
     <None Include="wwwroot\assets\vendor\libs\loader\.github\CODE_OF_CONDUCT.md" />
     <None Include="wwwroot\assets\vendor\libs\loader\.github\CONTRIBUTING.md" />
     <None Include="wwwroot\assets\vendor\libs\loader\.github\ISSUE_TEMPLATE\bug_report.md" />

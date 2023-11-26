@@ -6,5 +6,6 @@
         public string PersonName { get; internal set; }
         public double? Amount { get; internal set; }
         public long? SpendMoneyId { get; internal set; }
+        public bool IsPaid { get; internal set; }
     }
 }
