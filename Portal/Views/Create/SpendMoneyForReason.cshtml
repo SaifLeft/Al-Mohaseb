@@ -587,12 +587,12 @@
         }
         function CollectData() {
             const PersonIdAmount = [];
-
             var IsPaidCheckboxList = document.querySelectorAll('.IsPaid-checkbox');
             IsPaidCheckboxList.forEach((checkbox) => {
                 var PersonId = checkbox.getAttribute('data-input-id');
                 var AmountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${PersonId}"]`);
-                var Amount = AmountPersonElement.value;
+                var Amount = AmountPersonElement.value; //593.354500000004 to 593.3545
+                Amount = parseFloat(Amount).toFixed(3); // 593.3545 to 593.35
                 PersonIdAmount.push(
                     {
                         'PersonId': PersonId,

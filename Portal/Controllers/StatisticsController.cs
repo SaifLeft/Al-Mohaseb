@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Index.HPRtree;
 using Portal.Data;
 using Portal.Models;
 using Portal.Models.ViewModels;
@@ -273,8 +274,8 @@ namespace Portal.Controllers
 
                 var Names = await _context.MosbName.ToListAsync();
 
-                VM.AllReceivePaymentsAmount = ReceivePayments.Sum(x => x.Amount);
-                VM.AllSpendMoneyAmount = SpendMoney.Sum(x => x.Amount);
+                VM.AllReceivePaymentsAmount = Math.Round(ReceivePayments.Sum(x => x.Amount),3);
+                VM.AllSpendMoneyAmount = Math.Round(SpendMoney.Sum(x => x.Amount), 3);
                 VM.GeneralBalance = VM.AllReceivePaymentsAmount - VM.AllSpendMoneyAmount;
 
 
@@ -285,8 +286,8 @@ namespace Portal.Controllers
                 if (NameId != null)
                 {
                     VM.PersonalBalanceIsAvailable = true;
-                    VM.PersonalReceivePayment = ReceivePayments.Where(x => x.NameId == NameId).Sum(x => x.Amount);
-                    VM.PersonalSpendMoney = SpendMoney.Where(x => x.PersonId == NameId).Sum(x => x.Amount);
+                    VM.PersonalReceivePayment = Math.Round(ReceivePayments.Where(x => x.NameId == NameId).Sum(x => x.Amount),3);
+                    VM.PersonalSpendMoney = Math.Round(SpendMoney.Where(x => x.PersonId == NameId).Sum(x => x.Amount), 3);
                     VM.PersonalTotalAmount = VM.PersonalReceivePayment - VM.PersonalSpendMoney;
                 }
 
@@ -313,17 +314,10 @@ namespace Portal.Controllers
                 {
                     PhoneNumber = x.PhoneNumber,
                     Name = x.Name,
-                    ReceivePayment = x.MosbReceivePayments.Sum(x => x.Amount),
-                    SpendMoney = x.MosbSpendMoney.Sum(x => x.Amount),
-                    TotalAmount = x.MosbReceivePayments.Sum(x => x.Amount) - x.MosbSpendMoney.Sum(x => x.Amount)
+                    ReceivePayment = Math.Round(x.MosbReceivePayments.Sum(x => x.Amount), 3),
+                    SpendMoney = Math.Round(x.MosbSpendMoney.Sum(x => x.Amount), 3),
+                    TotalAmount = Math.Round((x.MosbReceivePayments.Sum(x => x.Amount) - x.MosbSpendMoney.Sum(x => x.Amount)), 3)
                 }).ToList();
-
-
-
-
-
-
-
 
                 return View(VM);
             }

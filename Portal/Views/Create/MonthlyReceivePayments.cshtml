@@ -7,11 +7,11 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="card mb-4">
         <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">أيداع مبالغ بشكل شهري</h5>
+            <h5 class="mb-0">ايداع مبالغ بشكل شهري</h5>
         </div>
         <div class="card-body">
             <div class="row mb-3" id="flatpickrDiv">
-                <label class="col-sm-2 col-form-label-lg">شهر الأيداع</label>
+                <label class="col-sm-2 col-form-label-lg">شهر الايداع</label>
                 <div class="col-sm-3">
                     <input type="text" class="form-control flatpickr-input active" placeholder="YY-MM" id="flatpickr-date" readonly="readonly">
                 </div>
@@ -288,7 +288,9 @@
             IsPaidCheckboxList.forEach((checkbox) => {
                 var PersonId = checkbox.getAttribute('data-input-id');
                 var AmountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${PersonId}"]`);
-                var Amount = AmountPersonElement.value;
+                var Amount = AmountPersonElement.value; //593.354500000004 to 593.3545
+                Amount = parseFloat(Amount).toFixed(3); // 593.3545 to 593.35
+
                 if (checkbox.checked) {
                     MonthlyPaidData.push(
                         {
@@ -313,12 +315,7 @@
             FillTruePaid(MonthlyPaidData);
 
             $('#ConfirmModal').modal('show');
-            //Fill Modal Data
 
-
-
-            //SendAjaxData(MonthlyPaidData);
-            //
             $('#ConfirmModalFormSubmit').click(function () {
                 SendAjaxData(MonthlyPaidData);
             });
