@@ -15,6 +15,7 @@ namespace Portal.Data
         public string Date { get; set; }
         public double Amount { get; set; }
         public string Description { get; set; }
+        public double? MonthlyAmount { get; set; }
 
         public virtual MosbName Person { get; set; }
         public virtual MosbReasons Reasons { get; set; }

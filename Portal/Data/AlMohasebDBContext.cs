@@ -146,6 +146,10 @@ namespace Portal.Data
                     .HasColumnType("integer(1)")
                     .HasColumnName("IS_PAID");
 
+                entity.Property(e => e.MonthlyAmount)
+                    .HasColumnType("double(10)")
+                    .HasColumnName("MONTHLY_AMOUNT");
+
                 entity.Property(e => e.PersonId)
                     .HasColumnType("integer(10)")
                     .HasColumnName("PERSON_ID");
