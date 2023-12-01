@@ -1,15 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Index.HPRtree;
 using Portal.Data;
 using Portal.Models;
 using Portal.Models.ViewModels;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq.Expressions;
-using System.Xml.Linq;
 
 namespace Portal.Controllers
 {
