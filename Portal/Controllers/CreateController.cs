@@ -33,6 +33,8 @@ namespace Portal.Controllers
         {
             return View();
         }
+
+        #region Name
         public async Task<IActionResult> Names()
         {
             return View();
@@ -95,7 +97,9 @@ namespace Portal.Controllers
                 throw;
             }
         }
+        #endregion Name
 
+        #region Reason
         public async Task<ActionResult> CreateReason(string Reason, double Amount)
         {
             var reason = new MosbReasons
@@ -132,8 +136,9 @@ namespace Portal.Controllers
             }
             return Ok(delete);
         }
+        #endregion Reason
 
-
+        #region ReceivePayments
         public IActionResult ReceivePayments(long? ReasonId = null)
         {
             return View();
@@ -182,6 +187,8 @@ namespace Portal.Controllers
                 throw;
             }
         }
+        #endregion ReceivePayments
+
         #region SpendMoney
         public IActionResult SpendMoney()
         {
@@ -287,9 +294,10 @@ namespace Portal.Controllers
                         PersonId = x.Person.Id,
                         PersonName = x.Person.Name,
                         Amount = Math.Round(x.Amount, 2),
-                        IsPaid = x.IsPaid == true.GetHashCode() ? true : false
+                        IsPaid = x.IsPaid == true.GetHashCode() ? true : false,
                     })
                     .ToList();
+                VM.AmountSubscribed = spendMoneyForReason.Select(x => x.MonthlyAmount).First().Value;
                 VM.IsHasRecodes = true;
             }
             else
@@ -329,7 +337,8 @@ namespace Portal.Controllers
                     ReasonsId = record.ReasonId,
                     Date = YearMonthDate.ToString("yyyy-MM-dd"),
                     Amount = x.IsPaid ? x.Amount : 0,
-                    IsPaid = x.IsPaid
+                    IsPaid = x.IsPaid,
+                    MonthlyAmountRecord = record.MonthlyAmountRecord
                 }).ToList();
                 ModifyStatus = await NewRecordOnSpendMoneyForReason(DTO);
             }
@@ -368,6 +377,7 @@ namespace Portal.Controllers
                         Amount = Math.Round(item.Amount, 2),
                         IsPaid = item.IsPaid.GetHashCode(),
                         IsForReason = true.GetHashCode(),
+                        MonthlyAmount = item.MonthlyAmountRecord,
                         Description = string.Concat("تم صرف مبلغ ", Math.Round(item.Amount, 2), " لـ ", _context.MosbName.Where(x => x.Id == item.PersonId).Select(x => x.Name).FirstOrDefault(), " لسبب ", _context.MosbReasons.Where(x => x.Id == item.ReasonsId).Select(x => x.Name).FirstOrDefault(), " بتاريخ ", item.Date),
                     };
                     await _context.MosbSpendMoney.AddAsync(newRecord);
@@ -409,6 +419,8 @@ namespace Portal.Controllers
 
                     recordToEdit.Amount = item.IsPaid ? item.Amount : 0;
                     recordToEdit.IsPaid = item.IsPaid.GetHashCode();
+                    recordToEdit.Description = string.Concat("تم تعديل مبلغ الصرف من ", Math.Round(recordToEdit.Amount, 2), " إلى ", Math.Round(item.Amount, 2), " لـ ", _context.MosbName.Where(x => x.Id == item.PersonId).Select(x => x.Name).FirstOrDefault(), " لسبب ", _context.MosbReasons.Where(x => x.Id == record.ReasonId).Select(x => x.Name).FirstOrDefault(), " بتاريخ ", YearMonthDate.ToString("yyyy-MM-dd"));
+                    recordToEdit.MonthlyAmount = record.MonthlyAmountRecord;
 
                     _context.MosbSpendMoney.Update(recordToEdit);
                     await _context.SaveChangesAsync();
@@ -429,7 +441,6 @@ namespace Portal.Controllers
 
 
         #endregion SpendMoneyForReason
-
 
         #region MonthlyReceivePayments
         public async Task<IActionResult> MonthlyReceivePayments(string? YearMonth = null)

@@ -5,6 +5,7 @@
         public long ReasonId { get; set; }
         public bool IsRecord { get; set; }
         public string MonthYear { get; set; }
+        public double MonthlyAmountRecord { get; set; }
         public List<PersonIdAmount> PersonIdAmount { get; set; }
     }
     public class PersonIdAmount

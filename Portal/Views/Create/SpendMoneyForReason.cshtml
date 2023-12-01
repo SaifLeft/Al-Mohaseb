@@ -287,16 +287,16 @@
 
 
 
-@section Stylesheet{
+@section Stylesheet {
     <link rel="stylesheet" href="~/assets/vendor/libs/select2/select2.css">
     <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
     <link rel="stylesheet" href="~/assets/vendor/libs/typeahead-js/typeahead.css" />
     <link rel="stylesheet" href="~/assets/vendor/libs/flatpickr/flatpickr.css">
     <link rel="stylesheet" href="~/assets/vendor/libs/flatpickr/monthSelect/style.css">
 
-    }
+}
 
-@section Scripts{
+@section Scripts {
     <script src="~/assets/vendor/libs/select2/select2.js"></script>
     <script src="~/assets/vendor/libs/flatpickr/flatpickr.js"></script>
     <script src="~/assets/vendor/libs/flatpickr/monthSelect/index.js"></script>
@@ -318,6 +318,7 @@
 
             // Check if the 'IsSelected' value is true or false
             var IsSelected = '@Model.IsSelected';
+            var isHasRecodes = '@Model.IsHasRecodes';
 
             // Get the current year and month in the format 'yyyy-MM'
             var YearMonth = '@Model.YearMonth'; // Example: '2021-01'
@@ -416,26 +417,32 @@
             // Get references to elements
             const selectAll = document.querySelector('#selectAll');
             const IsPaidCheckboxList = document.querySelectorAll('.IsPaid-checkbox');
-            const amountInputList = document.querySelectorAll('.Amount-inputs');
+            var amountInputList = document.querySelectorAll('.Amount-inputs');
 
             // Amount data
             var AmountSubscribed = $('#AmountSubscribedInput').val();
             var amountInputCount = amountInputList.length;
-            var initialAmountPerInput = AmountSubscribed / amountInputCount;
-            // math around the amount inputs to 3 decimal places like 1.235 OMR
-            initialAmountPerInput = Math.round(initialAmountPerInput * 1000) / 1000;
+            var initialAmountPerInput = parseFloat(AmountSubscribed / amountInputCount).toFixed(3);
 
 
             // if AmountSubscribedInput has iput value
-            $('#AmountSubscribedInput').change('change', (event) => {
-                debugger;
-                AmountSubscribed = parseFloat($('#AmountSubscribedInput').val());
-                initialAmountPerInput = parseFloat(AmountSubscribed / amountInputCount);
-                initialAmountPerInput = Math.round(initialAmountPerInput * 1000) / 1000;
-                amountInputList.forEach((input) => {
-                    input.value = initialAmountPerInput;
-                });
-                initializeAmountInputs();
+            $('#AmountSubscribedInput').change('input', (event) => {
+                console.log(event);
+                var value = $('#AmountSubscribedInput').val();
+                AmountSubscribed = parseFloat(value).toFixed(3);
+                initialAmountPerInput = parseFloat(AmountSubscribed / amountInputCount).toFixed(3);
+                initialAmountPerInput = parseFloat(initialAmountPerInput).toFixed(3);
+                amountInputList = document.querySelectorAll('.Amount-inputs:not([disabled])');
+                if (amountInputList.length > 0) {
+                    amountInputList.forEach((input) => {
+                        if (input != 0) {
+                            input.value = initialAmountPerInput;
+                        }
+                    });
+                    initializeAmountInputs();
+                } else {
+                    alert('لا يوجد أشخاص محددين للدفع');
+                }
             });
 
 
@@ -479,6 +486,9 @@
             initializeAmountInputs();
 
             function initializeAmountInputs() {
+                if (isHasRecodes == 'True') {
+                    return;
+                }
                 amountInputList.forEach((input) => {
                     input.value = initialAmountPerInput;
                 });
@@ -486,7 +496,7 @@
             function divideAmountPersonToRestOfPersons(checkbox) {
                 const PersonId = checkbox.getAttribute('data-input-id');
                 const AmountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${PersonId}"]`);
-                const AmountPersonValue = parseFloat(AmountPersonElement.value);
+                const AmountPersonValue = parseFloat(AmountPersonElement.value).toFixed(3);
 
                 if (AmountPersonValue === 0) {
                     return;
@@ -502,8 +512,8 @@
                 let AmountPerPerson = 0;
 
                 if (EnabledAmountInputCount !== 0) {
-                    AmountPerPerson = AmountPersonValue / EnabledAmountInputCount;
-                }
+                    AmountPerPerson = parseFloat((AmountPersonValue / EnabledAmountInputCount)).toFixed(3);
+                } 
 
                 let AmountPerPersonRounded = 0.000;
 
@@ -535,7 +545,7 @@
                     enabledAmountInputCount++;
                 } else {
                     var AmountSubscribed = $('#AmountSubscribedInput').val();
-                    amountPersonElement.value = Math.round(AmountSubscribed * 1000) / 1000;
+                    amountPersonElement.value = parseFloat(AmountSubscribed).toFixed(3);
                     return;
                 }
 
@@ -547,22 +557,22 @@
 
                 InputListValue = 0;
                 if (enabledTotalAmount > 0) {
-                    InputListValue = Math.round((enabledTotalAmount * 1000) / 1000) / enabledAmountInputCount;
+                    InputListValue = parseFloat(enabledTotalAmount / enabledAmountInputCount).toFixed(3);
                 }
 
 
-                var amountResult = Math.round(InputListValue * 1000) / 1000;
+                var amountResult = parseFloat(InputListValue).toFixed(3);
 
                 // Subtract the amount of the person from all enabled amount inputs
                 enabledAmountInputList.forEach((input) => {
                     var inputPersonValue = parseFloat(input.value);
                     var round = 0;
                     if (inputPersonValue > 0) {
-                        round = Math.round((inputPersonValue - amountResult) * 1000) / 1000;
+                        var math = inputPersonValue - amountResult;
+                        round = parseFloat(math).toFixed(3);
                     }
-                    input.value = inputPersonValue - round;
+                    input.value = parseFloat(inputPersonValue - round).toFixed(3);
                 });
-
 
                 amountPersonElement.value = amountResult;
             }
@@ -605,12 +615,19 @@
             var IsRecord = '@Model.IsHasRecodes';
             var MonthYear = '@Model.YearMonth';
             var ReasonId = '@Model.ReasonId';
+            var MonthlyAmountRecord = $('#AmountSubscribedInput').val();
+
+            if (MonthlyAmountRecord == 0 || MonthlyAmountRecord == '') {
+                alert('أكتب مبلغ الصرف وضغط زر الأنتر او الأدخال')
+                return;
+            }
 
             var data = {
                 'ReasonId': ReasonId,
                 'PersonIdAmount': PersonIdAmount,
                 'IsRecord': IsRecord,
-                'MonthYear': MonthYear
+                'MonthYear': MonthYear,
+                'MonthlyAmountRecord': MonthlyAmountRecord
             };
             debugger;
             console.log(data);
@@ -712,5 +729,5 @@
 
 
 
-    }
+}
 
