@@ -159,7 +159,7 @@
                         </table>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-info table-flush-spacing" id="BicStatestic">
+                        <table class="table table-flush-spacing" id="BicStatestic">
                             <tbody>
                             </tbody>
                         </table>
@@ -390,7 +390,7 @@
             var WillPaidCountTaxt = 'عدد الأشخاص الذين دفعوا : ' + WillPaidCount + ' أشخاص';
             var WillNotSelectedCountTaxt = 'عدد الأشخاص الذين لم يدفعوا : ' + WillNotSelectedCount + ' أشخاص'
             var WillPaidAmountTaxt = 'مجموع المبالغ التي تم دفعها : ' + WillPaidAmount + ' ريال';
-            var BicStatesticBodyHtml = '<tr><td>' + WillPaidCountTaxt + '</td></tr><tr><td>' + WillNotSelectedCountTaxt + '</td></tr><tr><td>' + WillPaidAmountTaxt + '</td></tr>';
+            var BicStatesticBodyHtml = '<tr class="text-success" ><td>' + WillPaidCountTaxt + '</td></tr><tr class="text-danger" ><td>' + WillNotSelectedCountTaxt + '</td></tr><tr class="text-info" ><td>' + WillPaidAmountTaxt + '</td></tr>';
             BicStatesticBody.append(BicStatesticBodyHtml);
 
 

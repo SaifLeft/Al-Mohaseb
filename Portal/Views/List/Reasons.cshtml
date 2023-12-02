@@ -28,7 +28,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (!Model.Reasons.Any())
+                            @if (Model.Reasons.Any())
                             {
                                 @foreach (var item in Model.Reasons)
                                 {
@@ -122,50 +122,45 @@
         $(document).ready(function () {
 
             // DataTable userTable
-            $('#userTable').DataTable(
-                { 
-                    paging: false,
-                    columnDefs: [
-                        // Center align both header and body content of columns 1, 2 & 3
-                        { className: "dt-center", targets: [0, 1, 2] }
-                    ]
-                });
-
-            // Add New Reason
-            $("#ReasonBtn").click(function () {
-                var Reason = $("#Reason").val();
-                if (Reason == "") {
-                    alert("الرجاء ادخال السبب");
-                    return;
-                }
-                var Amount = $("#Amount").val();
-                if (Amount == "") {
-                    alert("الرجاء ادخال مبلغ الأشتراك");
-                    return;
-                }
-
-                $.ajax({
-                    url: "@Url.Action("CreateReason", "Create")",
-                    type: "POST",
-                    data: {
-                        Reason: Reason,
-                        Amount: Amount
-                    },
-                    success: function (data) {
-                        if (data == "1") {
-                            alert("تمت الاضافة بنجاح");
-                            location.reload();
-                        }
-                        else {
-                            alert("حدث خطأ");
-                        }
-                    }
-                });
+            $('#userTable').DataTable({
+                paging: false,
+                columnDefs: [
+                    // Center align both header and body content of columns 1, 2 & 3
+                    { className: "dt-center", targets: [0, 1, 2] }
+                ]
             });
 
+        });
+        // Add New Reason
+        $("#ReasonBtn").click(function () {
+            var Reason = $("#Reason").val();
+            if (Reason == "") {
+                alert("الرجاء ادخال السبب");
+                return;
+            }
+            var Amount = $("#Amount").val();
+            if (Amount == "") {
+                alert("الرجاء ادخال مبلغ الأشتراك");
+                return;
+            }
 
-
-
+            $.ajax({
+                url: "@Url.Action("CreateReason", "Create")",
+                type: "POST",
+                data: {
+                    Reason: Reason,
+                    Amount: Amount
+                },
+                success: function (data) {
+                    if (data == "1") {
+                        alert("تمت الاضافة بنجاح");
+                        location.reload();
+                    }
+                    else {
+                        alert("حدث خطأ");
+                    }
+                }
+            });
         });
 
         //function Delete(id) with ajax swal2 to confirm the delete by enter the password of the user who logged in.
@@ -252,7 +247,7 @@
             // Get the DataTable instance
             var table = $('#userTable').DataTable();
 
-                            var Title = 'جميع الأسباب في النظام';
+            var Title = 'جميع الأسباب في النظام';
 
             // Export data with column header formatting
             var data = table.buttons.exportData({

@@ -268,9 +268,9 @@ namespace Portal.Controllers
 
                 var Names = await _context.MosbName.ToListAsync();
 
-                VM.AllReceivePaymentsAmount = Math.Round(ReceivePayments.Sum(x => x.Amount),3);
-                VM.AllSpendMoneyAmount = Math.Round(SpendMoney.Sum(x => x.Amount), 3);
-                VM.GeneralBalance = VM.AllReceivePaymentsAmount - VM.AllSpendMoneyAmount;
+                VM.AllReceivePaymentsAmount = Math.Round(ReceivePayments.Sum(x => x.Amount),4);
+                VM.AllSpendMoneyAmount = Math.Round(SpendMoney.Sum(x => x.Amount), 4);
+                VM.GeneralBalance = Math.Round(VM.AllReceivePaymentsAmount - VM.AllSpendMoneyAmount, 4);
 
 
                 VM.NamesList = Names.Select(x => new SelectListModel { Text = x.Name, Value = x.Id, IsSelected = x.Id == NameId }).ToList();
@@ -280,9 +280,9 @@ namespace Portal.Controllers
                 if (NameId != null)
                 {
                     VM.PersonalBalanceIsAvailable = true;
-                    VM.PersonalReceivePayment = Math.Round(ReceivePayments.Where(x => x.NameId == NameId).Sum(x => x.Amount),3);
-                    VM.PersonalSpendMoney = Math.Round(SpendMoney.Where(x => x.PersonId == NameId).Sum(x => x.Amount), 3);
-                    VM.PersonalTotalAmount = VM.PersonalReceivePayment - VM.PersonalSpendMoney;
+                    VM.PersonalReceivePayment = Math.Round(ReceivePayments.Where(x => x.NameId == NameId).Sum(x => x.Amount),4);
+                    VM.PersonalSpendMoney = Math.Round(SpendMoney.Where(x => x.PersonId == NameId).Sum(x => x.Amount), 4);
+                    VM.PersonalTotalAmount = Math.Round(VM.PersonalReceivePayment - VM.PersonalSpendMoney, 4);
                 }
 
 
@@ -297,10 +297,9 @@ namespace Portal.Controllers
                     var YearlyDateTime = new DateTime(Year.Value, 1, 1);
                     VM.SelectedYear = Year.Value;
                     VM.YearIsAvailable = true;
-                    var SpendMoneyDate = SpendMoney.Where(x => DateTime.Parse(x.Date).Year == YearlyDateTime.Year).ToList();
-                    VM.SpendMoneyYearlyData = SpendMoney.Sum(x => x.Amount);
-                    VM.ReceivePaymentsYearlyData = ReceivePayments.Where(x => DateTime.Parse(x.Date).Year == YearlyDateTime.Year).Sum(x => x.Amount);
-                    VM.TotalAmountYearlyData = VM.ReceivePaymentsYearlyData - VM.SpendMoneyYearlyData;
+                    VM.SpendMoneyYearlyData = Math.Round(SpendMoney.Sum(x => x.Amount), 4);
+                    VM.ReceivePaymentsYearlyData = Math.Round(ReceivePayments.Where(x => DateTime.Parse(x.Date).Year == YearlyDateTime.Year).Sum(x => x.Amount), 3);
+                    VM.TotalAmountYearlyData = Math.Round(VM.ReceivePaymentsYearlyData - VM.SpendMoneyYearlyData, 4);
                 }
 
 
@@ -308,9 +307,10 @@ namespace Portal.Controllers
                 {
                     PhoneNumber = x.PhoneNumber,
                     Name = x.Name,
-                    ReceivePayment = Math.Round(x.MosbReceivePayments.Sum(x => x.Amount), 3),
-                    SpendMoney = Math.Round(x.MosbSpendMoney.Sum(x => x.Amount), 3),
-                    TotalAmount = Math.Round((x.MosbReceivePayments.Sum(x => x.Amount) - x.MosbSpendMoney.Sum(x => x.Amount)), 3)
+                    ReceivePayment = Math.Round(x.MosbReceivePayments.Sum(x => x.Amount), 4),
+                    SpendMoney = Math.Round(x.MosbSpendMoney.Sum(x => x.Amount), 4),
+                    TotalAmount = Math.Round((x.MosbReceivePayments.Sum(x => x.Amount) - x.MosbSpendMoney.Sum(x => x.Amount)), 4),
+                    LastActivity = GetLastActivity(ReceivePayments, SpendMoney, x.Id)
                 }).ToList();
 
                 return View(VM);
@@ -330,7 +330,18 @@ namespace Portal.Controllers
                 IsSelected = selectedYear != null && yearExtractor(x) == selectedYear
             }));
         }
+        private static (string? LastReceivePayment, string? LastSpendMoney) GetLastActivity(List<MosbReceivePayments> ReceivePayments, List<MosbSpendMoney> SpendMoney, long NameId)
+        {
+            var LastReceivePayment = ReceivePayments.Where(x => x.NameId == NameId).OrderByDescending(x => x.Date).FirstOrDefault()?.Date;
+            var LastSpendMoney = SpendMoney.Where(x => x.PersonId == NameId).OrderByDescending(x => x.Date).FirstOrDefault()?.Date;
+            // 2022-2 foramt
+            LastReceivePayment = LastReceivePayment?.Substring(0, LastReceivePayment.Length - 3);
+            LastSpendMoney = LastSpendMoney?.Substring(0, LastSpendMoney.Length - 3);
 
+
+
+            return (LastReceivePayment, LastSpendMoney);
+        }
 
         #endregion Semple
 

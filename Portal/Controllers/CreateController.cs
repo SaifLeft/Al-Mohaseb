@@ -297,7 +297,7 @@ namespace Portal.Controllers
                         IsPaid = x.IsPaid == true.GetHashCode() ? true : false,
                     })
                     .ToList();
-                VM.AmountSubscribed = spendMoneyForReason.Select(x => x.MonthlyAmount).First().Value;
+                VM.AmountSubscribed = spendMoneyForReason.Select(x => x.MonthlyAmount).First();
                 VM.IsHasRecodes = true;
             }
             else
