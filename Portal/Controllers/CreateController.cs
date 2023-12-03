@@ -368,17 +368,22 @@ namespace Portal.Controllers
                 _context.Database.BeginTransaction();
                 foreach (var item in DTO)
                 {
-                    item.Amount = Math.Round(item.Amount, 2);
+
+                    var newAmount = item.IsPaid ? Math.Round(item.Amount, 2) : 0;
+                    var name = _context.MosbName.Where(x => x.Id == item.PersonId).Select(x => x.Name).FirstOrDefault();
+                    var reason = _context.MosbReasons.Where(x => x.Id == item.ReasonsId).Select(x => x.Name).FirstOrDefault();
+                    var NotPaidDescription = string.Concat("الفاضل ", name, "لم يتم صرف مبلغ له لسبب ", reason, " بتاريخ ", item.Date);
+                    var PaidDescription = string.Concat("تم صرف مبلغ ", newAmount, " لـ ", name, " لسبب ", reason, " بتاريخ ", item.Date);
                     var newRecord = new MosbSpendMoney
                     {
                         PersonId = item.PersonId,
                         ReasonsId = item.ReasonsId,
                         Date = item.Date,
-                        Amount = Math.Round(item.Amount, 2),
+                        Amount = newAmount,
                         IsPaid = item.IsPaid.GetHashCode(),
                         IsForReason = true.GetHashCode(),
                         MonthlyAmount = item.MonthlyAmountRecord,
-                        Description = string.Concat("تم صرف مبلغ ", Math.Round(item.Amount, 2), " لـ ", _context.MosbName.Where(x => x.Id == item.PersonId).Select(x => x.Name).FirstOrDefault(), " لسبب ", _context.MosbReasons.Where(x => x.Id == item.ReasonsId).Select(x => x.Name).FirstOrDefault(), " بتاريخ ", item.Date),
+                        Description = item.IsPaid ? PaidDescription : NotPaidDescription
                     };
                     await _context.MosbSpendMoney.AddAsync(newRecord);
                     
@@ -417,11 +422,18 @@ namespace Portal.Controllers
                         return false;
                     }
 
-                    recordToEdit.Amount = item.IsPaid ? item.Amount : 0;
-                    recordToEdit.IsPaid = item.IsPaid.GetHashCode();
-                    recordToEdit.Description = string.Concat("تم تعديل مبلغ الصرف من ", Math.Round(recordToEdit.Amount, 2), " إلى ", Math.Round(item.Amount, 2), " لـ ", _context.MosbName.Where(x => x.Id == item.PersonId).Select(x => x.Name).FirstOrDefault(), " لسبب ", _context.MosbReasons.Where(x => x.Id == record.ReasonId).Select(x => x.Name).FirstOrDefault(), " بتاريخ ", YearMonthDate.ToString("yyyy-MM-dd"));
-                    recordToEdit.MonthlyAmount = record.MonthlyAmountRecord;
-
+                    var oldAmount = Math.Round(recordToEdit.Amount, 2);
+                    var newAmount = item.IsPaid ? Math.Round(item.Amount, 2) : 0;
+                    var name = _context.MosbName.Where(x => x.Id == item.PersonId).Select(x => x.Name).FirstOrDefault();
+                    var reason = _context.MosbReasons.Where(x => x.Id == record.ReasonId).Select(x => x.Name).FirstOrDefault();
+                    string EditDescription = string.Concat("تم تعديل مبلغ الصرف من ", oldAmount, " إلى ", newAmount, " لـ ", name, " لسبب ", reason, " بتاريخ ", record.MonthYear);
+                    string ZeroAmountDescription = string.Concat("تم تعديل مبلغ الصرف من ", oldAmount, " إلى ", newAmount, " لـ ", name, " لسبب ", reason, " بتاريخ ", record.MonthYear, " وتم تعديل الحالة إلى غير مدفوع");
+                    if (newAmount != oldAmount)
+                    {
+                        recordToEdit.Amount = newAmount;
+                        recordToEdit.Description = !item.IsPaid ? ZeroAmountDescription : EditDescription;
+                        recordToEdit.IsPaid = item.IsPaid.GetHashCode();
+                    }
                     _context.MosbSpendMoney.Update(recordToEdit);
                     await _context.SaveChangesAsync();
                 }
