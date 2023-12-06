@@ -7,5 +7,6 @@
         public double ReceivePayment { get; set; }
         public double SpendMoney { get; set; }
         public double TotalAmount { get; set; }
+        public (string? LastReceivePayment, string? LastSpendMoney) LastActivity { get; set; }
     }
 }

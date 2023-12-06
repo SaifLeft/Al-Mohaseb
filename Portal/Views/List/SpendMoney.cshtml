@@ -270,9 +270,17 @@
 
                     printWin.document.write('</tbody>');
                     printWin.document.write('</table>');
-                    if (!IsNamesListSelected) {
-                        printWin.document.write('<h3>عدد الأسماء في النظام : ' + data.body.length + '</h3>');
-                    }
+
+                    // number of rows in the table
+                    var RowsCount = table.rows({ search: 'applied' }).data().length;
+                    printWin.document.write('<h3>عدد المصروفات: ' + RowsCount + '</h3>');
+
+
+                    // number of names in the data where is not repeated
+                    var NamesCount = table.column(0, { search: 'applied' }).data().unique().length;
+                    printWin.document.write('<h3>عدد الأسماء في الجدول: ' + NamesCount + '</h3>');
+
+
 
 
 

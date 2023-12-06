@@ -25,7 +25,18 @@
                     <span class="mx-5 mt-2">=</span>
                     <div class="mx-1">
                         <span>الرصيد العام</span>
-                        <span class="badge rounded-pill bg-success">@Model.GeneralBalance</span>
+                        @if (@Model.GeneralBalance < 0)
+                        {
+                            <span class="badge rounded-pill bg-danger">@Model.GeneralBalance</span>
+                        }
+                        else if (@Model.GeneralBalance == 0)
+                        {
+                            <span class="badge rounded-pill bg-warning">@Model.GeneralBalance</span>
+                        }
+                        else if (@Model.GeneralBalance > 0)
+                        {
+                            <span class="badge rounded-pill bg-success">@Model.GeneralBalance</span>
+                        }
                     </div>
                 </div>
             </div>
@@ -37,6 +48,7 @@
             <label class="mb-3 text-uppercase col-md-2" style="font-size:x-large">بحث في سنة المعنية</label>
             <div class="col-md-4">
                 <select id="YearList" class="select2 form-select">
+                    <option value="">اختر سنة</option>
                     @foreach (var item in Model.YearsList)
                     {
                         if (item.IsSelected)
@@ -66,7 +78,18 @@
                     <span class="mx-5 mt-2">=</span>
                     <div class="mx-1">
                         <span>الرصيد السنوي</span>
-                        <span class="badge rounded-pill bg-success">@Model.TotalAmountYearlyData</span>
+                        @if (@Model.TotalAmountYearlyData < 0)
+                        {
+                            <span class="badge rounded-pill bg-danger">@Model.TotalAmountYearlyData</span>
+                        }
+                        else if (@Model.TotalAmountYearlyData == 0)
+                        {
+                            <span class="badge rounded-pill bg-warning">@Model.TotalAmountYearlyData</span>
+                        }
+                        else if (@Model.TotalAmountYearlyData > 0)
+                        {
+                            <span class="badge rounded-pill bg-success">@Model.TotalAmountYearlyData</span>
+                        }
                     </div>
                 </div>
             </div>
@@ -78,6 +101,7 @@
             <label class="mb-3 text-uppercase col-md-2" style="font-size:x-large">أسم الشخص</label>
             <div class="col-md-4">
                 <select id="NamesList" class="select2 form-select">
+                    <option value="">اختر اسم</option>
                     @foreach (var item in Model.NamesList)
                     {
                         if (item.IsSelected)
@@ -107,7 +131,18 @@
                     <span class="mx-5 mt-2">=</span>
                     <div class="mx-1">
                         <span>الرصيد الشخصي</span>
-                        <span class="badge rounded-pill bg-success">@Model.PersonalTotalAmount</span>
+                        @if (Model.PersonalTotalAmount < 0)
+                        {
+                            <span class="badge rounded-pill bg-danger">@Model.PersonalTotalAmount</span>
+                        }
+                        else if (Model.PersonalTotalAmount == 0)
+                        {
+                            <span class="badge rounded-pill bg-warning">@Model.PersonalTotalAmount</span>
+                        }
+                        else if (Model.PersonalTotalAmount > 0)
+                        {
+                            <span class="badge rounded-pill bg-success">@Model.PersonalTotalAmount</span>
+                        }
                     </div>
                 </div>
             </div>
@@ -132,6 +167,7 @@
                                 <th>جميع الايداعات</th>
                                 <th>جميع المصروفات</th>
                                 <th>الرصيد الشخصي</th>
+                                <th>آخر نشاط للشخص</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -143,6 +179,39 @@
                                     <td>@item.ReceivePayment</td>
                                     <td>@item.SpendMoney</td>
                                     <td>@item.TotalAmount</td>
+                                    <td>
+                                        @{
+                                            var LastReceivePayment = item.LastActivity.LastReceivePayment;
+                                            var LastSpendMoney = item.LastActivity.LastSpendMoney;
+                                            var Txt1 = "";
+                                            if (LastReceivePayment != null)
+                                            {
+                                                Txt1 = "أخر ايداع بتاريخ " + LastReceivePayment;
+
+                                            }
+                                            var Txt2 = "";
+                                            if (LastSpendMoney != null)
+                                            {
+                                                Txt2 = "أخر صرف بتاريخ " + LastSpendMoney;
+
+                                            }
+                                            if (Txt1 != "" && Txt2 != "")
+                                            {
+                                                <span>@Txt1</span>
+                                                <br />
+                                                <span>@Txt2</span>
+                                            }
+                                            else if (Txt1 != "")
+                                            {
+                                                <span>@Txt1</span>
+                                            }
+                                            else if (Txt2 != "")
+                                            {
+                                                <span>@Txt2</span>
+                                            }
+
+                                        }
+                                    </td>
                                 </tr>
                             }
                     </table>
@@ -207,6 +276,11 @@
                 allowClear: true,
                 placeholder: "أختيار من القائمة"
             });
+            $('#YearList').select2({
+                allowClear: true,
+                placeholder: "أختيار من القائمة",
+                dir: "rtl",
+            });
 
             $('#NamesList').on('change', function () {
                 var selectedName = $(this).val();
@@ -257,7 +331,7 @@
                         "sLast": "الأخير"
                     }
                 },
-                columnDefs: [{ className: "dt-center", targets: [0, 1, 2, 3, 4] }]
+                columnDefs: [{ className: "dt-center", targets: [0, 1, 2, 3, 4,5] }]
             });
             $('#PrintTableBtn').on('click', function () {
                 // Get the DataTable instance

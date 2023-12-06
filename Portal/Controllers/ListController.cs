@@ -111,18 +111,7 @@ namespace Portal.Controllers
             }
             return await _context.MosbReasons.ToListAsync();
         }
-        public async Task<double> GetReasonAmount(long? reasonId = null)
-        {
-            if (reasonId != null)
-            {
-                var reason = await _context.MosbReasons
-                    .Where(p => p.Id == reasonId)
-                    .Select(p => p.Amount)
-                    .FirstOrDefaultAsync();
-                return reason;
-            }
-            return 0;
-        }
+        
 
         [HttpGet]
         public async Task<List<MosbName>> GetNames()
