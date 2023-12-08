@@ -15,11 +15,15 @@
                 <h4 class="mb-2">تسيجل الدخول</h4>
                 <p class="mb-4"></p>
 
-                <form class="mb-3" asp-area="" asp-controller="Auth" asp-action="Index" method="POST">
+                <form id="formAuthentication" class="mb-3" asp-controller="Auth" asp-action="Login" method="POST">
+                    <div class="mb-3 form-password-toggle">
+                        <div class="d-flex justify-content-center text-center">
+                            <label class="form-label" for="password" style="font-size:xx-large">مرحبا بك حمد !</label>
+                        </div>
+                    </div>
                     <div class="mb-3 form-password-toggle">
                         <div class="d-flex justify-content-between">
-                            <label class="form-label" for="password">كلمة المرور</label>
-
+                            <label class="form-label" for="password">للتأكيد الدخول الرجاء إدخال كلمة المرور</label>
                         </div>
                         <div class="input-group input-group-merge">
                             <input type="password"
@@ -28,7 +32,6 @@
                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
                                    aria-describedby="كلمة المرور" />
                             <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-
                         </div>
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>

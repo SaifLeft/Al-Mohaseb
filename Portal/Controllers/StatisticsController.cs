@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portal.Data;
 using Portal.Models;
@@ -7,6 +8,7 @@ using System.Globalization;
 
 namespace Portal.Controllers
 {
+    [Authorize]
     public class StatisticsController : Controller
     {
         private AlMohasebDBContext _context;
@@ -344,9 +346,6 @@ namespace Portal.Controllers
         }
 
         #endregion Semple
-
-
-
 
     }
 }

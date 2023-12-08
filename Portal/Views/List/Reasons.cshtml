@@ -36,6 +36,7 @@
                                         <td>@item.Item2</td>
                                         <td>@item.Item3 ريال</td>
                                         <td>
+                                            <a style="color:azure" onclick="Edit('@item.Item1','@item.Item2','@item.Item3')" class="btn btn-dark">تعديل السبب</a>
                                             <a style="color:azure" onclick="Delete('@item.Item1')" class="btn btn-danger">حذف</a>
                                         </td>
                                     </tr>
@@ -87,8 +88,7 @@
     <link rel="stylesheet" href="~/assets/vendor/libs/select2/select2.css" />
     <link rel="stylesheet" href="~/assets/vendor/libs/formvalidation/dist/css/formValidation.min.css" />
     <link rel="stylesheet" href="~/assets/vendor/libs/sweetalert2/sweetalert2.css">
-
-
+   
 }
 
 @section Scripts {
@@ -243,6 +243,85 @@
             })
         }
 
+        function Edit(id, name, Amount) {
+            // Show Swal2 to edit the reason.
+            Swal.fire({
+                title: 'تعديل السبب',
+                html:
+                    '<input id="swal-input1" class="swal2-input" value="' + name + '">' +
+                    '<input id="swal-input2" class="swal2-input" value="' + Amount + '">',
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'تعديل',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    var ReasonInput = $("#swal-input1").val();
+                    if (!ReasonInput) {
+                        Swal.showValidationMessage('الرجاء إدخال السبب');
+                        return;
+                    }
+
+                    var AmountInput = $("#swal-input2").val();
+                    if (!AmountInput) {
+                        Swal.showValidationMessage('الرجاء إدخال مبلغ الاشتراك');
+                        return;
+                    }
+
+                    // If the amount is less than or equal to 0.
+                    if (AmountInput <= 0) {
+                        Swal.showValidationMessage('مبلغ الاشتراك يجب أن يكون أكبر من 0');
+                        return;
+                    }
+                    // If the amount is not a number.
+                    if (isNaN(AmountInput)) {
+                        Swal.showValidationMessage('مبلغ الاشتراك يجب أن يكون رقم');
+                        return;
+                    }
+
+                    // Check if the input is the same as the old one.
+                    if (ReasonInput === name && parseFloat(Amount) === parseFloat(AmountInput)) {
+                        Swal.showValidationMessage('لا يوجد تعديل');
+                        return;
+                    }
+                    var data = {
+                        id: id,
+                        Reason: ReasonInput,
+                        Amount: AmountInput
+                    };
+                    return $.ajax({
+                        url: "@Url.Action("EditReason", "Create")",
+                        type: 'POST',
+                        data: data,
+                        success: function (data) {
+                            console.log(data);
+                            if (data === '1') {
+                                return '1';
+                            } else {
+                                return '0';
+                            }
+                        }
+                    });
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log(result.value);
+                    if (result.value === 1) {
+                        Swal.fire({
+                            title: 'تم!',
+                            text: 'تم التعديل بنجاح',
+                            icon: 'success',
+                            timer: 2000,
+                            timerProgressBar: true,
+                            onClose: () => {
+                                location.reload();
+                            }
+                        });
+                    } else {
+                        Swal.fire('خطأ!', 'حدث خطأ', 'error');
+                    }
+                }
+            });
+        }
         $('#PrintTableBtn').on('click', function () {
             // Get the DataTable instance
             var table = $('#userTable').DataTable();

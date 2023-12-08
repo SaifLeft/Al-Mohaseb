@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Portal.Data;
@@ -8,6 +9,7 @@ using System.Xml.Linq;
 
 namespace Portal.Controllers
 {
+    [Authorize]
     public class EditController : Controller
     {
         //cotaxt 

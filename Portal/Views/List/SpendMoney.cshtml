@@ -53,7 +53,7 @@
 </div>
 
 
-@section Stylesheet{
+@section Stylesheet {
     <link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
     <link rel="stylesheet" href="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
     <!-- Vendors CSS -->
@@ -67,9 +67,9 @@
     <link rel="stylesheet" href="~/assets/vendor/libs/sweetalert2/sweetalert2.css">
 
 
-    }
+}
 
-@section Scripts{
+@section Scripts {
     <script src="~/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="~/assets/vendor/libs/datatables/jquery.dataTables.js"></script>
     <script src="~/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
@@ -107,7 +107,7 @@
                 "paging": false,
                 "orderMulti": false,
                 "ajax": {
-                    "url": "@Url.Action("GetSpendMoneyDetails","List")",
+                    "url": "@Url.Action("GetSpendMoneyDetails", "List")",
                     "type": "POST",
                     "datatype": "json"
                 },
@@ -136,7 +136,7 @@
                     },
                     { "data": "description", "name": "description", "width": "25%" },
                     {
-                        "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="@Url.Action("EditSpendMoney","Edit")?id=' + full.id + '">تعديل</a>'; }
+                        "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="@Url.Action("EditSpendMoney", "Edit")?id=' + full.id + '">تعديل</a>'; }
                     }
                 ],
                 columnDefs: [
@@ -275,12 +275,11 @@
                     var RowsCount = table.rows({ search: 'applied' }).data().length;
                     printWin.document.write('<h3>عدد المصروفات: ' + RowsCount + '</h3>');
 
+                    if (!IsNamesListSelected) {
+                        var NamesCount = table.column(0, { search: 'applied' }).data().unique().length;
+                        printWin.document.write('<h3>عدد الأسماء في الجدول: ' + NamesCount + '</h3>');
 
-                    // number of names in the data where is not repeated
-                    var NamesCount = table.column(0, { search: 'applied' }).data().unique().length;
-                    printWin.document.write('<h3>عدد الأسماء في الجدول: ' + NamesCount + '</h3>');
-
-
+                    }
 
 
 
@@ -299,4 +298,4 @@
 
 
     </script>
-        }
+}

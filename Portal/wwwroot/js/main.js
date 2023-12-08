@@ -4,8 +4,8 @@
 
 'use strict';
 
-let isRtl = window.Helpers.isRtl(),
-  isDarkStyle = window.Helpers.isDarkStyle(),
+let isRtl = true,
+    isDarkStyle = !document.documentElement.classList.contains("light-style"),
   menu,
   animate,
   isHorizontalLayout = false;

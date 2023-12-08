@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portal.Data;
 using Portal.Models;
@@ -6,6 +7,7 @@ using Portal.Models.ViewModels;
 
 namespace Portal.Controllers
 {
+    [Authorize]
     public class CreateController : Controller
     {
         private readonly ILogger<CreateController> _logger;
@@ -116,6 +118,28 @@ namespace Portal.Controllers
             }
             return Ok(add);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> EditReason(long Id, string Reason, double Amount)
+        {
+            var reason = await _context.MosbReasons.FindAsync(Id);
+            if (reason == null)
+            {
+                return NotFound(0);
+            }
+            if (reason.Name != Reason) reason.Name = Reason;
+            if (reason.Amount != Amount) reason.Amount = Amount;
+
+            _context.MosbReasons.Update(reason);
+            int edit = await _context.SaveChangesAsync();
+            if (edit == 0)
+            {
+                return BadRequest(0);
+            }
+            return Ok(1);
+        }
+
+
         [HttpPost]
         public async Task<ActionResult> DeleteReason(long Id, string Password)
         {

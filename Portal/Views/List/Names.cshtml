@@ -168,7 +168,6 @@
             var Title = 'جميع الأسماء في النظام';
 
 
-            // Export data with column header formatting
             var data = table.buttons.exportData({
                 format: {
                     header: function (data, columnIdx) {
@@ -191,7 +190,7 @@
                     printWin.document.write('<thead>');
                     printWin.document.write('<tr>');
                     $.each(data.header, function (i, header) {
-                        if (i !== 4) {
+                        if (i !== 5) {
                             printWin.document.write('<th>' + header + '</th>');
                         }
                     });
@@ -201,7 +200,8 @@
                     $.each(data.body, function (i, row) {
                         printWin.document.write('<tr>');
                         $.each(row, function (j, cell) {
-                            if (j !== 4) {
+                            if (j !== 5) {
+                                console.log(cell);
                                 printWin.document.write('<td>' + cell + '</td>');
                             }
                         });
@@ -223,7 +223,7 @@
                     printWin.focus();
                     printWin.print();
                     printWin.close();
-                }, 500); // Adjust the delay time as needed
+                }, 1500); // Adjust the delay time as needed
             };
         });
 

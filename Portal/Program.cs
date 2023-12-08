@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Portal.Data;
 
@@ -11,6 +12,18 @@ builder.Services.AddDbContext<AlMohasebDBContext>(options =>
 {
     options.UseSqlite(connectionString);
 });
+builder.Services.AddHttpContextAccessor();
+
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
+        options =>
+        {
+            options.LoginPath = new PathString("/Auth/Index");
+            options.AccessDeniedPath = new PathString("/Auth/AccessDenied");
+            options.LogoutPath = new PathString("/Auth/Logout");
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+        });
 
 var app = builder.Build();
 
@@ -27,10 +40,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Statistics}/{action=Semple}/{id?}");
+    pattern: "{controller=Auth}/{action=Index}/{id?}");
 
 app.Run();

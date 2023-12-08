@@ -30,6 +30,8 @@
     <link rel="stylesheet" href="~/assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
     <link rel="stylesheet" href="~/assets/css/demo.css" />
     <link rel="stylesheet" href="~/assets/css/LoginBody.css" />
+    <link rel="stylesheet" href="~/css/font.css" />
+
 
     <!-- Vendors CSS -->
     <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
@@ -50,32 +52,92 @@
     <div class="container-xxl ">
         @RenderBody()
     </div>
-
-
-    <!-- / Content -->
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
-    <script src="~/assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="~/assets/vendor/libs/popper/popper.js"></script>
-    <script src="~/assets/vendor/js/bootstrap.js"></script>
-    <script src="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-
-    <script src="~/assets/vendor/libs/hammer/hammer.js"></script>
-
-    <script src="~/assets/vendor/libs/i18n/i18n.js"></script>
-    <script src="~/assets/vendor/libs/typeahead-js/typeahead.js"></script>
-
-    <script src="~/assets/vendor/js/menu.js"></script>
-    <!-- endbuild -->
-    <!-- Vendors JS -->
     <script src="~/assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js"></script>
     <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js"></script>
     <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js"></script>
 
-    <!-- Main JS -->
-    <script src="~/assets/js/main.js"></script>
 
-    <!-- Page JS -->
-    <script src="~/assets/js/pages-auth.js"></script>
+
+    <script>
+        const formAuthentication = document.querySelector('#formAuthentication');
+        document.addEventListener('DOMContentLoaded', function (e) {
+            (function () {
+                // Form validation for Add new record
+                if (formAuthentication) {
+                    const fv = FormValidation.formValidation(formAuthentication, {
+                        fields: {
+                            password: {
+                                validators: {
+                                    notEmpty: {
+                                        message: 'الرجاء أدخال كلمة السر'
+                                    },
+                                    stringLength: {
+                                        min: 8,
+                                        message: 'يجب أن تكون كلمة السر مكونة من 8 حروف'
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            trigger: new FormValidation.plugins.Trigger(),
+                            bootstrap5: new FormValidation.plugins.Bootstrap5({
+                                eleValidClass: '',
+                                rowSelector: '.mb-3'
+                            }),
+                            submitButton: new FormValidation.plugins.SubmitButton(),
+
+                            defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+                            autoFocus: new FormValidation.plugins.AutoFocus()
+                        },
+                        init: instance => {
+                            instance.on('plugins.message.placed', function (e) {
+                                if (e.element.parentElement.classList.contains('input-group')) {
+                                    e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
+                                }
+                            });
+                        }
+                    });
+                }
+
+                //  Two Steps Verification
+                const numeralMask = document.querySelectorAll('.numeral-mask');
+
+                // Verification masking
+                if (numeralMask.length) {
+                    numeralMask.forEach(e => {
+                        new Cleave(e, {
+                            numeral: true
+                        });
+                    });
+                }
+            })();
+
+
+
+            const toggler = document.querySelectorAll('.form-password-toggle i')
+            if (typeof toggler !== 'undefined' && toggler !== null) {
+                toggler.forEach(el => {
+                    el.addEventListener('click', e => {
+                        e.preventDefault()
+                        const formPasswordToggle = el.closest('.form-password-toggle')
+                        const formPasswordToggleIcon = formPasswordToggle.querySelector('i')
+                        const formPasswordToggleInput = formPasswordToggle.querySelector('input')
+
+                        if (formPasswordToggleInput.getAttribute('type') === 'text') {
+                            formPasswordToggleInput.setAttribute('type', 'password')
+                            formPasswordToggleIcon.classList.replace('bx-show', 'bx-hide')
+                        } else if (formPasswordToggleInput.getAttribute('type') === 'password') {
+                            formPasswordToggleInput.setAttribute('type', 'text')
+                            formPasswordToggleIcon.classList.replace('bx-hide', 'bx-show')
+                        }
+                    })
+                })
+            }
+        });
+
+
+
+
+    </script>
 </body>
 </html>
