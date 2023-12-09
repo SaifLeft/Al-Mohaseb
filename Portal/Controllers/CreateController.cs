@@ -73,7 +73,7 @@ namespace Portal.Controllers
                         SubscriptionAmount = VM.SubscriptionAmount
                     };
 
-                     await _context.MosbName.AddAsync(newMosbName);
+                    await _context.MosbName.AddAsync(newMosbName);
 
                     var saveChangesResult = await _context.SaveChangesAsync();
                     if (saveChangesResult == 0)
@@ -287,7 +287,7 @@ namespace Portal.Controllers
             var YearMonthDate = DateTime.Parse(YearMonth);
 
             var spendMoneyForReason = await _context.MosbSpendMoney.Include(x => x.Person)
-                .Where(x => x.ReasonsId == ReasonId 
+                .Where(x => x.ReasonsId == ReasonId
                 && x.IsForReason == true.GetHashCode()
                 && x.Date == YearMonthDate.ToString("yyyy-MM-dd")
                 )
@@ -296,10 +296,11 @@ namespace Portal.Controllers
             var VM = new SpendMoneyForReasonVM
             {
                 ReasonId = ReasonId.Value,
-                Reasons = await _context.MosbReasons.Select(x=> new SelectListModel { 
+                Reasons = await _context.MosbReasons.Select(x => new SelectListModel
+                {
                     Value = x.Id,
                     IsSelected = x.Id == ReasonId.Value ? true : false,
-                    Text = x.Name 
+                    Text = x.Name
                 }
                 ).ToListAsync(),
                 YearMonth = YearMonth,
@@ -326,7 +327,7 @@ namespace Portal.Controllers
             }
             else
             {
-                VM.AllPersonInSystem  = await _context.MosbName
+                VM.AllPersonInSystem = await _context.MosbName
                     .Select(x => new ShowSpendMoney
                     {
                         PersonId = x.Id,
@@ -410,7 +411,7 @@ namespace Portal.Controllers
                         Description = item.IsPaid ? PaidDescription : NotPaidDescription
                     };
                     await _context.MosbSpendMoney.AddAsync(newRecord);
-                    
+
                 }
                 var status = await _context.SaveChangesAsync();
                 if (status == 0)
@@ -489,7 +490,7 @@ namespace Portal.Controllers
             var YearMonthDate = DateTime.Parse(YearMonth);
 
             var monthlyReceivePayments = await _context.MosbReceivePayments.Include(x => x.Name)
-                .Where(x => x.Date == YearMonthDate.ToString("yyyy-MM-dd") && x.IsMonthly == true.GetHashCode()) 
+                .Where(x => x.Date == YearMonthDate.ToString("yyyy-MM-dd") && x.IsMonthly == true.GetHashCode())
                 .ToListAsync();
 
             var VM = new MonthlyReceivePaymentsVM
@@ -512,6 +513,15 @@ namespace Portal.Controllers
                         IsPaid = x.IsPaid == 1 ? true : false
                     }).ToList();
                 VM.IsHasRecodes = true;
+                //var rr  = [ "مبلغ الأشتراك", "هل دفع الأشتراك؟", "المبلغ الأشتراك", "الحالة"];
+                VM.TableHeder = new List<string> { "الأسم", "مبلغ الأشتراك", "هل دفع الأشتراك؟", "المبلغ" };
+                VM.TableBody = monthlyReceivePayments.Select(x =>
+                new List<string> {
+                    x.Name.Name,
+                    Math.Round(x.Name.SubscriptionAmount, 2).ToString(),
+                    x.IsPaid == 1 ? "نعم" : "لا",
+                    Math.Round(x.Amount, 2).ToString()}).ToList();
+
             }
             else
             {

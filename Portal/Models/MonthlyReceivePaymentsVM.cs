@@ -6,6 +6,8 @@
         public string YearMonth { get;  set; }
         public bool IsHasRecodes { get;  set; }
         public List<ShowMonthlyReceivePayments> SumitedMonthlyPayments { get; set; } = new List<ShowMonthlyReceivePayments>();
+        public List<string> TableHeder { get; internal set; }
+        public List<List<string>> TableBody { get; internal set; }
     }
     public class MonthlyReceiveRow
     {
