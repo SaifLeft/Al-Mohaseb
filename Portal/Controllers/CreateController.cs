@@ -397,8 +397,8 @@ namespace Portal.Controllers
                     var newAmount = item.IsPaid ? Math.Round(item.Amount, 2) : 0;
                     var name = _context.MosbName.Where(x => x.Id == item.PersonId).Select(x => x.Name).FirstOrDefault();
                     var reason = _context.MosbReasons.Where(x => x.Id == item.ReasonsId).Select(x => x.Name).FirstOrDefault();
-                    var NotPaidDescription = string.Concat("الفاضل ", name, "لم يتم صرف مبلغ له لسبب ", reason, " بتاريخ ", item.Date);
-                    var PaidDescription = string.Concat("تم صرف مبلغ ", newAmount, " لـ ", name, " لسبب ", reason, " بتاريخ ", item.Date);
+                    var NotPaidDescription = string.Concat("الفاضل ", name, "لم يتم خصم مبلغ له لسبب ", reason, " بتاريخ ", item.Date);
+                    var PaidDescription = string.Concat("تم خصم مبلغ ", newAmount, " لـ ", name, " لسبب ", reason, " بتاريخ ", item.Date);
                     var newRecord = new MosbSpendMoney
                     {
                         PersonId = item.PersonId,
@@ -662,5 +662,57 @@ namespace Portal.Controllers
             }
         }
         #endregion MonthlyReceivePayments
+
+        #region TransferMoney
+        public async Task<IActionResult> TransferMoney()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<ActionResult> TransferMoney(TransferMoneyVM VM)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+
+                    using var transaction = await _context.Database.BeginTransactionAsync();
+                    var newTransferMoney = new MosbTransferMoney
+                    {
+                        FromPersonId = VM.FromNameId,
+                        ToPersonId = VM.ToNameId,
+                        Date = VM.Date.ToString("yyyy-MM-dd"),
+                        Amount = VM.Amount,
+                        Description = VM.description,
+                    };
+
+                    var AddedTransferMoney = await _context.MosbTransferMoney.AddAsync(newTransferMoney);
+
+                    var saveChangesResult = await _context.SaveChangesAsync();
+                    if (saveChangesResult == 0)
+                    {
+                        await transaction.RollbackAsync();
+                        ModelState.AddModelError("", "حدث خطأ عام");
+                    }
+
+                    await transaction.CommitAsync();
+                    TempData["AddStatus"] = "Success";
+                    return RedirectToAction("TransferMoney", "List");
+                }
+                else
+                {
+                    TempData["AddStatus"] = "Error";
+                    ModelState.AddModelError("", "حدث خطأ عام");
+                    return View();
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        #endregion TransferMoney
     }
 }

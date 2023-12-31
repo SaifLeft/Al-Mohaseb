@@ -63,7 +63,7 @@ namespace Portal.Controllers
                 );
             }
 
-           
+
 
             totalRecord = await data.CountAsync();
             filterRecord = totalRecord;
@@ -97,12 +97,12 @@ namespace Portal.Controllers
             var reasons = _context.MosbReasons.ToList();
             var VM = new ReasonVM
             {
-                Reasons = reasons.Select(r => (r.Id, r.Name,r.Amount)).ToList()
+                Reasons = reasons.Select(r => (r.Id, r.Name, r.Amount)).ToList()
             };
             return View(VM);
         }
         [HttpGet]
-        public async Task<List<MosbReasons>> GetReasons(long? ByNameId =null)
+        public async Task<List<MosbReasons>> GetReasons(long? ByNameId = null)
         {
             if (ByNameId != null)
             {
@@ -114,7 +114,7 @@ namespace Portal.Controllers
             }
             return await _context.MosbReasons.ToListAsync();
         }
-        
+
 
         [HttpGet]
         public async Task<List<MosbName>> GetNames()
@@ -128,70 +128,6 @@ namespace Portal.Controllers
                 .Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
                 .ToListAsync();
             return View();
-        }
-        [HttpPost]
-        public async Task<IActionResult> GetReceivePaymentsDetailsV1()
-        {
-            int totalRecord = 0;
-            int filterRecord = 0;
-            var draw = Request.Form["draw"].FirstOrDefault();
-            var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
-            var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
-            var searchValue = Request.Form["search[value]"].FirstOrDefault();
-            int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
-            int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
-
-            var data = _context.MosbReceivePayments
-                .Include(n => n.ReceivePaymentsReasonsMapping)
-                .AsQueryable();
-
-            string? NameIdSearch = Request.Form["columns[1][search][value]"].FirstOrDefault().Trim();
-
-            if (!string.IsNullOrEmpty(NameIdSearch) || NameIdSearch != "")
-            {
-                data = data.Where(p => p.Name.Id == long.Parse(NameIdSearch));
-            }
-
-            // Filter the data based on the searchValue if applicable
-            if (!string.IsNullOrEmpty(searchValue.ToString()))
-            {
-                searchValue = searchValue.Trim();
-                data = data.Where(p =>
-                    p.Name.Name.Contains(searchValue.ToString()) ||
-                    p.Description.ToString().Contains(searchValue.ToString()) ||
-                    p.Date.Contains(searchValue.ToString()) ||
-                    p.Name.PhoneNumber.ToString().Contains(searchValue.ToString()) ||
-                    p.Name.CivilNumber.ToString().Contains(searchValue.ToString())
-                );
-            }
-            totalRecord = await data.CountAsync();
-            filterRecord = totalRecord;
-
-
-            var phoneList = await data
-                .OrderBy(x => sortColumn + " " + sortColumnDirection)
-                .Skip(skip)
-                .Take(pageSize)
-                .Select(p => new
-                {
-                    id = p.Id,
-                    name = p.Name.Name,
-                    amount = p.Amount,
-                    date = p.Date,
-                    description = p.Description
-                })
-                .ToListAsync();
-
-
-
-            var returnObj = new
-            {
-                recordsTotal = totalRecord,
-                recordsFiltered = filterRecord,
-                Data = phoneList
-            };
-
-            return Ok(returnObj);
         }
 
         [HttpPost]
@@ -207,6 +143,7 @@ namespace Portal.Controllers
             int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
 
             var data = _context.MosbReceivePayments
+                .Where(x => x.IsPaid == true.GetHashCode())
                 .Include(n => n.ReceivePaymentsReasonsMapping)
                 .AsQueryable();
 
@@ -264,7 +201,6 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> GetSpendMoneyDetails()
         {
-
             int totalRecord = 0;
             int filterRecord = 0;
             var draw = Request.Form["draw"].FirstOrDefault();
@@ -274,7 +210,7 @@ namespace Portal.Controllers
             int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
             int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
 
-            var data = _context.MosbSpendMoney.AsQueryable();
+            var data = _context.MosbSpendMoney.Where(x => x.IsPaid == true.GetHashCode()).AsQueryable();
             totalRecord = await data.CountAsync();
             filterRecord = totalRecord;
 

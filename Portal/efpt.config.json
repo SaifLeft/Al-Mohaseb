@@ -32,6 +32,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "MOSB_TRANSFER_MONEY",
+         "ObjectType": 0
+      },
+      {
          "Name": "PERSON_REASON_MAPPING",
          "ObjectType": 0
       },
@@ -40,12 +44,13 @@
          "ObjectType": 0
       }
    ],
-   "UiHint": "C:\\Users\\hayzh\\source\\repos\\Al-Mohaseb\\Portal\\AlMohaseb-ERD.db",
+   "UiHint": "C:\\Users\\hayzh\\source\\repos\\SaifLeft\\Al-Mohaseb\\Portal\\AlMohaseb-ERD.db",
    "UncountableWords": null,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,
    "UseDateOnlyTimeOnly": false,
    "UseDbContextSplitting": false,
+   "UseDecimalDataAnnotationForSprocResult": true,
    "UseFluentApiOnly": true,
    "UseHandleBars": false,
    "UseHierarchyId": false,
@@ -53,6 +58,7 @@
    "UseLegacyPluralizer": false,
    "UseManyToManyEntity": true,
    "UseNoDefaultConstructor": false,
+   "UseNoNavigations": false,
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
    "UseNullableReferences": false,

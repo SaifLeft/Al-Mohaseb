@@ -22,6 +22,7 @@ namespace Portal.Data
         public virtual DbSet<MosbReasons> MosbReasons { get; set; }
         public virtual DbSet<MosbReceivePayments> MosbReceivePayments { get; set; }
         public virtual DbSet<MosbSpendMoney> MosbSpendMoney { get; set; }
+        public virtual DbSet<MosbTransferMoney> MosbTransferMoney { get; set; }
         public virtual DbSet<PersonReasonMapping> PersonReasonMapping { get; set; }
         public virtual DbSet<ReceivePaymentsReasonsMapping> ReceivePaymentsReasonsMapping { get; set; }
 
@@ -166,6 +167,45 @@ namespace Portal.Data
                 entity.HasOne(d => d.Reasons)
                     .WithMany(p => p.MosbSpendMoney)
                     .HasForeignKey(d => d.ReasonsId);
+            });
+
+            modelBuilder.Entity<MosbTransferMoney>(entity =>
+            {
+                entity.ToTable("MOSB_TRANSFER_MONEY");
+
+                entity.Property(e => e.Id).HasColumnName("ID");
+
+                entity.Property(e => e.Amount)
+                    .HasColumnType("double(10)")
+                    .HasColumnName("AMOUNT");
+
+                entity.Property(e => e.Date)
+                    .IsRequired()
+                    .HasColumnType("varchar(255)")
+                    .HasColumnName("DATE");
+
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasColumnType("varchar(1025)")
+                    .HasColumnName("DESCRIPTION");
+
+                entity.Property(e => e.FromPersonId)
+                    .HasColumnType("integer(10)")
+                    .HasColumnName("FROM_PERSON_ID");
+
+                entity.Property(e => e.ToPersonId)
+                    .HasColumnType("integer(10)")
+                    .HasColumnName("TO_PERSON_ID");
+
+                entity.HasOne(d => d.FromPerson)
+                    .WithMany(p => p.MosbTransferMoneyFromPerson)
+                    .HasForeignKey(d => d.FromPersonId)
+                    .OnDelete(DeleteBehavior.ClientSetNull);
+
+                entity.HasOne(d => d.ToPerson)
+                    .WithMany(p => p.MosbTransferMoneyToPerson)
+                    .HasForeignKey(d => d.ToPersonId)
+                    .OnDelete(DeleteBehavior.ClientSetNull);
             });
 
             modelBuilder.Entity<PersonReasonMapping>(entity =>
