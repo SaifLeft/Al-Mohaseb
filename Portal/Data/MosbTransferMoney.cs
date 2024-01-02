@@ -9,12 +9,12 @@ namespace Portal.Data
     {
         public long Id { get; set; }
         public double Amount { get; set; }
-        public long FromPersonId { get; set; }
-        public long ToPersonId { get; set; }
+        public long FromNameId { get; set; }
+        public long ToNameId { get; set; }
         public string Date { get; set; }
         public string Description { get; set; }
 
-        public virtual MosbReasons FromPerson { get; set; }
-        public virtual MosbReasons ToPerson { get; set; }
+        public virtual MosbName FromName { get; set; }
+        public virtual MosbName ToName { get; set; }
     }
 }

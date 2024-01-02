@@ -4,25 +4,361 @@
 }
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="card mb-4">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">
-                تحويل مبلغ من رصيد الى رصيد اخر
-            </h5>
-        </div>
-        <div class="card-body">
-            <div class="col-md-4">
-                <div class="input-group">
-                    <span class="input-group-text">تحويل مبلغ من</span>
-                    <input type="text" aria-label="First name" class="form-control">
-                    <span class="input-group-text">الى</span>
-                    <input type="text" aria-label="Last name" class="form-control">
+    <div class="row gy-4">
+        <div class="col-xl-7">
+            <div class="card mb-4">
+                <div class="d-flex card-header">
+                    <div class="col-md-12">
+                        <h4 class="card-title m-0 me-2">
+                            قائمة تحويلات الاموال
+                        </h4>
+                        <button class="btn btn-outline-dark float-end" id="PrintTableBtn">
+                            <i class="bx bx-printer"></i>
+                            <span class="d-lg-inline-block">طباعة الجدول</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body demo-vertical-spacing demo-only-element">
+                    <table class="table table-striped" id="datatable">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>المبلغ</th>
+                                <th>السبب</th>
+                                <th>من</th>
+                                <th>الى</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.TransferMoneyList.Any())
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center">لا يوجد بيانات</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var item in Model.TransferMoneyList)
+                                {
+                                    <tr>
+                                        <td>@item.Date</td>
+                                        <td>@item.Amount</td>
+                                        <td>@item.Description</td>
+                                        <td>@item.FromName.Name</td>
+                                        <td>@item.ToName.Name</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-
-
-
-
+        <!-- Stage API Box -->
+        <div class="col-md-5">
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title m-0 me-2">تحويل مبلغ من رصيد الى رصيد اخر</h5>
+                </div>
+                <div class="card-body demo-vertical-spacing demo-only-element">
+                    <div class="mb-3 input-group">
+                        <span class="input-group-text">التاريخ</span>
+                        <input type="text"
+                               id="Date"
+                               placeholder="yyyy-mm-dd"
+                               class="form-control" />
+                    </div>
+                    <div class="mb-3 input-group">
+                        <span class="input-group-text">تحويل مبلغ من</span>
+                        <div class="col-md-4">
+                            <select class="select2 form-select" id="PersonSelect1">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <span class="input-group-text">الى</span>
+                        <div class="col-md-4">
+                            <select class="select2 form-select" id="PersonSelect2">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 input-group col-md-2">
+                        <span class="input-group-text">المبلغ</span>
+                        <input type="number" id="Amount" class="form-control" placeholder="0.00">
+                    </div>
+                    <div class="mb-3 input-group">
+                        <span class="input-group-text">السبب</span>
+                        <textarea id="Description" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <button type="button" onclick="ConfirmTransfer()" class="btn btn-primary">حفظ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+@section Stylesheet {
+    <link rel="stylesheet" href="~/assets/vendor/libs/sweetalert2/sweetalert2.css">
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/select2/select2.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/jquery-timepicker/jquery-timepicker.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/pickr/pickr-themes.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/sweetalert2/sweetalert2.css">
+
+
+
+}
+
+@section Scripts {
+    <script src="~/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="~/assets/vendor/libs/datatables/jquery.dataTables.js"></script>
+    <script src="~/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive/datatables.responsive.js"></script>
+    <script src="~/assets/vendor/libs/flatpickr/flatpickr.js"></script>
+    <script src="~/assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js"></script>
+    <script src="~/assets/vendor/libs/select2/select2.js"></script>
+
+
+
+    <script>
+
+        $(document).ready(function () {
+            // Select2 initialization
+            $('.select2').each(function () {
+                $(this).select2({
+                    placeholder: 'اختر',
+                    allowClear: true
+                });
+            });
+            $('#datatable').DataTable({
+                paging: false,
+                columnDefs: [
+                    // Center align both header and body content of columns 1, 2 & 3
+                    { className: "dt-center", targets: [0, 1, 2, 3, 4] }
+                ]
+            });
+
+            SetNames();
+
+
+            // Event handlers
+            $('#PersonSelect1').on('change', function () {
+                var selectedId = $(this).val();
+                removeSelectedId(selectedId, $('#PersonSelect2'));
+            });
+
+            $('#PersonSelect2').on('change', function () {
+                var selectedId = $(this).val();
+                removeSelectedId(selectedId, $('#PersonSelect1'));
+            });
+
+
+            var bsDatepickerAutoclose = $('#Date')
+            if (bsDatepickerAutoclose.length) {
+                bsDatepickerAutoclose.datepicker({
+                    todayHighlight: true,
+                    autoclose: true,
+                    orientation: isRtl ? 'auto right' : 'auto left',
+                    format: 'yyyy-mm-dd'
+                });
+                // set date to today
+                bsDatepickerAutoclose.datepicker('setDate', new Date());
+            }
+
+
+
+
+        });
+
+        function populateDropdown(nameList, dropdown) {
+            $.each(nameList, function () {
+                dropdown.append($("<option />").val(this.id).text(this.name));
+            });
+        }
+
+        function GetNames() {
+            var result;
+            $.ajax({
+                url: '@Url.Action("GetNames", "List")',
+                type: 'GET',
+                cache: true,
+                dataType: 'json',
+                async: false, // Wait for the request to complete before proceeding
+                success: function (data) {
+                    result = data;
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+            return result;
+        }
+
+        function removeSelectedId(id, dropdown) {
+            var nameList = GetNames();
+            nameList = nameList.filter(function (item) {
+                return item.id != id;
+            });
+            dropdown.empty();
+            populateDropdown(nameList, dropdown);
+
+        }
+        function SetNames() {
+            var nameList = GetNames();
+            var dropdown1 = $('#PersonSelect1');
+            var dropdown2 = $('#PersonSelect2');
+            dropdown1.empty();
+            dropdown2.empty();
+            populateDropdown(nameList, dropdown1);
+            populateDropdown(nameList, dropdown2);
+            dropdown1.val(null).trigger("change");
+            dropdown2.val(null).trigger("change");
+        }
+        function ConfirmTransfer() {
+            var date = $('#Date').val();
+            var fromPersonId = $('#PersonSelect1').val();
+            var toPersonId = $('#PersonSelect2').val();
+            var amount = $('#Amount').val();
+            var description = $('#Description').val();
+
+
+            var isValid = ValidateTransferRequest();
+            if (!isValid) {
+                return;
+            }
+
+
+
+            var data = {
+                date: date,
+                FromNameId: fromPersonId,
+                ToNameId: toPersonId,
+                Amount: amount,
+                Description: description
+            };
+            console.log(data);
+            var Text = 'هل انت متأكد من صرف من رصيد ' + $('#PersonSelect1 option:selected').text() + ' الى رصيد ' + $('#PersonSelect2 option:selected').text() + ' مبلغ ' + amount + ' ريال؟';
+            //sweetalert2
+            Swal.fire({
+                title: 'هل انت متأكد؟',
+                text: Text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'نعم',
+                cancelButtonText: 'لا'
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    CreateTransfer(data);
+                }
+            });
+
+        }
+        function CreateTransfer(data) {
+            $.ajax({
+                url: '@Url.Action("CreateTransferMoneyAjax", "Create")',
+                type: 'POST',
+                dataType: 'json',
+                data: data,
+                success: function (data) {
+                    if (data.status) {
+                        Swal.fire({
+                            title: 'تمت العملية بنجاح',
+                            text: 'تمت عملية التحويل بنجاح',
+                            icon: 'success',
+                            confirmButtonText: 'حسناً'
+                        }).then(function (result) {
+                            if (result.isConfirmed) {
+                                SetNames();
+                            }
+                        });
+                    }
+                    else {
+                        Swal.fire({
+                            title: 'فشلت العملية',
+                            text: 'فشلت عملية التحويل',
+                            icon: 'error',
+                            confirmButtonText: 'حسناً'
+                        });
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus, errorThrown);
+                }
+            });
+        }
+        function ValidateTransferRequest() {
+            var date = $('#Date').val();
+            var fromPersonId = $('#PersonSelect1').val();
+            var toPersonId = $('#PersonSelect2').val();
+            var amount = $('#Amount').val();
+            var description = $('#Description').val();
+            // Validation
+            if (date == '') {
+                Swal.fire({
+                    title: 'خطأ',
+                    text: 'الرجاء ادخال التاريخ',
+                    icon: 'error',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+            if (fromPersonId == '' || fromPersonId == null) {
+                Swal.fire({
+                    title: 'خطأ',
+                    text: 'الرجاء اختيار الشخص المحول منه',
+                    icon: 'error',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+            if (toPersonId == '' || toPersonId == null) {
+                Swal.fire({
+                    title: 'خطأ',
+                    text: 'الرجاء اختيار الشخص المحول اليه',
+                    icon: 'error',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+            if (fromPersonId == toPersonId) {
+                Swal.fire({
+                    title: 'خطأ',
+                    text: 'لا يمكن التحويل الى نفس الشخص',
+                    icon: 'error',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+            if (amount == '') {
+                Swal.fire({
+                    title: 'خطأ',
+                    text: 'الرجاء ادخال المبلغ',
+                    icon: 'error',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+            if (description == '' || description == null) {
+                Swal.fire({
+                    title: 'خطأ',
+                    text: 'الرجاء ادخال السبب',
+                    icon: 'error',
+                    confirmButtonText: 'حسناً'
+                });
+                return;
+            }
+            return true;
+        }
+
+
+
+
+
+
+    </script>
+
+
+}

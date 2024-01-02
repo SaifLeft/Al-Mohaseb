@@ -189,22 +189,22 @@ namespace Portal.Data
                     .HasColumnType("varchar(1025)")
                     .HasColumnName("DESCRIPTION");
 
-                entity.Property(e => e.FromPersonId)
+                entity.Property(e => e.FromNameId)
                     .HasColumnType("integer(10)")
-                    .HasColumnName("FROM_PERSON_ID");
+                    .HasColumnName("FROM_NAME_ID");
 
-                entity.Property(e => e.ToPersonId)
+                entity.Property(e => e.ToNameId)
                     .HasColumnType("integer(10)")
-                    .HasColumnName("TO_PERSON_ID");
+                    .HasColumnName("TO_NAME_ID");
 
-                entity.HasOne(d => d.FromPerson)
-                    .WithMany(p => p.MosbTransferMoneyFromPerson)
-                    .HasForeignKey(d => d.FromPersonId)
+                entity.HasOne(d => d.FromName)
+                    .WithMany(p => p.MosbTransferMoneyFromName)
+                    .HasForeignKey(d => d.FromNameId)
                     .OnDelete(DeleteBehavior.ClientSetNull);
 
-                entity.HasOne(d => d.ToPerson)
-                    .WithMany(p => p.MosbTransferMoneyToPerson)
-                    .HasForeignKey(d => d.ToPersonId)
+                entity.HasOne(d => d.ToName)
+                    .WithMany(p => p.MosbTransferMoneyToName)
+                    .HasForeignKey(d => d.ToNameId)
                     .OnDelete(DeleteBehavior.ClientSetNull);
             });
 

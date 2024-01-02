@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Portal.Data;
 using Portal.Models;
 using Portal.Models.ViewModels;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Portal.Controllers
 {
@@ -666,45 +667,91 @@ namespace Portal.Controllers
         #region TransferMoney
         public async Task<IActionResult> TransferMoney()
         {
-            return View();
+            TransferMoneyVM VM = new();
+
+            VM.TransferMoneyList = await _context.MosbTransferMoney
+                .Include(x => x.FromName)
+                .Include(x => x.ToName)
+                .ToListAsync();
+
+
+            return View(VM);
         }
         [HttpPost]
-        public async Task<ActionResult> TransferMoney(TransferMoneyVM VM)
+        public async Task<IActionResult> CreateTransferMoneyAjax(TransferMoneyVM VM)
         {
             try
             {
-                if (ModelState.IsValid)
+                if(VM == null)
                 {
-
-                    using var transaction = await _context.Database.BeginTransactionAsync();
-                    var newTransferMoney = new MosbTransferMoney
+                    return Json(new
                     {
-                        FromPersonId = VM.FromNameId,
-                        ToPersonId = VM.ToNameId,
-                        Date = VM.Date.ToString("yyyy-MM-dd"),
-                        Amount = VM.Amount,
-                        Description = VM.description,
-                    };
-
-                    var AddedTransferMoney = await _context.MosbTransferMoney.AddAsync(newTransferMoney);
-
-                    var saveChangesResult = await _context.SaveChangesAsync();
-                    if (saveChangesResult == 0)
-                    {
-                        await transaction.RollbackAsync();
-                        ModelState.AddModelError("", "حدث خطأ عام");
-                    }
-
-                    await transaction.CommitAsync();
-                    TempData["AddStatus"] = "Success";
-                    return RedirectToAction("TransferMoney", "List");
+                        status = false,
+                        message = "حدث خطأ أثناء تعديل البيانات"
+                    });
                 }
-                else
+                using var transaction = await _context.Database.BeginTransactionAsync();
+
+                // FromPerson
+                var IsFromPersonExest = await _context.MosbName.AnyAsync(x => x.Id == VM.FromNameId);
+                if (!IsFromPersonExest)
                 {
-                    TempData["AddStatus"] = "Error";
-                    ModelState.AddModelError("", "حدث خطأ عام");
-                    return View();
+                    return Json(new
+                    {
+                        status = false,
+                        message = "حدث خطأ أثناء تعديل البيانات"
+                    });
                 }
+                var IsToPersonExest = await _context.MosbName.AnyAsync(x => x.Id == VM.ToNameId);
+                if (!IsToPersonExest)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        message = "حدث خطأ أثناء تعديل البيانات"
+                    });
+                }
+
+                if (VM.FromNameId == VM.ToNameId)
+                {
+                    return Json(new
+                    {
+                        status = false,
+                        message = "حدث خطأ أثناء تعديل البيانات"
+                    });
+                }
+
+                var newTransferMoney = new MosbTransferMoney
+                {
+                    FromNameId = VM.FromNameId,
+                    ToNameId = VM.ToNameId,
+                    Date = VM.Date.ToString("yyyy-MM-dd"),
+                    Amount = VM.Amount,
+                    Description = VM.description,
+                };
+
+                await _context.MosbTransferMoney.AddAsync(newTransferMoney);
+                int save = await _context.SaveChangesAsync();
+                if (save == 0)
+                {
+                    await transaction.RollbackAsync();
+                    return Json(new
+                    {
+                        status = false,
+                        message = "حدث خطأ أثناء تعديل البيانات"
+                    });
+                }
+                await transaction.CommitAsync();
+                return Json(new
+                {
+                    status = true,
+                    message = "تم أجراء التعديل بنجاح"
+                });
+
+
+
+
+
 
             }
             catch (Exception)
@@ -713,6 +760,7 @@ namespace Portal.Controllers
                 throw;
             }
         }
+
         #endregion TransferMoney
     }
 }
