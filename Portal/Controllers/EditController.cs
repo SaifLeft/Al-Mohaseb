@@ -188,6 +188,7 @@ namespace Portal.Controllers
             {
                 if (!ModelState.IsValid)
                 {
+                    ModelState.AddModelError("", "Error");
                     return View(VM);
                 }
 

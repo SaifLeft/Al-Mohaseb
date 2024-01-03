@@ -5,6 +5,7 @@ using Portal.Data;
 using Portal.Models;
 using Portal.Models.ViewModels;
 using System.Reflection.Metadata.Ecma335;
+using System.Text.Json;
 
 namespace Portal.Controllers
 {
@@ -668,14 +669,63 @@ namespace Portal.Controllers
         public async Task<IActionResult> TransferMoney()
         {
             TransferMoneyVM VM = new();
+            return View(VM);
+        }
 
-            VM.TransferMoneyList = await _context.MosbTransferMoney
+        [HttpPost]
+        public async Task<IActionResult> GetTransferMoneyAjax()
+        {
+            int totalRecord = 0;
+            int filterRecord = 0;
+            var draw = Request.Form["draw"].FirstOrDefault();
+            var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
+            var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+            var searchValue = Request.Form["search[value]"].FirstOrDefault();
+            int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
+            int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
+
+            var data = _context.MosbTransferMoney
                 .Include(x => x.FromName)
                 .Include(x => x.ToName)
+                .AsQueryable();
+
+            // Filter the data based on the searchValue if applicable
+            if (!string.IsNullOrEmpty(searchValue.ToString()))
+            {
+                data = data.Where(p => p.FromName.Name.Contains(searchValue)
+                               || p.ToName.Name.Contains(searchValue)
+                                              || p.Date.Contains(searchValue)
+                                                             || p.Amount.ToString().Contains(searchValue)
+                                                                            || p.Description.Contains(searchValue)
+                                                                                           );
+            }
+
+            totalRecord = await data.CountAsync();
+            filterRecord = totalRecord;
+
+            var phoneList = await data
+                .OrderBy(x => sortColumn + " " + sortColumnDirection)
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(p => new
+                {
+                    fromName = p.FromName.Name,
+                    toName = p.ToName.Name,
+                    date = p.Date,
+                    amount = p.Amount,
+                    description = p.Description
+                })
                 .ToListAsync();
 
+            var returnObj = new
+            {
+                recordsTotal = totalRecord,
+                recordsFiltered = filterRecord,
+                data = phoneList
+            };
 
-            return View(VM);
+            return Ok(returnObj);
+
         }
         [HttpPost]
         public async Task<IActionResult> CreateTransferMoneyAjax(TransferMoneyVM VM)

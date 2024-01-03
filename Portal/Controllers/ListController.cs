@@ -196,6 +196,14 @@ namespace Portal.Controllers
             ViewData["NamesList"] = await _context.MosbName
                 .Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
                 .ToListAsync();
+            ViewData["YearList"] = await _context.MosbSpendMoney
+                .Select(x => new SelectListItem { 
+                    Text =DateTime.Parse(x.Date).Year.ToString(),
+                    Value = DateTime.Parse(x.Date).Year.ToString()
+                })
+                .Distinct()
+                .ToListAsync();
+
             return View();
         }
         [HttpPost]
@@ -214,15 +222,28 @@ namespace Portal.Controllers
             totalRecord = await data.CountAsync();
             filterRecord = totalRecord;
 
-            string? NameIdSearch = Request.Form["columns[1][search][value]"].FirstOrDefault().Trim();
+            string? NameIdSearch = Request.Form["columns[1][search][value]"].FirstOrDefault()?.Trim();
+            string? YearSearch = Request.Form["columns[2][search][value]"].FirstOrDefault()?.Trim();
+            long parsedId = 0;
+            int parsedYear = 0;
+            bool isNameIdSearchValid = !string.IsNullOrEmpty(NameIdSearch) && long.TryParse(NameIdSearch, out parsedId);
+            bool isYearSearchValid = !string.IsNullOrEmpty(YearSearch) && int.TryParse(YearSearch, out parsedYear);
 
-            if (!string.IsNullOrEmpty(NameIdSearch) && long.TryParse(NameIdSearch, out long parsedId))
+            if (isNameIdSearchValid && isYearSearchValid)
+            {
+                data = data.Where(p => p.Person.Id == parsedId && p.Date.Contains(parsedYear.ToString()));
+            }
+            else if (isNameIdSearchValid)
             {
                 data = data.Where(p => p.Person.Id == parsedId);
             }
+            else if (isYearSearchValid)
+            {
+                data = data.Where(p => p.Date.Contains(parsedYear.ToString()));
+            }
 
             // Filter the data based on the searchValue if applicable
-            if (!string.IsNullOrEmpty(searchValue.ToString()))
+            if (!string.IsNullOrEmpty(searchValue))
             {
                 searchValue = searchValue.Trim();
                 data = data.Where(p =>
