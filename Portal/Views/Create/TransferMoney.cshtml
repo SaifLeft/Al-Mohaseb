@@ -141,15 +141,28 @@
 
             // Event handlers
             $('#PersonSelect1').on('change', function () {
-                var selectedId = $(this).val();
-                removeSelectedId(selectedId, $('#PersonSelect2'));
+                synchronizeDropdowns($(this), $('#PersonSelect2'));
             });
 
             $('#PersonSelect2').on('change', function () {
-                var selectedId = $(this).val();
-                removeSelectedId(selectedId, $('#PersonSelect1'));
+                synchronizeDropdowns($(this), $('#PersonSelect1'));
             });
 
+            function synchronizeDropdowns(sourceDropdown, targetDropdown) {
+                var selectedId = sourceDropdown.val();
+                var targetSelectedId = targetDropdown.val();
+
+                removeSelectedId(selectedId, targetDropdown);
+
+                if (selectedId !== null && targetSelectedId !== null && selectedId !== targetSelectedId) {
+                    // Check if the change event is not already in progress to avoid the infinite loop
+                    if (!targetDropdown.data('changing')) {
+                        targetDropdown.data('changing', true);
+                        targetDropdown.val(targetSelectedId).trigger("change");
+                        targetDropdown.data('changing', false);
+                    }
+                }
+            }
 
             var bsDatepickerAutoclose = $('#Date')
             if (bsDatepickerAutoclose.length) {
@@ -167,13 +180,6 @@
 
 
         });
-
-        function populateDropdown(nameList, dropdown) {
-            $.each(nameList, function () {
-                dropdown.append($("<option />").val(this.id).text(this.name));
-            });
-        }
-
         function GetNames() {
             var result;
             $.ajax({
@@ -191,13 +197,17 @@
             });
             return result;
         }
-
+        function populateDropdown(nameList, dropdown) {
+            dropdown.empty();
+            $.each(nameList, function () {
+                dropdown.append($("<option />").val(this.id).text(this.name));
+            });
+        }
         function removeSelectedId(id, dropdown) {
             var nameList = GetNames();
             nameList = nameList.filter(function (item) {
                 return item.id != id;
             });
-            dropdown.empty();
             populateDropdown(nameList, dropdown);
 
         }
@@ -212,6 +222,8 @@
             dropdown1.val(null).trigger("change");
             dropdown2.val(null).trigger("change");
         }
+
+
         function ConfirmTransfer() {
             var date = $('#Date').val();
             var fromPersonId = $('#PersonSelect1').val();

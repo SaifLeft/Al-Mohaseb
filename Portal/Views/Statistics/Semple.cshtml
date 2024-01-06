@@ -146,6 +146,22 @@
                     </div>
                 </div>
             </div>
+            @* Transactions from and to the person *@
+            <div class="col-md-6">
+                <div class="row">
+                    <label class="mb-3 text-uppercase col-md-12">
+                        مجموع المبالغ التي تم استقبالها من اشخاثص اخرين:
+                        <span class="badge rounded-pill bg-info">@Model.ReceiveMoneyFromOthers</span>
+                    </label>
+                </div>
+                <div class="row">
+                    <label class="mb-3 text-uppercase col-md-12">
+                        مجموع المبالغ التي تم صرفها لاشخاص اخرين:
+                        <span class="badge rounded-pill bg-warning">@Model.SendMoneyToOthers</span>
+                    </label>
+                </div>
+            </div>
+
         </div>
     </div>
     <div class="card mb-3 ">
@@ -224,7 +240,7 @@
     </div>
 </div>
 <!-- End Content Page -->
-@section Stylesheet{
+@section Stylesheet {
     <link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
     <link rel="stylesheet" href="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
     <!-- Vendors CSS -->
@@ -240,9 +256,9 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
 
-    }
+}
 
-@section Scripts{
+@section Scripts {
     <script src="~/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
     <script src="~/assets/vendor/libs/datatables/jquery.dataTables.js"></script>
     <script src="~/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
@@ -331,7 +347,7 @@
                         "sLast": "الأخير"
                     }
                 },
-                columnDefs: [{ className: "dt-center", targets: [0, 1, 2, 3, 4,5] }]
+                columnDefs: [{ className: "dt-center", targets: [0, 1, 2, 3, 4, 5] }]
             });
             $('#PrintTableBtn').on('click', function () {
                 // Get the DataTable instance
@@ -401,4 +417,4 @@
         });
 
     </script>
-    }
+}

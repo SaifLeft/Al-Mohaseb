@@ -39,8 +39,12 @@
             {
                 <div class="row mb-3">
                     <label class="col-sm-2 col-form-label-lg">مبلغ الصرف</label>
-                    <div class=" col-sm-3">
-                        <input type="number" id="AmountSubscribedInput" value="@Model.AmountSubscribed" class="form-control col-md-5">
+
+                    <div class="col-sm-3">
+                        <div class="input-group">
+                            <input type="number" id="AmountSubscribedInput" value="@Model.AmountSubscribed" class="form-control col-md-5">
+                            <button class="btn btn-outline-warning" disabled id="AmountSubscribedSplitBtn" type="button" id="button-addon2">توزيع</button>
+                        </div>
                     </div>
                 </div>
             }
@@ -424,9 +428,12 @@
             var amountInputCount = amountInputList.length;
             var initialAmountPerInput = parseFloat(AmountSubscribed / amountInputCount).toFixed(3);
 
+            AmountSubscribedInput.addEventListener('input', (event) => {
+                $('#AmountSubscribedSplitBtn').prop('disabled', false);
+            });
 
             // if AmountSubscribedInput has iput value
-            $('#AmountSubscribedInput').change('input', (event) => {
+            $('#AmountSubscribedSplitBtn').click(function () {
                 console.log(event);
                 var value = $('#AmountSubscribedInput').val();
                 AmountSubscribed = parseFloat(value).toFixed(3);
@@ -513,7 +520,7 @@
 
                 if (EnabledAmountInputCount !== 0) {
                     AmountPerPerson = parseFloat((AmountPersonValue / EnabledAmountInputCount)).toFixed(3);
-                } 
+                }
 
                 let AmountPerPersonRounded = 0.000;
 

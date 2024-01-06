@@ -268,9 +268,14 @@ namespace Portal.Controllers
                     .Include(x => x.Reasons)
                     .ToListAsync();
 
+                var Transactions = await _context.MosbTransferMoney
+                    .Include(x => x.FromName)
+                    .Include(x => x.ToName)
+                    .ToListAsync();
+
                 var Names = await _context.MosbName.ToListAsync();
 
-                VM.AllReceivePaymentsAmount = Math.Round(ReceivePayments.Sum(x => x.Amount),4);
+                VM.AllReceivePaymentsAmount = Math.Round(ReceivePayments.Sum(x => x.Amount), 4);
                 VM.AllSpendMoneyAmount = Math.Round(SpendMoney.Sum(x => x.Amount), 4);
                 VM.GeneralBalance = Math.Round(VM.AllReceivePaymentsAmount - VM.AllSpendMoneyAmount, 4);
 
@@ -282,9 +287,18 @@ namespace Portal.Controllers
                 if (NameId != null)
                 {
                     VM.PersonalBalanceIsAvailable = true;
-                    VM.PersonalReceivePayment = Math.Round(ReceivePayments.Where(x => x.NameId == NameId).Sum(x => x.Amount),4);
+                    VM.PersonalReceivePayment = Math.Round(ReceivePayments.Where(x => x.NameId == NameId).Sum(x => x.Amount), 4);
                     VM.PersonalSpendMoney = Math.Round(SpendMoney.Where(x => x.PersonId == NameId).Sum(x => x.Amount), 4);
                     VM.PersonalTotalAmount = Math.Round(VM.PersonalReceivePayment - VM.PersonalSpendMoney, 4);
+
+                    var ReceiveMoneyFromOthersList = Transactions.Where(x => x.ToNameId == NameId).ToList(); // ReceiveMoneyFromOthers 
+                    var SendMoneyToOthersList = Transactions.Where(x => x.FromNameId == NameId).ToList(); // SendMoneyToOthers
+
+                    VM.ReceiveMoneyFromOthers = Math.Round(ReceiveMoneyFromOthersList.Sum(x => x.Amount), 4);
+                    VM.SendMoneyToOthers = Math.Round(SendMoneyToOthersList.Sum(x => x.Amount), 4);
+
+                    VM.PersonalTotalAmount = Math.Round((VM.PersonalTotalAmount + VM.ReceiveMoneyFromOthers) - VM.SendMoneyToOthers,4);
+
                 }
 
 

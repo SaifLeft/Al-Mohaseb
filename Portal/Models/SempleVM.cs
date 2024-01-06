@@ -17,5 +17,7 @@
         public double ReceivePaymentsYearlyData { get; internal set; }
         public double TotalAmountYearlyData { get; internal set; }
         public List<ShowPersonsTotal> PersonsBalance { get; internal set; }
+        public double ReceiveMoneyFromOthers { get; internal set; }
+        public double SendMoneyToOthers { get; internal set; }
     }
 }
