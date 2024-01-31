@@ -193,18 +193,15 @@ namespace Portal.Controllers
         }
         public async Task<IActionResult> SpendMoney()
         {
-            ViewData["NamesList"] = await _context.MosbName
+            SpendMoneyVM VM = new SpendMoneyVM();
+            VM.NamesList = await _context.MosbName
                 .Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
                 .ToListAsync();
-            ViewData["YearList"] = await _context.MosbSpendMoney
-                .Select(x => new SelectListItem { 
-                    Text =DateTime.Parse(x.Date).Year.ToString(),
-                    Value = DateTime.Parse(x.Date).Year.ToString()
-                })
-                .Distinct()
+            VM.YearList = await _context.MosbSpendMoney.GroupBy(x => x.Date)
+                .Select(x => new SelectListItem { Text = DateTime.Parse(x.Key).Year.ToString(), Value = DateTime.Parse(x.Key).Year.ToString() })
                 .ToListAsync();
 
-            return View();
+            return View(VM);
         }
         [HttpPost]
         public async Task<IActionResult> GetSpendMoneyDetails()

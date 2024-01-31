@@ -1,4 +1,5 @@
-﻿@{
+﻿@model SpendMoneyVM;
+@{
     ViewData["Title"] = "قائمة المصروفات";
 }
 
@@ -26,7 +27,7 @@
                 <h6>بحث بأسم المستخدم</h6>
                 <select id="NamesList" class="select2 form-select">
                     <option value="">بحث بأسم</option>
-                    @foreach (var item in ViewData["NamesList"] as List<SelectListItem>)
+                    @foreach (var item in Model.NamesList)
                     {
                         <option value="@item.Value">@item.Text</option>
                     }
@@ -36,7 +37,7 @@
                 <h6>بحث بسنة محدد</h6>
                 <select id="YearList" class="select2 form-select">
                     <option value="">بحث بسنة معينة</option>
-                    @foreach (var item in ViewData["YearList"] as List<SelectListItem>)
+                    @foreach (var item in Model.YearList)
                     {
                         <option value="@item.Value">@item.Text</option>
                     }

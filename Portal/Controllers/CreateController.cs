@@ -221,7 +221,7 @@ namespace Portal.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<ActionResult> SpendMoney(SpendMoneyVM VM)
+        public async Task<ActionResult> SpendMoney(SpendMoneyCreateEditVM VM)
         {
             try
             {

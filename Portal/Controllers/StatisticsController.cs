@@ -291,13 +291,13 @@ namespace Portal.Controllers
                     VM.PersonalSpendMoney = Math.Round(SpendMoney.Where(x => x.PersonId == NameId).Sum(x => x.Amount), 4);
                     VM.PersonalTotalAmount = Math.Round(VM.PersonalReceivePayment - VM.PersonalSpendMoney, 4);
 
-                    var ReceiveMoneyFromOthersList = Transactions.Where(x => x.ToNameId == NameId).ToList(); // ReceiveMoneyFromOthers 
-                    var SendMoneyToOthersList = Transactions.Where(x => x.FromNameId == NameId).ToList(); // SendMoneyToOthers
+                    var ReceiveMoneyFromOthersList = Transactions.Where(x => x.ToNameId == NameId).ToList(); // ++
+                    var SendMoneyToOthersList = Transactions.Where(x => x.FromNameId == NameId).ToList(); //--
 
                     VM.ReceiveMoneyFromOthers = Math.Round(ReceiveMoneyFromOthersList.Sum(x => x.Amount), 4);
                     VM.SendMoneyToOthers = Math.Round(SendMoneyToOthersList.Sum(x => x.Amount), 4);
 
-                    VM.PersonalTotalAmount = Math.Round((VM.PersonalTotalAmount + VM.ReceiveMoneyFromOthers) - VM.SendMoneyToOthers,4);
+                    VM.PersonalTotalAmount = Math.Round((VM.PersonalTotalAmount + VM.ReceiveMoneyFromOthers) - VM.SendMoneyToOthers, 4);
 
                 }
 
