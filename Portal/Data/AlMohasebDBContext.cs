@@ -22,7 +22,6 @@ namespace Portal.Data
         public virtual DbSet<MosbReasons> MosbReasons { get; set; }
         public virtual DbSet<MosbReceivePayments> MosbReceivePayments { get; set; }
         public virtual DbSet<MosbSpendMoney> MosbSpendMoney { get; set; }
-        public virtual DbSet<MosbTransferMoney> MosbTransferMoney { get; set; }
         public virtual DbSet<PersonReasonMapping> PersonReasonMapping { get; set; }
         public virtual DbSet<ReceivePaymentsReasonsMapping> ReceivePaymentsReasonsMapping { get; set; }
 
@@ -106,6 +105,10 @@ namespace Portal.Data
                     .HasColumnType("integer(1)")
                     .HasColumnName("IS_PAID");
 
+                entity.Property(e => e.IsTransaction)
+                    .HasColumnType("integer(19)")
+                    .HasColumnName("IS_TRANSACTION");
+
                 entity.Property(e => e.NameId)
                     .HasColumnType("integer(10)")
                     .HasColumnName("NAME_ID");
@@ -147,6 +150,10 @@ namespace Portal.Data
                     .HasColumnType("integer(1)")
                     .HasColumnName("IS_PAID");
 
+                entity.Property(e => e.IsTransaction)
+                    .HasColumnType("integer(19)")
+                    .HasColumnName("IS_TRANSACTION");
+
                 entity.Property(e => e.MonthlyAmount)
                     .HasColumnType("double(10)")
                     .HasColumnName("MONTHLY_AMOUNT");
@@ -167,45 +174,6 @@ namespace Portal.Data
                 entity.HasOne(d => d.Reasons)
                     .WithMany(p => p.MosbSpendMoney)
                     .HasForeignKey(d => d.ReasonsId);
-            });
-
-            modelBuilder.Entity<MosbTransferMoney>(entity =>
-            {
-                entity.ToTable("MOSB_TRANSFER_MONEY");
-
-                entity.Property(e => e.Id).HasColumnName("ID");
-
-                entity.Property(e => e.Amount)
-                    .HasColumnType("double(10)")
-                    .HasColumnName("AMOUNT");
-
-                entity.Property(e => e.Date)
-                    .IsRequired()
-                    .HasColumnType("varchar(255)")
-                    .HasColumnName("DATE");
-
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasColumnType("varchar(1025)")
-                    .HasColumnName("DESCRIPTION");
-
-                entity.Property(e => e.FromNameId)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("FROM_NAME_ID");
-
-                entity.Property(e => e.ToNameId)
-                    .HasColumnType("integer(10)")
-                    .HasColumnName("TO_NAME_ID");
-
-                entity.HasOne(d => d.FromName)
-                    .WithMany(p => p.MosbTransferMoneyFromName)
-                    .HasForeignKey(d => d.FromNameId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
-
-                entity.HasOne(d => d.ToName)
-                    .WithMany(p => p.MosbTransferMoneyToName)
-                    .HasForeignKey(d => d.ToNameId)
-                    .OnDelete(DeleteBehavior.ClientSetNull);
             });
 
             modelBuilder.Entity<PersonReasonMapping>(entity =>

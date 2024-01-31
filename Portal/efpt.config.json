@@ -32,10 +32,6 @@
          "ObjectType": 0
       },
       {
-         "Name": "MOSB_TRANSFER_MONEY",
-         "ObjectType": 0
-      },
-      {
          "Name": "PERSON_REASON_MAPPING",
          "ObjectType": 0
       },

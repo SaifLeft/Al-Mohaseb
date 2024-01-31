@@ -268,10 +268,10 @@ namespace Portal.Controllers
                     .Include(x => x.Reasons)
                     .ToListAsync();
 
-                var Transactions = await _context.MosbTransferMoney
-                    .Include(x => x.FromName)
-                    .Include(x => x.ToName)
-                    .ToListAsync();
+                //var Transactions = await _context.MosbTransferMoney
+                //    .Include(x => x.FromName)
+                //    .Include(x => x.ToName)
+                //    .ToListAsync();
 
                 var Names = await _context.MosbName.ToListAsync();
 
@@ -284,21 +284,12 @@ namespace Portal.Controllers
 
                 VM.PersonalBalanceIsAvailable = false;
 
-                if (NameId != null)
+                if (NameId.HasValue)
                 {
                     VM.PersonalBalanceIsAvailable = true;
                     VM.PersonalReceivePayment = Math.Round(ReceivePayments.Where(x => x.NameId == NameId).Sum(x => x.Amount), 4);
                     VM.PersonalSpendMoney = Math.Round(SpendMoney.Where(x => x.PersonId == NameId).Sum(x => x.Amount), 4);
                     VM.PersonalTotalAmount = Math.Round(VM.PersonalReceivePayment - VM.PersonalSpendMoney, 4);
-
-                    var ReceiveMoneyFromOthersList = Transactions.Where(x => x.ToNameId == NameId).ToList(); // ++
-                    var SendMoneyToOthersList = Transactions.Where(x => x.FromNameId == NameId).ToList(); //--
-
-                    VM.ReceiveMoneyFromOthers = Math.Round(ReceiveMoneyFromOthersList.Sum(x => x.Amount), 4);
-                    VM.SendMoneyToOthers = Math.Round(SendMoneyToOthersList.Sum(x => x.Amount), 4);
-
-                    VM.PersonalTotalAmount = Math.Round((VM.PersonalTotalAmount + VM.ReceiveMoneyFromOthers) - VM.SendMoneyToOthers, 4);
-
                 }
 
 
@@ -308,7 +299,7 @@ namespace Portal.Controllers
                 VM.YearsList = AllYears.GroupBy(x => x.Value).Select(x => x.First()).ToList();
 
                 VM.YearIsAvailable = false;
-                if (Year != null)
+                if (Year.HasValue)
                 {
                     var YearlyDateTime = new DateTime(Year.Value, 1, 1);
                     VM.SelectedYear = Year.Value;

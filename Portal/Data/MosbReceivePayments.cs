@@ -20,6 +20,7 @@ namespace Portal.Data
         public long ReasonsId { get; set; }
         public long IsMonthly { get; set; }
         public long IsPaid { get; set; }
+        public long? IsTransaction { get; set; }
 
         public virtual MosbName Name { get; set; }
         public virtual ICollection<ReceivePaymentsReasonsMapping> ReceivePaymentsReasonsMapping { get; set; }

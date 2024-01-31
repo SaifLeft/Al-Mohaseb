@@ -672,67 +672,68 @@ namespace Portal.Controllers
             return View(VM);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> GetTransferMoneyAjax()
-        {
-            int totalRecord = 0;
-            int filterRecord = 0;
-            var draw = Request.Form["draw"].FirstOrDefault();
-            var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
-            var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
-            var searchValue = Request.Form["search[value]"].FirstOrDefault();
-            int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
-            int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
+        //[HttpPost]
+        //public async Task<IActionResult> GetTransferMoneyAjax()
+        //{
+        //    int totalRecord = 0;
+        //    int filterRecord = 0;
+        //    var draw = Request.Form["draw"].FirstOrDefault();
+        //    var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
+        //    var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+        //    var searchValue = Request.Form["search[value]"].FirstOrDefault();
+        //    int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
+        //    int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
 
-            var data = _context.MosbTransferMoney
-                .Include(x => x.FromName)
-                .Include(x => x.ToName)
-                .AsQueryable();
+        //    var data = _context.MosbTransferMoney
+        //        .Include(x => x.FromName)
+        //        .Include(x => x.ToName)
+        //        .AsQueryable();
 
-            // Filter the data based on the searchValue if applicable
-            if (!string.IsNullOrEmpty(searchValue.ToString()))
-            {
-                data = data.Where(p => p.FromName.Name.Contains(searchValue)
-                               || p.ToName.Name.Contains(searchValue)
-                                              || p.Date.Contains(searchValue)
-                                                             || p.Amount.ToString().Contains(searchValue)
-                                                                            || p.Description.Contains(searchValue)
-                                                                                           );
-            }
+        //    // Filter the data based on the searchValue if applicable
+        //    if (!string.IsNullOrEmpty(searchValue.ToString()))
+        //    {
+        //        data = data.Where(p => p.FromName.Name.Contains(searchValue)
+        //                       || p.ToName.Name.Contains(searchValue)
+        //                                      || p.Date.Contains(searchValue)
+        //                                                     || p.Amount.ToString().Contains(searchValue)
+        //                                                                    || p.Description.Contains(searchValue)
+        //                                                                                   );
+        //    }
 
-            totalRecord = await data.CountAsync();
-            filterRecord = totalRecord;
+        //    totalRecord = await data.CountAsync();
+        //    filterRecord = totalRecord;
 
-            var phoneList = await data
-                .OrderBy(x => sortColumn + " " + sortColumnDirection)
-                .Skip(skip)
-                .Take(pageSize)
-                .Select(p => new
-                {
-                    fromName = p.FromName.Name,
-                    toName = p.ToName.Name,
-                    date = p.Date,
-                    amount = p.Amount,
-                    description = p.Description
-                })
-                .ToListAsync();
+        //    var phoneList = await data
+        //        .OrderBy(x => sortColumn + " " + sortColumnDirection)
+        //        .Skip(skip)
+        //        .Take(pageSize)
+        //        .Select(p => new
+        //        {
+        //            fromName = p.FromName.Name,
+        //            toName = p.ToName.Name,
+        //            date = p.Date,
+        //            amount = p.Amount,
+        //            description = p.Description
+        //        })
+        //        .ToListAsync();
 
-            var returnObj = new
-            {
-                recordsTotal = totalRecord,
-                recordsFiltered = filterRecord,
-                data = phoneList
-            };
+        //    var returnObj = new
+        //    {
+        //        recordsTotal = totalRecord,
+        //        recordsFiltered = filterRecord,
+        //        data = phoneList
+        //    };
 
-            return Ok(returnObj);
+        //    return Ok(returnObj);
 
-        }
+        //}
+
         [HttpPost]
         public async Task<IActionResult> CreateTransferMoneyAjax(TransferMoneyVM VM)
         {
             try
             {
-                if(VM == null)
+                if (VM == null)
                 {
                     return Json(new
                     {
@@ -743,8 +744,8 @@ namespace Portal.Controllers
                 using var transaction = await _context.Database.BeginTransactionAsync();
 
                 // FromPerson
-                var IsFromPersonExest = await _context.MosbName.AnyAsync(x => x.Id == VM.FromNameId);
-                if (!IsFromPersonExest)
+                MosbName? FromPerson = await _context.MosbName.FirstAsync(x => x.Id == VM.FromNameId);
+                if (FromPerson == null)
                 {
                     return Json(new
                     {
@@ -752,8 +753,8 @@ namespace Portal.Controllers
                         message = "حدث خطأ أثناء تعديل البيانات"
                     });
                 }
-                var IsToPersonExest = await _context.MosbName.AnyAsync(x => x.Id == VM.ToNameId);
-                if (!IsToPersonExest)
+                MosbName? ToPerson = await _context.MosbName.FirstAsync(x => x.Id == VM.ToNameId);
+                if (ToPerson == null)
                 {
                     return Json(new
                     {
@@ -771,18 +772,43 @@ namespace Portal.Controllers
                     });
                 }
 
-                var newTransferMoney = new MosbTransferMoney
+                string Message = string.Empty;
+                string? FromName = FromPerson?.Name;
+                string? ToName = ToPerson?.Name;
+                double TransferMoneyAmount = VM.Amount;
+
+                Message = string.Concat("تم تحويل مبلغ ", TransferMoneyAmount, " ريال ", " من ", FromName, " إلى ", ToName, " بتاريخ ", VM.Date.ToString("yyyy-MM-dd"), " بسبب ", VM.description);
+
+                MosbSpendMoney newSpend = new()
                 {
-                    FromNameId = VM.FromNameId,
-                    ToNameId = VM.ToNameId,
+                    PersonId = VM.FromNameId,
                     Date = VM.Date.ToString("yyyy-MM-dd"),
                     Amount = VM.Amount,
-                    Description = VM.description,
+                    Description = Message,
+                    IsForReason = false.GetHashCode(),
+                    IsPaid = true.GetHashCode(),
+                    IsTransaction = true.GetHashCode(),
+                };
+                await _context.MosbSpendMoney.AddAsync(newSpend);
+
+                Message = string.Concat("تم أستلام مبلغ ", TransferMoneyAmount, " ريال ", " من ", FromName, " إلى ", ToName, " بتاريخ ", VM.Date.ToString("yyyy-MM-dd"), " بسبب ", VM.description);
+
+                MosbReceivePayments newReceive = new()
+                {
+                    NameId = VM.ToNameId,
+                    Date = VM.Date.ToString("yyyy-MM-dd"),
+                    Amount = VM.Amount,
+                    Description = Message,
+                    IsMonthly = false.GetHashCode(),
+                    IsPaid = true.GetHashCode(),
+                    IsTransaction = true.GetHashCode(),
                 };
 
-                await _context.MosbTransferMoney.AddAsync(newTransferMoney);
-                int save = await _context.SaveChangesAsync();
-                if (save == 0)
+                await _context.MosbReceivePayments.AddAsync(newReceive);
+
+                int saveChangesResult = await _context.SaveChangesAsync();
+
+                if (saveChangesResult == 0)
                 {
                     await transaction.RollbackAsync();
                     return Json(new
@@ -791,22 +817,17 @@ namespace Portal.Controllers
                         message = "حدث خطأ أثناء تعديل البيانات"
                     });
                 }
+
                 await transaction.CommitAsync();
+
                 return Json(new
                 {
                     status = true,
                     message = "تم أجراء التعديل بنجاح"
                 });
-
-
-
-
-
-
             }
             catch (Exception)
             {
-
                 throw;
             }
         }

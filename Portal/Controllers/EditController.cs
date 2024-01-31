@@ -12,7 +12,6 @@ namespace Portal.Controllers
     [Authorize]
     public class EditController : Controller
     {
-        //cotaxt 
         private readonly AlMohasebDBContext _dbContext;
 
         public EditController(AlMohasebDBContext dbContext)
@@ -44,7 +43,6 @@ namespace Portal.Controllers
 
             return View(VM);
         }
-
 
         [HttpPost]
         public async Task<IActionResult> EditPerson(EditPersonVM VM)
@@ -87,7 +85,6 @@ namespace Portal.Controllers
             }
         }
 
-        //EditReceivePayments
         public async Task<IActionResult> EditReceivePayments(long id)
         {
             var receivePayment = await _dbContext.MosbReceivePayments
@@ -156,7 +153,6 @@ namespace Portal.Controllers
             }
         }
 
-        //EditSpendMoney
         public async Task<IActionResult> EditSpendMoney(long id)
         {
             var spendMoney = await _dbContext.MosbSpendMoney
