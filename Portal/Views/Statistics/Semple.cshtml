@@ -99,10 +99,77 @@
     </div>
     @* الرصيد الشخصي *@
     <div class="card mb-3">
-        <div class="d-flex card-header ">
-            <h5 class="card-title">الرصيد الشخصي</h5>
+        <div class="d-flex flex-wrap gap-1 card-header ">
+            <h5 class="col-4 card-title">الرصيد الشخصي</h5>
+            <div class=" gap-3 d-flex col-sm-7">
+                <label for="exampleFormControlInput1" class="form-label col-form-label">البحث بـأسم الشخص</label>
+                <div class="col-sm-5">
+                    <select id="PersonalNamesList" class="select2 form-select">
+                        <option value="">اختر اسم</option>
+                        @foreach (var item in Model.NamesList)
+                        {
+                            if (item.IsSelected)
+                            {
+                                <option selected value="@item.Value">@item.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <label for="exampleFormControlInput1" class="form-label col-form-label">البحث بـأسم الشخص</label>
+                <div class="col-sm-5">
+                    <select id="PersonalYearsList" class="select2 form-select">
+                        <option value="">اختر اسم</option>
+                        @foreach (var item in Model.NamesList)
+                        {
+                            if (item.IsSelected)
+                            {
+                                <option selected value="@item.Value">@item.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+
         </div>
-        <div class="col-md-4 text-center mb-5">
+        <div class="col-md-4 d-flex flex-wrap gap-2">
+            <label for="exampleFormControlInput1" class="form-label">البحث بـأسم الشخص</label>
+            <select id="PersonalNamesList" class="select2 form-select">
+                <option value="">اختر اسم</option>
+                @foreach (var item in Model.NamesList)
+                {
+                    if (item.IsSelected)
+                    {
+                        <option selected value="@item.Value">@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
+            <label for="exampleFormControlInput1" class="form-label">بحث بسنة معينة أيضا</label>
+            <select id="PersonalYearsList" class="select2 form-select">
+                <option value="">اختر سنة</option>
+                @foreach (var item in Model.YearsList)
+                {
+                    if (item.IsSelected)
+                    {
+                        <option selected value="@item.Value">@item.Text</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                }
+            </select>
             <div class="mb-3">
                 <label for="exampleFormControlInput1" class="form-label">البحث بـأسم الشخص</label>
                 <select id="PersonalNamesList" class="select2 form-select">
@@ -139,9 +206,9 @@
             </div>
         </div>
         <div class="card-body" style="display:@display">
-           
+
             <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-1">
-               
+
                 <div class="d-flex align-items-center mb-3 form-inline" style="font-size:x-large">
                     <div>
                         <span>جميع ايداعات الشخص</span>
