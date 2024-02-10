@@ -1,8 +1,6 @@
 ﻿@model SpendMoneyVM;
 @{
     ViewData["Title"] = "قائمة المصروفات";
-    string AddStatus = ViewBag.AddStatus ?? "";
-    string UpdateStatus = ViewBag.UpdateStatus ?? "";
 }
 
 <!-- Content Page -->
@@ -186,37 +184,37 @@
 
 
 
-            if ('@AddStatus' == "Success") {
+            if ('@Model.AddStatus' == "True") {
                 Swal.fire({
                     title: 'تمت العملية بنجاح',
-                    text: 'تمت صرف المبلغ بنجاح',
+                    text: 'تمت بنجاح',
                     icon: 'success',
-                    setTimeout: 2000
+                    confirmButtonText: 'حسنا'
                 });
             }
-            else if ('@AddStatus' == "Error") {
+            else if ('@Model.AddStatus' == "False") {
                 Swal.fire({
                     title: 'حدث خطأ',
-                    text: 'حدث خطأ أثناء اضافة صرف جديد',
+                    text: 'حدث خطأ أثناء عملية الإضافة',
                     icon: 'error',
-                    setTimeout: 2000
+                    confirmButtonText: 'حسنا'
                 });
             }
 
-            if ('@UpdateStatus' == "Success") {
+            if ('@Model.UpdateStatus' == "True") {
                 Swal.fire({
                     title: 'تمت العملية بنجاح',
-                    text: 'تم تعديل الصرف بنجاح',
+                    text: 'تم التحديث',
                     icon: 'success',
-                    setTimeout: 2000
+                    confirmButtonText: 'حسنا'
                 });
             }
-            else if ('@UpdateStatus' == "Error") {
+            else if ('@Model.UpdateStatus' == "False") {
                 Swal.fire({
                     title: 'حدث خطأ',
-                    text: 'حدث خطأ أثناء تعديل مبلغ الصرف',
+                    text: 'حدث خطأ أثناء عملية التحديث',
                     icon: 'error',
-                    setTimeout: 2000
+                    confirmButtonText: 'حسنا'
                 });
             }
 

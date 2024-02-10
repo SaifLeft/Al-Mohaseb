@@ -55,14 +55,14 @@ namespace Portal.Controllers
                     if (existingCivilNumber)
                     {
                         ModelState.AddModelError("CivilNumber", "هذا الرقم المدني موجود بالفعل");
-                        return View();
+                        return View(VM);
                     }
 
                     var existingPhone = await _context.MosbName.AnyAsync(x => x.PhoneNumber == VM.Phone);
                     if (existingPhone)
                     {
                         ModelState.AddModelError("Phone", "هذا الرقم موجود بالفعل");
-                        return View();
+                        return View(VM);
                     }
 
                     using var transaction = await _context.Database.BeginTransactionAsync();
@@ -82,19 +82,17 @@ namespace Portal.Controllers
                     {
                         await transaction.RollbackAsync();
                         ModelState.AddModelError("", "حدث خطأ عام");
+                        return View(VM);
                     }
 
                     await transaction.CommitAsync();
-                    TempData["AddStatus"] = "Success";
-                    return RedirectToAction("Names", "List");
+                    return RedirectToAction("Names", "List", new { add = true });
                 }
                 else
                 {
-                    TempData["AddStatus"] = "Error";
                     ModelState.AddModelError("", "حدث خطأ عام");
-                    return View();
+                    return View(VM);
                 }
-
             }
             catch (Exception)
             {
@@ -190,14 +188,13 @@ namespace Portal.Controllers
 
                     await _context.MosbReceivePayments.AddAsync(newReceivePayments);
                     var saveChangesResult = await _context.SaveChangesAsync();
-                    ViewBag.AddStatus = saveChangesResult == 0 ? "Error" : "Success";
-                    return RedirectToAction("ReceivePayments", "List");
+                    
+                    return RedirectToAction("ReceivePayments", "List", new { add = saveChangesResult == 1 });
                 }
                 else
                 {
-                    ViewBag.AddStatus = "Error";
                     ModelState.AddModelError("", "حدث خطأ عام");
-                    return View();
+                    return View(VM);
                 }
 
             }
@@ -235,14 +232,13 @@ namespace Portal.Controllers
 
                     await _context.MosbSpendMoney.AddAsync(newSpendMoney);
                     var saveChangesResult = await _context.SaveChangesAsync();
-                    ViewBag.AddStatus = saveChangesResult == 0 ? "Success" : "Error";
-                    return RedirectToAction("SpendMoney", "List");
+                    
+                    return RedirectToAction("SpendMoney", "List", new { add = saveChangesResult == 1 });
                 }
                 else
                 {
-                    ViewBag.AddStatus = "Error";
                     ModelState.AddModelError("", "حدث خطأ عام");
-                    return View();
+                    return View(VM);
                 }
 
             }
@@ -660,17 +656,14 @@ namespace Portal.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> CreateTransferMoneyAjax(TransferMoneyVM VM)
+        public async Task<IActionResult> CreateTransferMoney(TransferMoneyVM VM)
         {
             try
             {
                 if (VM == null)
                 {
-                    return Json(new
-                    {
-                        status = false,
-                        message = "حدث خطأ أثناء تعديل البيانات"
-                    });
+                    ModelState.AddModelError("", "حدث خطأ أثناء تعديل البيانات");
+                    return View(VM);
                 }
                 using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -678,29 +671,20 @@ namespace Portal.Controllers
                 MosbName? FromPerson = await _context.MosbName.FirstAsync(x => x.Id == VM.FromNameId);
                 if (FromPerson == null)
                 {
-                    return Json(new
-                    {
-                        status = false,
-                        message = "حدث خطأ أثناء تعديل البيانات"
-                    });
+                    ModelState.AddModelError("", "حدث خطأ أثناء تعديل البيانات");
+                    return View(VM);
                 }
                 MosbName? ToPerson = await _context.MosbName.FirstAsync(x => x.Id == VM.ToNameId);
                 if (ToPerson == null)
                 {
-                    return Json(new
-                    {
-                        status = false,
-                        message = "حدث خطأ أثناء تعديل البيانات"
-                    });
+                    ModelState.AddModelError("", "حدث خطأ أثناء تعديل البيانات");
+                    return View(VM);
                 }
 
                 if (VM.FromNameId == VM.ToNameId)
                 {
-                    return Json(new
-                    {
-                        status = false,
-                        message = "حدث خطأ أثناء تعديل البيانات"
-                    });
+                    ModelState.AddModelError("", "حدث خطأ أثناء تعديل البيانات");
+                    return View(VM);
                 }
 
                 string Message = string.Empty;
@@ -752,20 +736,15 @@ namespace Portal.Controllers
                 if (saveChangesResult == 0)
                 {
                     await transaction.RollbackAsync();
-                    return Json(new
-                    {
-                        status = false,
-                        message = "حدث خطأ أثناء تعديل البيانات"
-                    });
+                    ModelState.AddModelError("", "حدث خطأ أثناء تعديل البيانات");
+                    return View(VM);
                 }
 
                 await transaction.CommitAsync();
 
-                return Json(new
-                {
-                    status = true,
-                    message = "تم أجراء التعديل بنجاح"
-                });
+                ViewData["AddStatus"] = "Success";
+                return RedirectToAction("SpendMoney", "List");
+                
             }
             catch (Exception)
             {

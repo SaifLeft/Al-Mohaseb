@@ -15,7 +15,7 @@
     @* جميع الايداعات العامة *@
     <div class="card mb-3">
         <div class="card-header">
-            <h5 class="card-title mb-3">الرصيد العام</h5>
+            <h5 class="card-title mb-3">الرصيد العام (كل السنوات)</h5>
         </div>
         <div class="card-body">
             <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-5">
@@ -153,7 +153,7 @@
                 </div>
                 <div class="col-md-9" @(Model.PersonalBalanceIsAvailable ? "style=display:" + display : "style=display:none")>
                     <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-1 h-px-200">
-                        <div class="d-flex align-items-center form-inline" style="font-size:x-large">
+                        <div class="d-flex align-items-center form-inline" style="font-size:20px">
                             <div>
                                 <span>جميع ايداعات الشخص</span>
                                 <span class="badge rounded-pill bg-info">@Model.PersonalReceivePayment</span>
@@ -181,7 +181,6 @@
             <label class="mb-3 text-uppercase btn btn-outline-primary btn-sm" id="PrintTableBtn">
                 طباعة الجدول
             </label>
-
         </div>
         <div class="card-body">
             <div class="align-items-center justify-content-center ">
@@ -210,35 +209,18 @@
                                         @{
                                             var LastReceivePayment = item.LastActivity.LastReceivePayment;
                                             var LastSpendMoney = item.LastActivity.LastSpendMoney;
-                                            var Txt1 = "";
-                                            if (LastReceivePayment != null)
-                                            {
-                                                Txt1 = "أخر ايداع بتاريخ " + LastReceivePayment;
+                                            var Txt1 = (LastReceivePayment != null) ? "أخر ايداع بتاريخ " + LastReceivePayment : "";
+                                            var Txt2 = (LastSpendMoney != null) ? "أخر صرف بتاريخ " + LastSpendMoney : "";
 
-                                            }
-                                            var Txt2 = "";
-                                            if (LastSpendMoney != null)
-                                            {
-                                                Txt2 = "أخر صرف بتاريخ " + LastSpendMoney;
-
-                                            }
-                                            if (Txt1 != "" && Txt2 != "")
+                                            if (!string.IsNullOrEmpty(Txt1) || !string.IsNullOrEmpty(Txt2))
                                             {
                                                 <span>@Txt1</span>
                                                 <br />
                                                 <span>@Txt2</span>
                                             }
-                                            else if (Txt1 != "")
-                                            {
-                                                <span>@Txt1</span>
-                                            }
-                                            else if (Txt2 != "")
-                                            {
-                                                <span>@Txt2</span>
-                                            }
-
                                         }
                                     </td>
+
                                 </tr>
                             }
                     </table>

@@ -4,6 +4,8 @@ namespace Portal.Models.ViewModels
 {
     public class EditPersonVM
     {
+        [Required]
+        public long NameId { get; set; }
         [Required(ErrorMessage = "السبب مطلوب")]
         public string Name { get; set; }
         [Required(ErrorMessage = "رقم الهاتف مطلوب")]
@@ -13,7 +15,6 @@ namespace Portal.Models.ViewModels
         [Display(Name = "الرقم المدني")]
 
         public long CivilNumber { get; set; }
-        public long Id { get; internal set; }
 
         [Required(ErrorMessage = "السبب مطلوب")]
         public double SubscriptionAmount { get; set; }

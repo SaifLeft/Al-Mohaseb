@@ -1,7 +1,6 @@
-﻿@{
+﻿@model ReceivePaymentsVM;
+@{
     ViewData["Title"] = "قائمة أستقبال المبالغ";
-    string AddStatus = ViewBag.AddStatus ?? "";
-    string UpdateStatus = ViewBag.UpdateStatus ?? "";
 }
 
 <!-- Content Page -->
@@ -28,7 +27,7 @@
                 <div class="col-md-5 float-end">
                     <select id="NamesList" class="select2 form-select">
                         <option value="">الأسماء</option>
-                        @foreach (var item in ViewData["NamesList"] as List<SelectListItem>)
+                        @foreach (var item in Model.Names)
                         {
                             <option value="@item.Value">@item.Text</option>
                         }
@@ -168,37 +167,37 @@
                     .draw();
             });
 
-            if ('@AddStatus' == "Success") {
+            if ('@Model.AddStatus' == "True") {
                 Swal.fire({
                     title: 'تمت العملية بنجاح',
-                    text: 'تمت اضافة المبلغ بنجاح',
+                    text: 'تمت بنجاح',
                     icon: 'success',
                     confirmButtonText: 'حسنا'
                 });
             }
-            else if ('@AddStatus' == "Error") {
+            else if ('@Model.AddStatus' == "False") {
                 Swal.fire({
                     title: 'حدث خطأ',
-                    text: 'حدث خطأ أثناء اضافة المبلغ',
+                    text: 'حدث خطأ أثناء عملية الإضافة',
                     icon: 'error',
-                    setTimeout: 2000
+                    confirmButtonText: 'حسنا'
                 });
             }
 
-            if ('@UpdateStatus' == "Success") {
+            if ('@Model.UpdateStatus' == "True") {
                 Swal.fire({
                     title: 'تمت العملية بنجاح',
-                    text: 'تم تعديل المبلغ الشخص بنجاح',
+                    text: 'تم التحديث',
                     icon: 'success',
                     confirmButtonText: 'حسنا'
                 });
             }
-            else if ('@UpdateStatus' == "Error") {
+            else if ('@Model.UpdateStatus' == "False") {
                 Swal.fire({
                     title: 'حدث خطأ',
-                    text: 'حدث خطأ أثناء تعديل المبلغ الشخص',
+                    text: 'حدث خطأ أثناء عملية التحديث',
                     icon: 'error',
-                    setTimeout: 2000
+                    confirmButtonText: 'حسنا'
                 });
             }
 

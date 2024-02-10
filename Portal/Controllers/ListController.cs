@@ -29,9 +29,12 @@ namespace Portal.Controllers
         {
             return View();
         }
-        public async Task<IActionResult> Names()
+        public async Task<IActionResult> Names(bool? add, bool? update)
         {
-            return View();
+            var VM = new NamesVM();
+            VM.AddStatus = add;
+            VM.UpdateStatus = update;
+            return View(VM);
         }
         [HttpPost]
         public async Task<IActionResult> GetUserDetails()
@@ -122,12 +125,17 @@ namespace Portal.Controllers
             return await _context.MosbName.ToListAsync();
         }
 
-        public async Task<IActionResult> ReceivePayments()
+        public async Task<IActionResult> ReceivePayments(bool? add, bool? update)
         {
-            ViewData["NamesList"] = await _context.MosbName
+            ReceivePaymentsVM VM = new();
+            VM.Names = await _context.MosbName
                 .Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
                 .ToListAsync();
-            return View();
+
+            VM.AddStatus = add;
+            VM.UpdateStatus = update;
+
+            return View(VM);
         }
 
         [HttpPost]
@@ -191,15 +199,20 @@ namespace Portal.Controllers
 
             return Ok(returnObj);
         }
-        public async Task<IActionResult> SpendMoney()
+        public async Task<IActionResult> SpendMoney(bool? add, bool? update)
         {
             SpendMoneyVM VM = new SpendMoneyVM();
             VM.NamesList = await _context.MosbName
                 .Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
                 .ToListAsync();
-            VM.YearList = await _context.MosbSpendMoney.GroupBy(x => x.Date)
-                .Select(x => new SelectListItem { Text = DateTime.Parse(x.Key).Year.ToString(), Value = DateTime.Parse(x.Key).Year.ToString() })
+            // Get the years from the database and add them to the list of years in the view model group by the date year 
+            VM.YearList = await _context.MosbSpendMoney
+                .Select(x => new SelectListItem { Text = x.Date.Substring(0, 4), Value = x.Date.Substring(0, 4) })
+                .Distinct()
                 .ToListAsync();
+
+            VM.AddStatus = add;
+            VM.UpdateStatus = update;
 
             return View(VM);
         }

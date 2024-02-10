@@ -32,7 +32,7 @@ namespace Portal.Controllers
 
             EditPersonVM VM = new()
             {
-                Id = name.Id,
+                NameId = name.Id,
                 Name = name.Name,
                 CivilNumber = name.CivilNumber,
                 Phone = name.PhoneNumber,
@@ -49,12 +49,14 @@ namespace Portal.Controllers
         {
             try
             {
-                VM.Id = long.Parse(Request.Form["Id"]);
                 if (!ModelState.IsValid)
                 {
                     return View(VM);
                 }
-                var name = await _dbContext.MosbName.Include(x => x.PersonReasonMapping).FirstOrDefaultAsync(n => n.Id == VM.Id);
+                var name = await _dbContext
+                    .MosbName
+                    .Include(x => x.PersonReasonMapping)
+                    .FirstOrDefaultAsync(n => n.Id == VM.NameId);
 
                 if (name == null)
                 {
@@ -70,15 +72,12 @@ namespace Portal.Controllers
                 _dbContext.Update(name);
 
                 var saveStatus = await _dbContext.SaveChangesAsync();
-                ViewBag.UpdateStatus = saveStatus == 0
-                                        ? "Error" : "Success";
-
-                return RedirectToAction("Names", "List");
+               
+                return RedirectToAction("Names", "List", new { update = saveStatus == 1 });
             }
             catch (Exception ex)
             {
-                ViewBag.UpdateStatus = "Error: " + ex.Message;
-                return View(VM);
+                throw;
             }
         }
 
@@ -137,14 +136,11 @@ namespace Portal.Controllers
                 _dbContext.Update(receivePayment);
 
                 var saveStatus = await _dbContext.SaveChangesAsync();
-                ViewBag.UpdateStatus = saveStatus == 0
-                                        ? "Error" : "Success";
-                return RedirectToAction("ReceivePayments", "List");
+                return RedirectToAction("ReceivePayments", "List", new { update = saveStatus == 1 });
             }
             catch (Exception ex)
             {
-                ViewBag.UpdateStatus = "Error: " + ex.Message;
-                return View(VM);
+                throw;
             }
         }
 
@@ -184,8 +180,6 @@ namespace Portal.Controllers
                     return View(VM);
                 }
 
-                using var transaction = _dbContext.Database.BeginTransaction();
-
                 var spendMoney = await _dbContext.MosbSpendMoney.FirstOrDefaultAsync(n => n.Id == VM.SpendMoneyId);
 
                 if (spendMoney == null)
@@ -202,19 +196,12 @@ namespace Portal.Controllers
                 _dbContext.Update(spendMoney);
 
                 var Status = await _dbContext.SaveChangesAsync();
-                if (Status == 0)
-                {
-                    ViewData["UpdateStatus"] = "Error";
-                }
-                transaction.Commit();
-                ViewData["UpdateStatus"] = "Success";
 
-                return RedirectToAction("SpendMoney", "List");
+                return RedirectToAction("SpendMoney", "List", new { update = Status == 1 });
             }
             catch (Exception ex)
             {
-                ViewData["UpdateStatus"] = "Error";
-                return View(VM);
+                throw;
             }
         }
 

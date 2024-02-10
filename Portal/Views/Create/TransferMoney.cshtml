@@ -8,7 +8,7 @@
     <div class="d-flex align-items-center justify-content-center h-px-600">
         <div class="card">
             <div class="card-body">
-                <form id="formRequest" class="w-px-600 border rounded p-3 p-md-5" method="POST">
+                <form id="formRequest" asp-action="CreateTransferMoney" asp-controller="Create" class="w-px-600 border rounded p-3 p-md-5" method="POST">
                     <h5 class="mb-5">تحويل مبلغ من رصيد الى رصيد اخر</h5>
                     <div class="mb-3">
                         <label class="form-label">
@@ -23,19 +23,19 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="fullname">تحويل مبلغ من</label>
-                        <select class="select2 form-select" name="PersonSelect1" id="PersonSelect1">
+                        <select class="select2 form-select" name="FromNameId" id="PersonSelect1">
                             <option value=""></option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="fullname">الى</label>
-                        <select class="select2 form-select" name="PersonSelect2" id="PersonSelect2">
+                        <select class="select2 form-select" name="ToNameId" id="PersonSelect2">
                             <option value=""></option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">المبلغ</label>
-                        <input type="n" id="Amount" name="Amount" class="form-control" placeholder="0.00">
+                        <input type="number" id="Amount" name="Amount" class="form-control" placeholder="0.00">
                     </div>
                     <div class="mb-4">
                         <label class="form-label">السبب</label>
@@ -191,6 +191,7 @@
 
             // if formAuthentication is valid then call ConfirmTransfer()
             formAuthentication.addEventListener('submit', function (event) {
+                console.log('Form submitted');
                 event.preventDefault();
                 fv.validate().then(function (status) {
                     if (status === 'Valid') {
