@@ -1,5 +1,7 @@
 ﻿@{
     ViewData["Title"] = "قائمة أستقبال المبالغ";
+    string AddStatus = ViewBag.AddStatus ?? "";
+    string UpdateStatus = ViewBag.UpdateStatus ?? "";
 }
 
 <!-- Content Page -->
@@ -166,8 +168,7 @@
                     .draw();
             });
 
-            var AddStatus = '@TempData["AddStatus"]';
-            if (AddStatus == "Success") {
+            if ('@AddStatus' == "Success") {
                 Swal.fire({
                     title: 'تمت العملية بنجاح',
                     text: 'تمت اضافة المبلغ بنجاح',
@@ -175,17 +176,16 @@
                     confirmButtonText: 'حسنا'
                 });
             }
-            else if (AddStatus == "Error") {
+            else if ('@AddStatus' == "Error") {
                 Swal.fire({
                     title: 'حدث خطأ',
                     text: 'حدث خطأ أثناء اضافة المبلغ',
                     icon: 'error',
-                    confirmButtonText: 'حسنا'
+                    setTimeout: 2000
                 });
             }
 
-            var UpdateStatus = '@TempData["UpdateStatus"]';
-            if (UpdateStatus == "Success") {
+            if ('@UpdateStatus' == "Success") {
                 Swal.fire({
                     title: 'تمت العملية بنجاح',
                     text: 'تم تعديل المبلغ الشخص بنجاح',
@@ -193,12 +193,12 @@
                     confirmButtonText: 'حسنا'
                 });
             }
-            else if (UpdateStatus == "Error") {
+            else if ('@UpdateStatus' == "Error") {
                 Swal.fire({
                     title: 'حدث خطأ',
                     text: 'حدث خطأ أثناء تعديل المبلغ الشخص',
                     icon: 'error',
-                    confirmButtonText: 'حسنا'
+                    setTimeout: 2000
                 });
             }
 

@@ -2,7 +2,7 @@
 
 namespace Portal.Models.ViewModels
 {
-    public class SpendMoneyCreateEditVM
+    public class CreateSpendMoneyVM
     {
         [Required(ErrorMessage = "السبب مطلوب")]
         public long NameId { get; set; }

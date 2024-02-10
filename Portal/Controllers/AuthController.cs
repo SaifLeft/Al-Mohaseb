@@ -79,6 +79,10 @@ namespace Portal.Controllers
         {
             return View();
         }
+        public IActionResult NotFound()
+        {
+            return View();
+        }
         [Authorize]
         public IActionResult Logout()
         {

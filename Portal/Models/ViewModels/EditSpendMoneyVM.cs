@@ -4,6 +4,8 @@ namespace Portal.Models.ViewModels
 {
     public class EditSpendMoneyVM
     {
+        [Required(ErrorMessage = "الرقم مطلوب")]
+        public long SpendMoneyId { get; set; }
         [Required(ErrorMessage = "السبب مطلوب")]
         public long NameId { get; set; }
 

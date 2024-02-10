@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
 namespace Portal.Models.ViewModels
 {
-    public class ReceivePaymentsVM
+    public class CreateReceivePaymentsVM
     {
         [Required(ErrorMessage = "السبب مطلوب")]
         public long NameId { get; set; }

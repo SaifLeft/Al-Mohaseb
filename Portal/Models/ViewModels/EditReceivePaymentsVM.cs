@@ -4,7 +4,7 @@ namespace Portal.Models.ViewModels
 {
     public class EditReceivePaymentsVM
     {
-        public long Id { get; set; }
+        public long ReceivePaymentId { get; set; }
         [Required(ErrorMessage = "السبب مطلوب")]
         public long NameId { get; set; }
 

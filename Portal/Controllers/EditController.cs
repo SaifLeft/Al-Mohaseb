@@ -54,9 +54,7 @@ namespace Portal.Controllers
                 {
                     return View(VM);
                 }
-
-                using var transaction = _dbContext.Database.BeginTransaction();
-                var name = await _dbContext.MosbName.Include(x=>x.PersonReasonMapping).FirstOrDefaultAsync(n => n.Id == VM.Id);
+                var name = await _dbContext.MosbName.Include(x => x.PersonReasonMapping).FirstOrDefaultAsync(n => n.Id == VM.Id);
 
                 if (name == null)
                 {
@@ -71,10 +69,9 @@ namespace Portal.Controllers
 
                 _dbContext.Update(name);
 
-                await _dbContext.SaveChangesAsync();
-
-                transaction.Commit();
-                ViewBag.UpdateStatus = "Success";
+                var saveStatus = await _dbContext.SaveChangesAsync();
+                ViewBag.UpdateStatus = saveStatus == 0
+                                        ? "Error" : "Success";
 
                 return RedirectToAction("Names", "List");
             }
@@ -98,7 +95,7 @@ namespace Portal.Controllers
 
             EditReceivePaymentsVM VM = new()
             {
-                Id = receivePayment.Id,
+                ReceivePaymentId = receivePayment.Id,
                 Amount = receivePayment.Amount,
                 Date = receivePayment.Date,
                 Description = receivePayment.Description,
@@ -116,14 +113,15 @@ namespace Portal.Controllers
         {
             try
             {
-                VM.Id = long.Parse(Request.Form["Id"]);
                 if (!ModelState.IsValid)
                 {
                     return View(VM);
                 }
 
-                using var transaction = _dbContext.Database.BeginTransaction();
-                var receivePayment = await _dbContext.MosbReceivePayments.Include(x => x.ReceivePaymentsReasonsMapping).FirstOrDefaultAsync(n => n.Id == VM.Id);
+                var receivePayment = await _dbContext
+                    .MosbReceivePayments
+                    .Include(x => x.ReceivePaymentsReasonsMapping)
+                    .FirstOrDefaultAsync(n => n.Id == VM.ReceivePaymentId);
 
                 if (receivePayment == null)
                 {
@@ -138,12 +136,9 @@ namespace Portal.Controllers
 
                 _dbContext.Update(receivePayment);
 
-                await _dbContext.SaveChangesAsync();
-
-                transaction.Commit();
-
-                ViewBag.UpdateStatus = "Success";
-
+                var saveStatus = await _dbContext.SaveChangesAsync();
+                ViewBag.UpdateStatus = saveStatus == 0
+                                        ? "Error" : "Success";
                 return RedirectToAction("ReceivePayments", "List");
             }
             catch (Exception ex)
@@ -165,7 +160,8 @@ namespace Portal.Controllers
 
             EditSpendMoneyVM VM = new()
             {
-                NameId = spendMoney.Id,
+                SpendMoneyId = spendMoney.Id,
+                NameId = spendMoney.PersonId,
                 Amount = spendMoney.Amount,
                 Date = spendMoney.Date,
                 Description = spendMoney.Description,
@@ -189,12 +185,12 @@ namespace Portal.Controllers
                 }
 
                 using var transaction = _dbContext.Database.BeginTransaction();
-                
-                var spendMoney = await _dbContext.MosbSpendMoney.FirstOrDefaultAsync(n => n.Id == VM.NameId);
+
+                var spendMoney = await _dbContext.MosbSpendMoney.FirstOrDefaultAsync(n => n.Id == VM.SpendMoneyId);
 
                 if (spendMoney == null)
                 {
-                    return NotFound();
+                    return RedirectToAction("NotFound", "Auth");
                 }
 
                 // Update spendMoney properties
@@ -208,16 +204,16 @@ namespace Portal.Controllers
                 var Status = await _dbContext.SaveChangesAsync();
                 if (Status == 0)
                 {
-                    TempData["UpdateStatus"] = "Error";
+                    ViewData["UpdateStatus"] = "Error";
                 }
                 transaction.Commit();
-                TempData["UpdateStatus"] = "Success";
+                ViewData["UpdateStatus"] = "Success";
 
                 return RedirectToAction("SpendMoney", "List");
             }
             catch (Exception ex)
             {
-                TempData["UpdateStatus"] = "Error";
+                ViewData["UpdateStatus"] = "Error";
                 return View(VM);
             }
         }

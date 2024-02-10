@@ -3,6 +3,12 @@
     ViewData["Title"] = "أحصائيات بأسم معين";
     string display = Model.PersonalBalanceIsAvailable ? "block" : "none";
     string display2 = Model.YearIsAvailable ? "block" : "none";
+    string Personalbadge = Model.PersonalTotalAmount < 0
+                           ? "badge rounded-pill bg-danger"
+                           : Model.PersonalTotalAmount == 0
+                           ? "badge rounded-pill bg-warning"
+                           : "badge rounded-pill bg-success";
+
 }
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -99,145 +105,73 @@
     </div>
     @* الرصيد الشخصي *@
     <div class="card mb-3">
-        <div class="d-flex flex-wrap gap-1 card-header ">
+        <div class="card-header ">
             <h5 class="col-4 card-title">الرصيد الشخصي</h5>
-            <div class=" gap-3 d-flex col-sm-7">
-                <label for="exampleFormControlInput1" class="form-label col-form-label">البحث بـأسم الشخص</label>
-                <div class="col-sm-5">
-                    <select id="PersonalNamesList" class="select2 form-select">
-                        <option value="">اختر اسم</option>
-                        @foreach (var item in Model.NamesList)
-                        {
-                            if (item.IsSelected)
-                            {
-                                <option selected value="@item.Value">@item.Text</option>
-                            }
-                            else
-                            {
-                                <option value="@item.Value">@item.Text</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <label for="exampleFormControlInput1" class="form-label col-form-label">البحث بـأسم الشخص</label>
-                <div class="col-sm-5">
-                    <select id="PersonalYearsList" class="select2 form-select">
-                        <option value="">اختر اسم</option>
-                        @foreach (var item in Model.NamesList)
-                        {
-                            if (item.IsSelected)
-                            {
-                                <option selected value="@item.Value">@item.Text</option>
-                            }
-                            else
-                            {
-                                <option value="@item.Value">@item.Text</option>
-                            }
-                        }
-                    </select>
-                </div>
-            </div>
-
         </div>
-        <div class="col-md-4 d-flex flex-wrap gap-2">
-            <label for="exampleFormControlInput1" class="form-label">البحث بـأسم الشخص</label>
-            <select id="PersonalNamesList" class="select2 form-select">
-                <option value="">اختر اسم</option>
-                @foreach (var item in Model.NamesList)
-                {
-                    if (item.IsSelected)
-                    {
-                        <option selected value="@item.Value">@item.Text</option>
-                    }
-                    else
-                    {
-                        <option value="@item.Value">@item.Text</option>
-                    }
-                }
-            </select>
-            <label for="exampleFormControlInput1" class="form-label">بحث بسنة معينة أيضا</label>
-            <select id="PersonalYearsList" class="select2 form-select">
-                <option value="">اختر سنة</option>
-                @foreach (var item in Model.YearsList)
-                {
-                    if (item.IsSelected)
-                    {
-                        <option selected value="@item.Value">@item.Text</option>
-                    }
-                    else
-                    {
-                        <option value="@item.Value">@item.Text</option>
-                    }
-                }
-            </select>
-            <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">البحث بـأسم الشخص</label>
-                <select id="PersonalNamesList" class="select2 form-select">
-                    <option value="">اختر اسم</option>
-                    @foreach (var item in Model.NamesList)
-                    {
-                        if (item.IsSelected)
-                        {
-                            <option selected value="@item.Value">@item.Text</option>
-                        }
-                        else
-                        {
-                            <option value="@item.Value">@item.Text</option>
-                        }
-                    }
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="exampleFormControlInput1" class="form-label">بحث بسنة معينة أيضا</label>
-                <select id="PersonalYearsList" class="select2 form-select">
-                    <option value="">اختر سنة</option>
-                    @foreach (var item in Model.YearsList)
-                    {
-                        if (item.IsSelected)
-                        {
-                            <option selected value="@item.Value">@item.Text</option>
-                        }
-                        else
-                        {
-                            <option value="@item.Value">@item.Text</option>
-                        }
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="card-body" style="display:@display">
-
-            <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-1">
-
-                <div class="d-flex align-items-center mb-3 form-inline" style="font-size:x-large">
-                    <div>
-                        <span>جميع ايداعات الشخص</span>
-                        <span class="badge rounded-pill bg-info">@Model.PersonalReceivePayment</span>
-                    </div>
-                    <span class="mx-5 mt-2">-</span>
-                    <div>
-                        <span>جميع مصروفات الشخص</span>
-                        <span class="badge rounded-pill bg-warning">@Model.PersonalSpendMoney</span>
-                    </div>
-                    <span class="mx-5 mt-2">=</span>
-                    <div class="mx-1">
-                        <span>الرصيد الشخصي</span>
-                        @if (Model.PersonalTotalAmount < 0)
-                        {
-                            <span class="badge rounded-pill bg-danger">@Model.PersonalTotalAmount</span>
-                        }
-                        else if (Model.PersonalTotalAmount == 0)
-                        {
-                            <span class="badge rounded-pill bg-warning">@Model.PersonalTotalAmount</span>
-                        }
-                        else if (Model.PersonalTotalAmount > 0)
-                        {
-                            <span class="badge rounded-pill bg-success">@Model.PersonalTotalAmount</span>
-                        }
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <form asp-action="Semple" asp-controller="Statistics" method="get">
+                        <div class="mb-2">
+                            <label for="exampleFormControlInput1" class="form-label col-form-label">البحث بـأسم الشخص</label>
+                            <select id="PersonalNamesList" name="PersonalNameId" class="select2 form-select" required>
+                                <option value="">اختر اسم</option>
+                                @foreach (var item in Model.NamesList)
+                                {
+                                    if (item.IsSelected)
+                                    {
+                                        <option selected value="@item.Value">@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleFormControlInput1" class="form-label col-form-label">البحث بـالسنة</label>
+                            <select id="PersonalYearsList" name="PersonalYear" class="select2 form-select" required>
+                                <option value="0000">كل السنوات</option>
+                                @foreach (var item in Model.YearsList)
+                                {
+                                    if (item.IsSelected)
+                                    {
+                                        <option selected value="@item.Value">@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-2 align-items-center justify-content-center">
+                            <button type="submit" class="btn btn-primary ">بحث</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-9" @(Model.PersonalBalanceIsAvailable ? "style=display:" + display : "style=display:none")>
+                    <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-1 h-px-200">
+                        <div class="d-flex align-items-center form-inline" style="font-size:x-large">
+                            <div>
+                                <span>جميع ايداعات الشخص</span>
+                                <span class="badge rounded-pill bg-info">@Model.PersonalReceivePayment</span>
+                            </div>
+                            <span class="mx-5 mt-2">-</span>
+                            <div>
+                                <span>جميع مصروفات الشخص</span>
+                                <span class="badge rounded-pill bg-warning">@Model.PersonalSpendMoney</span>
+                            </div>
+                            <span class="mx-5 mt-2">=</span>
+                            <div class="mx-1">
+                                <span>الرصيد الشخصي</span>
+                                <span class="@Personalbadge">@Model.PersonalTotalAmount</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
     @* رصيد جميع الأشخاص *@
@@ -375,18 +309,9 @@
                 dir: "rtl",
             });
 
-            $('#PersonalNamesList').on('change', function () {
-                var selectedName = $(this).val();
-                var url = '@Url.Action("Semple", "Statistics")?nameId=' + selectedName;
-                window.location.href = url;
-            });
-            $('#PersonalNamesList').on('select2:unselecting', function () {
-                var url = '@Url.Action("Semple", "Statistics")';
-                window.location.href = url
-            });
             $('#YearList').on('change', function () {
                 var selectedYear = $(this).val();
-                var url = '@Url.Action("Semple", "Statistics")?Year=' + selectedYear;
+                var url = '@Url.Action("Semple", "Statistics")?StatisticsYear=' + selectedYear;
                 window.location.href = url;
             });
             $('#YearList').on('select2:unselecting', function () {

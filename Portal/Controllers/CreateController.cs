@@ -170,14 +170,12 @@ namespace Portal.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<ActionResult> ReceivePayments(ReceivePaymentsVM VM)
+        public async Task<ActionResult> ReceivePayments(CreateReceivePaymentsVM VM)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-
-                    using var transaction = await _context.Database.BeginTransactionAsync();
 
                     var newReceivePayments = new MosbReceivePayments
                     {
@@ -185,23 +183,19 @@ namespace Portal.Controllers
                         Date = VM.Date,
                         Amount = VM.Amount,
                         Description = VM.Description,
+                        IsMonthly = false.GetHashCode(),
+                        IsPaid = true.GetHashCode(),
+                        IsTransaction = false.GetHashCode()
                     };
 
-                    var AddedRePayment = await _context.MosbReceivePayments.AddAsync(newReceivePayments);
+                    await _context.MosbReceivePayments.AddAsync(newReceivePayments);
                     var saveChangesResult = await _context.SaveChangesAsync();
-                    if (saveChangesResult == 0)
-                    {
-                        await transaction.RollbackAsync();
-                        ModelState.AddModelError("", "حدث خطأ عام");
-                    }
-
-                    await transaction.CommitAsync();
-                    TempData["AddStatus"] = "Success";
+                    ViewBag.AddStatus = saveChangesResult == 0 ? "Error" : "Success";
                     return RedirectToAction("ReceivePayments", "List");
                 }
                 else
                 {
-                    TempData["AddStatus"] = "Error";
+                    ViewBag.AddStatus = "Error";
                     ModelState.AddModelError("", "حدث خطأ عام");
                     return View();
                 }
@@ -221,14 +215,13 @@ namespace Portal.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<ActionResult> SpendMoney(SpendMoneyCreateEditVM VM)
+        public async Task<ActionResult> SpendMoney(CreateSpendMoneyVM VM)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
 
-                    using var transaction = await _context.Database.BeginTransactionAsync();
                     var newSpendMoney = new MosbSpendMoney
                     {
                         PersonId = VM.NameId,
@@ -237,24 +230,17 @@ namespace Portal.Controllers
                         Description = VM.Description,
                         IsForReason = false.GetHashCode(),
                         IsPaid = true.GetHashCode(),
+                        IsTransaction = false.GetHashCode()
                     };
 
-                    var AddedSpendMoney = await _context.MosbSpendMoney.AddAsync(newSpendMoney);
-
+                    await _context.MosbSpendMoney.AddAsync(newSpendMoney);
                     var saveChangesResult = await _context.SaveChangesAsync();
-                    if (saveChangesResult == 0)
-                    {
-                        await transaction.RollbackAsync();
-                        ModelState.AddModelError("", "حدث خطأ عام");
-                    }
-
-                    await transaction.CommitAsync();
-                    TempData["AddStatus"] = "Success";
+                    ViewBag.AddStatus = saveChangesResult == 0 ? "Success" : "Error";
                     return RedirectToAction("SpendMoney", "List");
                 }
                 else
                 {
-                    TempData["AddStatus"] = "Error";
+                    ViewBag.AddStatus = "Error";
                     ModelState.AddModelError("", "حدث خطأ عام");
                     return View();
                 }
@@ -672,61 +658,6 @@ namespace Portal.Controllers
             return View(VM);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> GetTransferMoneyAjax()
-        //{
-        //    int totalRecord = 0;
-        //    int filterRecord = 0;
-        //    var draw = Request.Form["draw"].FirstOrDefault();
-        //    var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
-        //    var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
-        //    var searchValue = Request.Form["search[value]"].FirstOrDefault();
-        //    int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
-        //    int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
-
-        //    var data = _context.MosbTransferMoney
-        //        .Include(x => x.FromName)
-        //        .Include(x => x.ToName)
-        //        .AsQueryable();
-
-        //    // Filter the data based on the searchValue if applicable
-        //    if (!string.IsNullOrEmpty(searchValue.ToString()))
-        //    {
-        //        data = data.Where(p => p.FromName.Name.Contains(searchValue)
-        //                       || p.ToName.Name.Contains(searchValue)
-        //                                      || p.Date.Contains(searchValue)
-        //                                                     || p.Amount.ToString().Contains(searchValue)
-        //                                                                    || p.Description.Contains(searchValue)
-        //                                                                                   );
-        //    }
-
-        //    totalRecord = await data.CountAsync();
-        //    filterRecord = totalRecord;
-
-        //    var phoneList = await data
-        //        .OrderBy(x => sortColumn + " " + sortColumnDirection)
-        //        .Skip(skip)
-        //        .Take(pageSize)
-        //        .Select(p => new
-        //        {
-        //            fromName = p.FromName.Name,
-        //            toName = p.ToName.Name,
-        //            date = p.Date,
-        //            amount = p.Amount,
-        //            description = p.Description
-        //        })
-        //        .ToListAsync();
-
-        //    var returnObj = new
-        //    {
-        //        recordsTotal = totalRecord,
-        //        recordsFiltered = filterRecord,
-        //        data = phoneList
-        //    };
-
-        //    return Ok(returnObj);
-
-        //}
 
         [HttpPost]
         public async Task<IActionResult> CreateTransferMoneyAjax(TransferMoneyVM VM)
@@ -777,7 +708,12 @@ namespace Portal.Controllers
                 string? ToName = ToPerson?.Name;
                 double TransferMoneyAmount = VM.Amount;
 
-                Message = string.Concat("تم تحويل مبلغ ", TransferMoneyAmount, " ريال ", " من ", FromName, " إلى ", ToName, " بتاريخ ", VM.Date.ToString("yyyy-MM-dd"), " بسبب ", VM.description);
+                Message = string.Concat(" تم تحويل مبلغ ",
+                    TransferMoneyAmount, " ريال ",
+                    " من ", FromName,
+                    " إلى ", ToName,
+                    " بتاريخ ", VM.Date.ToString("yyyy-MM-dd"),
+                    " بسبب ", VM.description);
 
                 MosbSpendMoney newSpend = new()
                 {
@@ -791,7 +727,12 @@ namespace Portal.Controllers
                 };
                 await _context.MosbSpendMoney.AddAsync(newSpend);
 
-                Message = string.Concat("تم أستلام مبلغ ", TransferMoneyAmount, " ريال ", " من ", FromName, " إلى ", ToName, " بتاريخ ", VM.Date.ToString("yyyy-MM-dd"), " بسبب ", VM.description);
+                Message = string.Concat(" تم أستلام مبلغ ",
+                    TransferMoneyAmount, " ريال ",
+                    " من ", FromName,
+                    " إلى ", ToName,
+                    " بتاريخ ", VM.Date.ToString("yyyy-MM-dd"),
+                    " بسبب ", VM.description);
 
                 MosbReceivePayments newReceive = new()
                 {
