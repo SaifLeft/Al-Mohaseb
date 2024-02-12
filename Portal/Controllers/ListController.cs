@@ -84,6 +84,7 @@ namespace Portal.Controllers
                     date = p.RegisterDate,
                     amount = p.SubscriptionAmount
                 })
+                .OrderByDescending(x => x.id)
                 .ToListAsync();
 
             var returnObj = new
@@ -100,7 +101,8 @@ namespace Portal.Controllers
             var reasons = _context.MosbReasons.ToList();
             var VM = new ReasonVM
             {
-                Reasons = reasons.Select(r => (r.Id, r.Name, r.Amount)).ToList()
+                Reasons = reasons.Select(r => (r.Id, r.Name, r.Amount)).OrderByDescending(r => r.Id)
+                .ToList()
             };
             return View(VM);
         }
@@ -188,6 +190,7 @@ namespace Portal.Controllers
                     date = p.Date,
                     description = p.Description
                 })
+                .OrderByDescending(x => x.id)
                 .ToListAsync();
 
             var returnObj = new
@@ -216,6 +219,7 @@ namespace Portal.Controllers
 
             return View(VM);
         }
+
         [HttpPost]
         public async Task<IActionResult> GetSpendMoneyDetails()
         {
@@ -228,7 +232,9 @@ namespace Portal.Controllers
             int pageSize = Convert.ToInt32(Request.Form["length"].FirstOrDefault() ?? "0");
             int skip = Convert.ToInt32(Request.Form["start"].FirstOrDefault() ?? "0");
 
-            var data = _context.MosbSpendMoney.Where(x => x.IsPaid == true.GetHashCode()).AsQueryable();
+            var data = _context.MosbSpendMoney
+                        .Where(x => x.IsPaid == true.GetHashCode())
+                        .AsQueryable();
             totalRecord = await data.CountAsync();
             filterRecord = totalRecord;
 
@@ -273,9 +279,10 @@ namespace Portal.Controllers
                     id = p.Id,
                     name = p.Person.Name,
                     amount = p.Amount,
-                    date = p.Date,
+                    date = DateTime.Parse(p.Date, null, System.Globalization.DateTimeStyles.RoundtripKind),
                     description = p.Description
                 })
+                .OrderByDescending(x => x.id)
                 .ToListAsync();
 
 

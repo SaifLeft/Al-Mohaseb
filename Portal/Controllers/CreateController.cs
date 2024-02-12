@@ -741,9 +741,7 @@ namespace Portal.Controllers
                 }
 
                 await transaction.CommitAsync();
-
-                ViewData["AddStatus"] = "Success";
-                return RedirectToAction("SpendMoney", "List");
+                return RedirectToAction("SpendMoney", "List", new { add = true });
                 
             }
             catch (Exception)

@@ -437,9 +437,10 @@
                 console.log(event);
                 var value = $('#AmountSubscribedInput').val();
                 AmountSubscribed = parseFloat(value).toFixed(3);
+                amountInputList = document.querySelectorAll('.Amount-inputs:not([disabled])');
+                amountInputCount = amountInputList.length;
                 initialAmountPerInput = parseFloat(AmountSubscribed / amountInputCount).toFixed(3);
                 initialAmountPerInput = parseFloat(initialAmountPerInput).toFixed(3);
-                amountInputList = document.querySelectorAll('.Amount-inputs:not([disabled])');
                 if (amountInputList.length > 0) {
                     amountInputList.forEach((input) => {
                         if (input != 0) {
@@ -583,6 +584,44 @@
 
                 amountPersonElement.value = amountResult;
             }
+
+            // if one of the amount inputs has a increased or decreased value by the user then the rest of the amount inputs will effect by the change value
+            amountInputList.forEach((input) => {
+                input.addEventListener('input', (event) => {
+                    var value = parseFloat(event.target.value).toFixed(3);
+                    var personId = event.target.getAttribute('data-PersonId');
+                    var personCheckbox = document.querySelector(`.IsPaid-checkbox[data-input-id="${personId}"]`);
+                    if (personCheckbox.checked) {
+                        var personCheckboxValue = parseFloat(personCheckbox.value).toFixed(3);
+                        var diff = value - personCheckboxValue;
+                        var diffRounded = parseFloat(diff).toFixed(3);
+
+                        var amountInputList = document.querySelectorAll('.Amount-inputs:not([disabled])');
+                        var initialAmountPerInput = parseFloat(AmountSubscribed / amountInputCount).toFixed(3);
+                        var initialAmountPerInputRounded = parseFloat(initialAmountPerInput).toFixed(3);
+
+                        var amountInputListValue = 0;
+                        amountInputList.forEach((input) => {
+                            amountInputListValue += parseFloat(input.value);
+                        });
+
+                        var amountInputListValueRounded = parseFloat(amountInputListValue).toFixed(3);
+                        var diffAmount = parseFloat(AmountSubscribed - amountInputListValueRounded).toFixed(3);
+                        if (diffAmount !== 0) {
+                            var diffAmountPerInput = parseFloat(diffAmount / amountInputCount).toFixed(3);
+                            var diffAmountPerInputRounded = parseFloat(diffAmountPerInput).toFixed(3);
+                            amountInputList.forEach((input) => {
+                                input.value = (parseFloat(input.value) + parseFloat(diffAmountPerInputRounded)).toFixed(3);
+                            });
+                        }
+                        else {
+                            amountInputList.forEach((input) => {
+                                input.value = (parseFloat(input.value) + parseFloat(diffRounded)).toFixed(3);
+                            });
+                        }
+                    }
+                });
+            });
 
 
 

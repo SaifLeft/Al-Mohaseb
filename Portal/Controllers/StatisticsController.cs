@@ -295,10 +295,10 @@ namespace Portal.Controllers
                     VM.PersonalTotalAmount = Math.Round(VM.PersonalReceivePayment - VM.PersonalSpendMoney, 4);
                 }
 
-
+                int? year = model.StatisticsYear.HasValue ? model.StatisticsYear.Value : model.PersonalYear;
                 List<SelectListModel> AllYears = new();
-                AddYearsToListModel(ReceivePayments, ref AllYears, x => DateTime.Parse(x.Date).Year, model.StatisticsYear);
-                AddYearsToListModel(SpendMoney, ref AllYears, x => DateTime.Parse(x.Date).Year, model.StatisticsYear);
+                AddYearsToListModel(ReceivePayments, ref AllYears, x => DateTime.Parse(x.Date).Year, year);
+                AddYearsToListModel(SpendMoney, ref AllYears, x => DateTime.Parse(x.Date).Year, year);
                 VM.YearsList = AllYears.GroupBy(x => x.Value).Select(x => x.First()).ToList();
 
                 VM.YearIsAvailable = false;
