@@ -379,7 +379,6 @@
             });
 
 
-
             // Function to hide all related elements
             function hideAll() {
                 $("#flatpickr-date").val(null);
@@ -434,9 +433,10 @@
 
             // if AmountSubscribedInput has iput value
             $('#AmountSubscribedSplitBtn').click(function () {
-                console.log(event);
                 var value = $('#AmountSubscribedInput').val();
+
                 AmountSubscribed = parseFloat(value).toFixed(3);
+
                 amountInputList = document.querySelectorAll('.Amount-inputs:not([disabled])');
                 amountInputCount = amountInputList.length;
                 initialAmountPerInput = parseFloat(AmountSubscribed / amountInputCount).toFixed(3);
@@ -540,7 +540,6 @@
 
 
             function RestoreAmountPersonToRestOfPersons(checkbox) {
-                debugger;
                 // Set the amount of the person that enabled the checkbox to 0
                 const personId = checkbox.getAttribute('data-input-id');
                 const amountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${personId}"]`);
@@ -584,42 +583,35 @@
 
                 amountPersonElement.value = amountResult;
             }
+            var DelayTimerInMilliseconds = 1 * 1000;
+            let timer;
 
             // if one of the amount inputs has a increased or decreased value by the user then the rest of the amount inputs will effect by the change value
             amountInputList.forEach((input) => {
                 input.addEventListener('input', (event) => {
-                    var value = parseFloat(event.target.value).toFixed(3);
-                    var personId = event.target.getAttribute('data-PersonId');
-                    var personCheckbox = document.querySelector(`.IsPaid-checkbox[data-input-id="${personId}"]`);
-                    if (personCheckbox.checked) {
-                        var personCheckboxValue = parseFloat(personCheckbox.value).toFixed(3);
-                        var diff = value - personCheckboxValue;
-                        var diffRounded = parseFloat(diff).toFixed(3);
 
-                        var amountInputList = document.querySelectorAll('.Amount-inputs:not([disabled])');
-                        var initialAmountPerInput = parseFloat(AmountSubscribed / amountInputCount).toFixed(3);
-                        var initialAmountPerInputRounded = parseFloat(initialAmountPerInput).toFixed(3);
+                    clearTimeout(timer)
 
-                        var amountInputListValue = 0;
-                        amountInputList.forEach((input) => {
-                            amountInputListValue += parseFloat(input.value);
-                        });
+                    var valueinputTarget = 0
+                    timer = setTimeout(() => {
+                        debugger;
+                        var value = parseFloat(event.target.value).toFixed(3);
+                        var CarrentPersonId = event.target.getAttribute('data-PersonId');
+                        // get all Amount-inputs Elements that not disabled and not equal to the current person id
+                        var CarrentamountInputList = document.querySelectorAll('.Amount-inputs:not([disabled]):not([data-PersonId="' + CarrentPersonId + '"])');
+                        var CarrentAmountInputsCount = CarrentamountInputList.length;
 
-                        var amountInputListValueRounded = parseFloat(amountInputListValue).toFixed(3);
-                        var diffAmount = parseFloat(AmountSubscribed - amountInputListValueRounded).toFixed(3);
-                        if (diffAmount !== 0) {
-                            var diffAmountPerInput = parseFloat(diffAmount / amountInputCount).toFixed(3);
-                            var diffAmountPerInputRounded = parseFloat(diffAmountPerInput).toFixed(3);
-                            amountInputList.forEach((input) => {
-                                input.value = (parseFloat(input.value) + parseFloat(diffAmountPerInputRounded)).toFixed(3);
-                            });
-                        }
-                        else {
-                            amountInputList.forEach((input) => {
-                                input.value = (parseFloat(input.value) + parseFloat(diffRounded)).toFixed(3);
-                            });
-                        }
-                    }
+
+                        var CarrentAmountSubscribed = parseFloat(document.querySelector('#AmountSubscribed').value);
+
+
+
+
+
+
+
+
+                    }, DelayTimerInMilliseconds)
                 });
             });
 
