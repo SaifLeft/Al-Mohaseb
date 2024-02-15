@@ -188,6 +188,7 @@
                                                                 else
                                                                 {
                                                                     <input class="form-check-input IsPaid-checkbox checkbox-group" type="checkbox"
+                                                                           oninput="adjustValues(this)"
                                                                            checked
                                                                            data-input-id="@item.PersonId">
                                                                 }
@@ -209,6 +210,7 @@
                                                                         <input class="form-control form-control-sm Amount-inputs "
                                                                                value="@item.Amount"
                                                                                type="number"
+                                                                               oninput="adjustValues(this)"
                                                                                data-PersonId="@item.PersonId">
                                                                     }
                                                                 </div>
@@ -297,6 +299,7 @@
     <link rel="stylesheet" href="~/assets/vendor/libs/typeahead-js/typeahead.css" />
     <link rel="stylesheet" href="~/assets/vendor/libs/flatpickr/flatpickr.css">
     <link rel="stylesheet" href="~/assets/vendor/libs/flatpickr/monthSelect/style.css">
+    <link rel="stylesheet" href="~/assets/vendor/libs/toastr/toastr.css">
 
 }
 
@@ -305,6 +308,7 @@
     <script src="~/assets/vendor/libs/flatpickr/flatpickr.js"></script>
     <script src="~/assets/vendor/libs/flatpickr/monthSelect/index.js"></script>
     <script src="~/assets/vendor/libs/flatpickr/monthSelect/monthSelect.js"></script>
+    <script src="~/assets/vendor/libs/toastr/toastr.js"></script>
 
 
     <script>
@@ -583,7 +587,7 @@
 
                 amountPersonElement.value = amountResult;
             }
-            var DelayTimerInMilliseconds = 1 * 1000;
+            var DelayTimerInMilliseconds = 0.5 * 1000;
             let timer;
 
             // if one of the amount inputs has a increased or decreased value by the user then the rest of the amount inputs will effect by the change value
@@ -592,25 +596,41 @@
 
                     clearTimeout(timer)
 
-                    var valueinputTarget = 0
                     timer = setTimeout(() => {
                         debugger;
-                        var value = parseFloat(event.target.value).toFixed(3);
-                        var CarrentPersonId = event.target.getAttribute('data-PersonId');
-                        // get all Amount-inputs Elements that not disabled and not equal to the current person id
-                        var CarrentamountInputList = document.querySelectorAll('.Amount-inputs:not([disabled]):not([data-PersonId="' + CarrentPersonId + '"])');
-                        var CarrentAmountInputsCount = CarrentamountInputList.length;
+                        var value = parseFloat(event.target.value).toFixed(2.5); //
+                        var personId = event.target.getAttribute('data-PersonId');
+                        var personCheckbox = document.querySelector(`.IsPaid-checkbox[data-input-id="${personId}"]`);
+                        if (personCheckbox.checked) {
+                            var amountInputs = document.querySelectorAll('.Amount-inputs:not([disabled])');
+                            var numInputs = amountInputs.length;
+                            var AmountSubscribed = parseFloat($('#AmountSubscribedInput').val()).toFixed(3);
 
+                            var diff = parseFloat(AmountSubscribed - value).toFixed(3);
+                            var diffPerInput = parseFloat(diff / (numInputs - 1)).toFixed(3);
+                            diffPerInput = diffPerInput > 0 ? diffPerInput : 0;
+                            amountInputs.forEach((input) => {
+                                if (input.getAttribute('data-PersonId') !== personId) {
+                                    input.value = diffPerInput;
+                                }
+                            });
+                            console.log('diffPerInput', diffPerInput);
+                            var personName = $('.na-person[data-PersonId="' + personId + '"]').text().trim();
+                            console.log('personName', personName);
+                            var message = '';
+                            if (diffPerInput == 0) {
+                                var personName = $('.na-person[data-PersonId="' + personId + '"]').text();
+                                message = 'الفاضل ' + personName + '  سيدفع المبلغ الكامل من مبلغ الصرف وهو ' + value + ' ريال';
+                            } else if (diffPerInput > 0) {
+                                message = 'تم توزيع مجموع المبلغ ' + diff + ' ريال على ' + (numInputs - 1) + ' أشخاص بمقدار ' + diffPerInput + ' ريال لكل شخص';
+                            }
 
-                        var CarrentAmountSubscribed = parseFloat(document.querySelector('#AmountSubscribed').value);
-
-
-
-
-
-
-
-
+                            toastr.success(message, 'تم', {
+                                timeOut: 8000,
+                                progressBar: true,
+                                positionClass: 'toast-top-center'
+                            });
+                        }
                     }, DelayTimerInMilliseconds)
                 });
             });
@@ -621,9 +641,8 @@
 
 
 
-
-
         });
+
         function ClearAll() {
             $("#ReasonList").val(null).trigger('change');
             $("#flatpickr-date").val(null);
