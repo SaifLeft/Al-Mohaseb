@@ -126,18 +126,6 @@
                         date: {
                             format: 'YYYY-MM-DD',
                             message: 'الرجاء ادخال تاريخ صحيح'
-                        },
-                        callback: {
-                            message: 'التاريخ يجب ان يكون اقل من اليوم',
-                            callback: function (input) {
-                                var date = input.value;
-                                var today = new Date();
-                                var inputDate = new Date(date);
-                                if (inputDate > today) {
-                                    return false;
-                                }
-                                return true;
-                            }
                         }
                     },
                     Amount: {
