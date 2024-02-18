@@ -7,23 +7,21 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     <h3>قائمة بيانات الأساسية للأعضاء المنتسبة</h3>
     <div class="card p-4">
-        <div class="d-flex card-header">
-            <div class="col-md-12">
-                <a class="btn btn-dark" asp-controller="Create" asp-action="Names">
-                    <i class="bx bx-plus"></i>
-                    <span class="d-lg-inline-block">
-                        أضافة شخص جديد
-                    </span>
-                </a>
-                <button class="btn btn-outline-dark float-end" id="PrintTableBtn">
-                    <i class="bx bx-printer"></i>
-                    <span class="d-lg-inline-block">طباعة الجدول</span>
-                </button>
-            </div>
+        <div class=" card-header">
+            <a class="btn btn-dark" asp-controller="Create" asp-action="Names">
+                <i class="bx bx-plus"></i>
+                <span class="d-lg-inline-block">
+                    أضافة شخص جديد
+                </span>
+            </a>
+            <button class="btn btn-outline-dark float-end" id="PrintTableBtn">
+                <i class="bx bx-printer"></i>
+                <span class="d-lg-inline-block">طباعة الجدول</span>
+            </button>
         </div>
-        <div class="card-body ">
-            <div class="table-responsive mt-5">
-                <table id="userTable" class="table  table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="userTable" class="table  table-sm table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>الاسم</th>

@@ -96,7 +96,7 @@ namespace Portal.Controllers
 
             return Ok(returnObj);
         }
-        public IActionResult Reasons()
+        public IActionResult Reasons(bool? add, bool? update, bool? delete)
         {
             var reasons = _context.MosbReasons.ToList();
             var VM = new ReasonVM
@@ -104,6 +104,9 @@ namespace Portal.Controllers
                 Reasons = reasons.Select(r => (r.Id, r.Name, r.Amount)).OrderByDescending(r => r.Id)
                 .ToList()
             };
+            VM.AddStatus = add;
+            VM.UpdateStatus = update;
+            VM.DeleteStatus = delete;
             return View(VM);
         }
         [HttpGet]

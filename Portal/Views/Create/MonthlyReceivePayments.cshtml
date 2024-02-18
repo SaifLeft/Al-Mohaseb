@@ -82,43 +82,26 @@
                                 {
                                     <tr>
                                         <td class="text-nowrap">
-                                            @item.PersonName  - <span>مبلغ الأشتراك: <label class="badge bg-dark">@item.SubscriptionAmount ريال</label></span>
+                                            @item.PersonName
+                                            <br />
+                                            <span>مبلغ الأشتراك: <label class="badge bg-dark">@item.SubscriptionAmount ريال</label></span>
                                         </td>
                                         <td class="na-person" data-PersonId="@item.PersonId" hidden>
                                             @item.PersonName
                                         </td>
-                                        <td class="d-flex">
-                                            <div class="form-check col-md-2  form-check-success form-check-inline">
-                                                @if (!item.IsPaid)
-                                                {
-                                                    <input class="form-check-input  IsPaid-checkbox" type="checkbox"
-                                                           data-input-id="@item.PersonId">
-                                                }
-                                                else
-                                                {
-                                                    <input class="form-check-input IsPaid-checkbox" type="checkbox"
-                                                           checked
-                                                           data-input-id="@item.PersonId">
-                                                }
-                                                <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <label class="form-check-label col-form-label-sm col-md-1">دفع المبلغ؟</label>
+                                                <div class="form-check col-md-1 form-check-success form-check-inline">
+                                                    <input class="form-check-input IsPaid-checkbox" @(item.IsPaid ? "checked" : "") type="checkbox" data-input-id="@item.PersonId">
+                                                    <label class="form-check-label col-form-label-sm">نعم</label>
+                                                </div>
                                             </div>
-                                            <label class="col-md-1 col-form-label-sm">المبلغ</label>
-                                            <div class="col-md-2">
-                                                @if (!item.IsPaid)
-                                                {
-                                                    <input class="form-control form-control-sm Amount-inputs"
-                                                           value="@item.Amount"
-                                                           type="number"
-                                                           disabled
-                                                           data-PersonId="@item.PersonId">
-                                                }
-                                                else
-                                                {
-                                                    <input class="form-control form-control-sm Amount-inputs"
-                                                           value="@item.Amount"
-                                                           type="number"
-                                                           data-PersonId="@item.PersonId">
-                                                }
+                                            <div class="d-flex gap-4">
+                                                <label class="col-form-label-sm">المبلغ</label>
+                                                <div class="col-md-2">
+                                                    <input class="form-control form-control-sm Amount-inputs" value="@item.Amount" type="number" data-PersonId="@item.PersonId" @(item.IsPaid ? "" : "disabled")>
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
@@ -242,70 +225,72 @@
 
 
     <script>
-        var IsDark = !document.documentElement.classList.contains("light-style");
-        var IsSelected = '@Model.IsSelected';
-        if (IsSelected != '' && IsSelected === 'True') {
-            $('#CardDetailsDiv').show();
-        }
-        else {
-            $('#CardDetailsDiv').hide();
-        }
-        // Get the current year and month in the format 'yyyy-MM'
-        var YearMonth = '@Model.YearMonth'; // Example: '2021-01'
-        var year2digit = new Date().getFullYear().toString()
-        var dayNow = year2digit + '-' + (new Date().getMonth() + 1);
-        var dateformat = YearMonth === '' ? dayNow : YearMonth;
-        var flatpickrDate = flatpickr('#flatpickr-date', {
-            altInput: true,
-            defaultDate: dateformat,
-            plugins: [
-                new monthSelectPlugin({
-                    shorthand: true, // Use shorthand month names
-                    dateFormat: "Y-m", // Display format 'year-month'
-                    altFormat: "F Y", // Format for the alternative input display
-                    theme: IsDark ? "dark" : "light" // Set the theme to light
-                })
-            ],
-            locale: {
-                // Define Arabic month names
-                months: {
-                    shorthand: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
-                    longhand: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
-                }
-            },
-            onChange: function (selectedDates, dateStr, instance) {
-                var date = new Date(dateStr);
-                var month = date.getMonth() + 1;
-                var year = date.getFullYear();
-                var monthStr = month < 10 ? '0' + month : month;
-                var dateStr = year + '-' + monthStr;
-                var isValid = date !== '' && date !== undefined && date !== null;
-                if (!isValid) {
-                    alert("الرجاء اختيار التاريخ");
-                    return;
-                } else {
-                    window.location.href = '@Url.Action("MonthlyReceivePayments", "Create")?YearMonth=' + dateStr;
-                }
-            },
+        $(document).ready(function () {
+            var IsDark = !document.documentElement.classList.contains("light-style");
+            var IsSelected = '@Model.IsSelected';
+            if (IsSelected != '' && IsSelected === 'True') {
+                $('#CardDetailsDiv').show();
+            }
+            else {
+                $('#CardDetailsDiv').hide();
+            }
+            // Get the current year and month in the format 'yyyy-MM'
+            var YearMonth = '@Model.YearMonth'; // Example: '2021-01'
+            var year2digit = new Date().getFullYear().toString()
+            var dayNow = year2digit + '-' + (new Date().getMonth() + 1);
+            var dateformat = YearMonth === '' ? dayNow : YearMonth;
+            var flatpickrDate = flatpickr('#flatpickr-date', {
+                altInput: true,
+                defaultDate: dateformat,
+                plugins: [
+                    new monthSelectPlugin({
+                        shorthand: true, // Use shorthand month names
+                        dateFormat: "Y-m", // Display format 'year-month'
+                        altFormat: "F Y", // Format for the alternative input display
+                        theme: IsDark ? "dark" : "light" // Set the theme to light
+                    })
+                ],
+                locale: {
+                    // Define Arabic month names
+                    months: {
+                        shorthand: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+                        longhand: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر']
+                    }
+                },
+                onChange: function (selectedDates, dateStr, instance) {
+                    var date = new Date(dateStr);
+                    var month = date.getMonth() + 1;
+                    var year = date.getFullYear();
+                    var monthStr = month < 10 ? '0' + month : month;
+                    var dateStr = year + '-' + monthStr;
+                    var isValid = date !== '' && date !== undefined && date !== null;
+                    if (!isValid) {
+                        alert("الرجاء اختيار التاريخ");
+                        return;
+                    } else {
+                        window.location.href = '@Url.Action("MonthlyReceivePayments", "Create")?YearMonth=' + dateStr;
+                    }
+                },
 
-        });
+            });
 
-        const selectAll = document.querySelector('#selectAll');
-        const IsPaidCheckboxList = document.querySelectorAll('.IsPaid-checkbox');
-        // Event listeners
-        if (selectAll) {
-            selectAll.addEventListener('change', (event) => {
-                const isChecked = event.target.checked;
-                IsPaidCheckboxList.forEach((checkbox) => {
-                    checkbox.checked = isChecked;
+            const selectAll = document.querySelector('#selectAll');
+            const IsPaidCheckboxList = document.querySelectorAll('.IsPaid-checkbox');
+            if (selectAll) {
+                selectAll.addEventListener('change', (event) => {
+                    const isChecked = event.target.checked;
+                    IsPaidCheckboxList.forEach((checkbox) => {
+                        checkbox.checked = isChecked;
+                        handleCheckboxChange(checkbox);
+                    });
+                });
+            }
+            IsPaidCheckboxList.forEach((checkbox) => {
+                checkbox.addEventListener('change', () => {
                     handleCheckboxChange(checkbox);
                 });
             });
-        }
-        IsPaidCheckboxList.forEach((checkbox) => {
-            checkbox.addEventListener('change', () => {
-                handleCheckboxChange(checkbox);
-            });
+
         });
         function handleCheckboxChange(checkbox) {
             const PersonId = checkbox.getAttribute('data-input-id');
@@ -313,6 +298,9 @@
             const AmountPersonElement = document.querySelector(`.Amount-inputs[data-PersonId="${PersonId}"]`);
             AmountPersonElement.disabled = !checkbox.checked;
             //inputElement.value = checkbox.checked ? initialAmountPerInput : 0;
+            // if is checked then show green tick, else show red cross for each checkbox
+            const icon = checkbox.checked ? '<i class="fa fa-check"></i>' : '<i class="fa fa-times"></i>';
+
         }
         function CollectData() {
             var MonthlyPaidData = [];
@@ -486,7 +474,7 @@
 
                     printWin.document.write('</tbody>');
                     printWin.document.write('</table>');
-                    
+
 
 
 

@@ -7,74 +7,82 @@
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row gy-4">
-        <div class="col-xl-9">
-            <div class="card mb-4">
-                <div class="d-flex card-header">
-                    <div class="col-md-12">
-                        <h4 class="card-title m-0 me-2">قائمة بجميع الأسباب</h4>
-                        <button class="btn btn-outline-dark float-end" id="PrintTableBtn">
-                            <i class="bx bx-printer"></i>
-                            <span class="d-lg-inline-block">طباعة الجدول</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body demo-vertical-spacing demo-only-element">
-                    <table id="userTable" class="table border-danger table-striped">
-                        <thead>
-                            <tr>
-                                <th scope="col">السبب</th>
-                                <th scope="col">مبلغ الصرف</th>
-                                <th scope="col">التحكم</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.Reasons.Any())
-                            {
-                                @foreach (var item in Model.Reasons)
-                                {
-                                    <tr>
-                                        <td>@item.Item2</td>
-                                        <td>@item.Item3 ريال</td>
-                                        <td>
-                                            <a style="color:azure" onclick="Edit('@item.Item1','@item.Item2','@item.Item3')" class="btn btn-dark">تعديل السبب</a>
-                                            <a style="color:azure" onclick="Delete('@item.Item1')" class="btn btn-danger">حذف</a>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            else
+        <div class="card">
+            <div class="card-header">
+                <h4>قائمة بجميع الأسباب</h4>
+                <button class="btn btn-primary float-start" data-bs-toggle="modal" data-bs-target="#AddReasonModel">
+                    <i class="bx bx-plus"></i>
+                    <span class="d-lg-inline-block">أضافة سبب جديد</span>
+                </button>
+                <button class="btn btn-outline-dark float-end" id="PrintTableBtn">
+                    <i class="bx bx-printer"></i>
+                    <span class="d-lg-inline-block">طباعة الجدول</span>
+                </button>
+            </div>
+            <div class="card-body">
+                <table id="userTable" class="table  table-sm table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">السبب</th>
+                            <th scope="col">مبلغ الصرف</th>
+                            <th scope="col">التحكم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Reasons.Any())
+                        {
+                            @foreach (var item in Model.Reasons)
                             {
                                 <tr>
-                                    <td colspan="3" class="text-center">لا يوجد أسباب</td>
+                                    <td>@item.Item2</td>
+                                    <td>@item.Item3 ريال</td>
+                                    <td>
+                                        <a style="color:azure" onclick="Edit('@item.Item1','@item.Item2','@item.Item3')" class="btn btn-dark">تعديل السبب</a>
+                                        <a style="color:azure" onclick="Delete('@item.Item1')" class="btn btn-danger">حذف</a>
+                                    </td>
                                 </tr>
                             }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center">لا يوجد أسباب</td>
+                            </tr>
+                        }
 
-                        </tbody>
-                    </table>
+                    </tbody>
+                </table>
 
-                </div>
             </div>
         </div>
-        <!-- Stage API Box -->
-        <div id="StageAPIBox" class="col-md-3">
-            <div class="card mb-4">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="card-title m-0 me-2">انشاء سبب جديد</h5>
-                </div>
-                <div class="card-body demo-vertical-spacing demo-only-element">
-                    <label class="form-label" for="Reason">السبب</label>
-                    <input type="search" class="form-control" id="Reason">
-                    <label class="form-label" for="Reason">مبلغ الصرف</label>
-                    <input type="search" class="form-control" id="Amount">
-                    <button type="submit" id="ReasonBtn" class="btn btn-primary">أضافة</button>
-                </div>
-            </div>
-        </div>
-
-
     </div>
-
 </div>
+<div class="modal fade" id="AddReasonModel" tabindex="-1" aria-labelledby="AddReasonLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="AddReasonLabel">أضافة سبب جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CreateReason" asp-controller="Create" method="post">
+                    <div class="mb-3">
+                        <label class="form-label" for="Reason">السبب</label>
+                        <input type="search" class="form-control" name="Reason" id="Reason" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="Reason">مبلغ الصرف</label>
+                        <input type="search" class="form-control" name="Amount" id="Amount" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">أضافة</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">الغاء</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 @section Stylesheet {
     <link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
@@ -131,37 +139,55 @@
             });
 
         });
-        // Add New Reason
-        $("#ReasonBtn").click(function () {
-            var Reason = $("#Reason").val();
-            if (Reason == "") {
-                alert("الرجاء ادخال السبب");
-                return;
-            }
-            var Amount = $("#Amount").val();
-            if (Amount == "") {
-                alert("الرجاء ادخال مبلغ الأشتراك");
-                return;
-            }
 
-            $.ajax({
-                url: "@Url.Action("CreateReason", "Create")",
-                type: "POST",
-                data: {
-                    Reason: Reason,
-                    Amount: Amount
-                },
-                success: function (data) {
-                    if (data == "1") {
-                        alert("تمت الاضافة بنجاح");
-                        location.reload();
-                    }
-                    else {
-                        alert("حدث خطأ");
-                    }
-                }
-            });
-        });
+        var AddStatus = '@Model.AddStatus';
+        var UpdateStatus = '@Model.UpdateStatus';
+        var DeleteStatus = '@Model.DeleteStatus';
+
+        if (AddStatus === "True") {
+            Swal.fire(
+                'تم!',
+                'تمت الاضافة بنجاح',
+                'success'
+            );
+        } else if (AddStatus === "False") {
+            Swal.fire(
+                'خطأ!',
+                'حدث خطأ',
+                'error'
+            );
+        }
+
+        if (UpdateStatus === "True") {
+            Swal.fire(
+                'تم!',
+                'تم التعديل بنجاح',
+                'success'
+            );
+        } else if (UpdateStatus === "False") {
+            Swal.fire(
+                'خطأ!',
+                'حدث خطأ',
+                'error'
+            );
+        }
+
+        if (DeleteStatus === "True") {
+            Swal.fire(
+                'تم!',
+                'تم الحذف بنجاح',
+                'success'
+            );
+        } else if (DeleteStatus === "False") {
+            Swal.fire(
+                'خطأ!',
+                'حدث خطأ',
+                'error'
+            );
+        }
+
+
+
 
         //function Delete(id) with ajax swal2 to confirm the delete by enter the password of the user who logged in.
         function Delete(id) {
@@ -216,11 +242,10 @@
                                     'تم!',
                                     'تم الحذف بنجاح',
                                     'success'
-                                ).then((result) => {
-                                    if (result.isConfirmed) {
-                                        location.reload();
-                                    }
-                                });
+                                )
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 2000);
 
                             }
                             else if (result.value == "2") {
@@ -309,14 +334,11 @@
                         Swal.fire({
                             title: 'تم!',
                             text: 'تم التعديل بنجاح',
-                            icon: 'success',
-                            timer: 2000,
-                            timerProgressBar: true,
-                            onClose: () => {
-                                // Reload the page.
-                                location.reload();
-                            }
+                            icon: 'success'
                         });
+                        setTimeout(function () {
+                            location.reload();
+                        }, 2000);
                     } else {
                         Swal.fire('خطأ!', 'حدث خطأ', 'error');
                     }

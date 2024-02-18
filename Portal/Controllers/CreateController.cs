@@ -112,11 +112,7 @@ namespace Portal.Controllers
             };
             await _context.MosbReasons.AddAsync(reason);
             int add = await _context.SaveChangesAsync();
-            if (add == 0)
-            {
-                return BadRequest();
-            }
-            return Ok(add);
+            return RedirectToAction("Reasons", "List", new { add = add == 1 });
         }
 
         [HttpPost]
@@ -134,7 +130,7 @@ namespace Portal.Controllers
             int edit = await _context.SaveChangesAsync();
             if (edit == 0)
             {
-                return BadRequest(0);
+                return NotFound(0);
             }
             return Ok(1);
         }
@@ -156,10 +152,11 @@ namespace Portal.Controllers
             int delete = await _context.SaveChangesAsync();
             if (delete == 0)
             {
-                return BadRequest(3);
+                return NotFound(0);
             }
-            return Ok(delete);
+            return Ok(1);
         }
+    
         #endregion Reason
 
         #region ReceivePayments

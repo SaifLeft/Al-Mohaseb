@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "أحصائيات بسبب معين";
     string anser = Model.IsHasRecodes ? "نعم" : "لا";
+
 }
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y">
@@ -19,7 +20,7 @@
                         {
                             if (item.IsSelected)
                             {
-                                <option value="@item.Value" selected>@item.Text</option>
+                                <option value="@item.Value">@item.Text</option>
                             }
                             else
                             {
@@ -127,38 +128,14 @@
                                                     <div class="d-flex">
                                                         <div class="d-flex">
                                                             <div class="form-check col-md-5 form-check-success form-check-inline">
-                                                                @if (!item.IsPaid)
-                                                                {
-                                                                    <input class="form-check-input IsPaid-checkbox" type="checkbox"
-                                                                           data-input-id="@item.PersonId">
-                                                                }
-                                                                else
-                                                                {
-                                                                    <input class="form-check-input IsPaid-checkbox" type="checkbox"
-                                                                           checked
-                                                                           data-input-id="@item.PersonId">
-                                                                }
+                                                                <input class="form-check-input IsPaid-checkbox" type="checkbox" data-input-id="@item.PersonId" @(item.IsPaid ? "checked" : "")>
                                                                 <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
                                                             </div>
+                                                            <br />
                                                             <div class="d-flex" style="display: none;">
                                                                 <label class="col-md-3 col-form-label-sm">المبلغ</label>
                                                                 <div class="col-md-10">
-                                                                    @if (!item.IsPaid)
-                                                                    {
-                                                                        <input class="form-control form-control-sm Amount-inputs"
-                                                                               value="@item.Amount"
-                                                                               type="number"
-                                                                               disabled
-                                                                               data-PersonId="@item.PersonId">
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <input class="form-control form-control-sm Amount-inputs"
-                                                                               value="@item.Amount"
-                                                                               type="number"
-                                                                               data-PersonId="@item.PersonId">
-                                                                    }
-
+                                                                    <input class="form-control form-control-sm Amount-inputs" value="@item.Amount" type="number" data-PersonId="@item.PersonId" @(item.IsPaid ? "" : "disabled")>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -193,27 +170,13 @@
                                                                 }
                                                                 <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
                                                             </div>
+                                                            <br />
                                                             <div class="d-flex" style="display: none;">
                                                                 <label class="col-md-3 col-form-label-sm">المبلغ</label>
                                                                 <div class="col-md-9">
-                                                                    @if (!item.IsPaid)
-                                                                    {
-                                                                        <input class="form-control form-control-sm Amount-inputs PersonId-@item.PersonId"
-                                                                               value="@item.Amount"
-                                                                               type="number"
-                                                                               disabled
-                                                                               data-PersonId="@item.PersonId">
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <input class="form-control form-control-sm Amount-inputs "
-                                                                               value="@item.Amount"
-                                                                               type="number"
-                                                                               data-PersonId="@item.PersonId">
-                                                                    }
+                                                                    <input class="form-control form-control-sm Amount-inputs PersonId-@item.PersonId" value="@item.Amount" type="number" data-PersonId="@item.PersonId" @(item.IsPaid ? "" : "disabled")>
                                                                 </div>
                                                                 <label class="col-md-2 col-form-label-sm"> ريال </label>
-
                                                             </div>
                                                         </div>
                                                     </div>
