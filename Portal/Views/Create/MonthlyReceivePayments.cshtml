@@ -93,7 +93,7 @@
                                             <div class="d-flex gap-2">
                                                 <label class="form-check-label col-form-label-sm col-md-1">دفع المبلغ؟</label>
                                                 <div class="form-check col-md-1 form-check-success form-check-inline">
-                                                    <input class="form-check-input IsPaid-checkbox" @(item.IsPaid ? "checked" : "") type="checkbox" data-input-id="@item.PersonId">
+                                                    <input class="form-check-input IsPaid-checkbox" type="checkbox" data-input-id="@item.PersonId" @(item.IsPaid ? "checked" : "")>
                                                     <label class="form-check-label col-form-label-sm">نعم</label>
                                                 </div>
                                             </div>

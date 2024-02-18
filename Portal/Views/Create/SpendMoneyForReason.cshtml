@@ -20,7 +20,7 @@
                         {
                             if (item.IsSelected)
                             {
-                                <option value="@item.Value">@item.Text</option>
+                                <option selected value="@item.Value">@item.Text</option>
                             }
                             else
                             {
@@ -89,117 +89,169 @@
             <button type="button" class="btn btn-primary" onclick="CollectData()">حفظ</button>
 
         </div>
-
         <div class="card-body">
             @if (Model.IsSelected)
             {
-                <div class="col-12">
-                    <div class="table-responsive">
-                        <table class="table table-flush-spacing">
-                            <tbody>
-                                @if (Model.AllPersonInSystem.Any() || Model.SpendMoneySubmitedAmount.Any())
-                                {
-                                    <tr>
-                                        <td class="text-nowrap">
-                                            تم صرف المبلغ للجميع؟
-                                            <i class="bx bx-info-circle bx-xs" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="جميع من بلاقائمة تمك صرف لهم المبالغ الدد بجانب اسهم"></i>
-                                        </td>
-                                        <td>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" checked
-                                                       id="selectAll">
-                                                <label class="form-check-label" for="selectAll">تحديد الجميع وأعادة توزيع مبلغ الأشتراك</label>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-
-
-                                    if (Model.SpendMoneySubmitedAmount is not null && Model.SpendMoneySubmitedAmount.Count > 0)
-                                    {
-                                        @foreach (var item in Model.SpendMoneySubmitedAmount)
-                                        {
-                                            <tr>
-                                                <td class="na-person" data-PersonId="@item.PersonId" hidden>
-                                                    @item.PersonName
-                                                </td>
-                                                <td class="text-nowrap">@item.PersonName</td>
-                                                <td>
-                                                    <div class="d-flex">
-                                                        <div class="d-flex">
-                                                            <div class="form-check col-md-5 form-check-success form-check-inline">
-                                                                <input class="form-check-input IsPaid-checkbox" type="checkbox" data-input-id="@item.PersonId" @(item.IsPaid ? "checked" : "")>
-                                                                <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
-                                                            </div>
-                                                            <br />
-                                                            <div class="d-flex" style="display: none;">
-                                                                <label class="col-md-3 col-form-label-sm">المبلغ</label>
-                                                                <div class="col-md-10">
-                                                                    <input class="form-control form-control-sm Amount-inputs" value="@item.Amount" type="number" data-PersonId="@item.PersonId" @(item.IsPaid ? "" : "disabled")>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        }
-                                    }
-                                    else
-                                    {
-                                        @foreach (var item in Model.AllPersonInSystem)
-                                        {
-                                            <tr>
-                                                <td class="text-nowrap">@item.PersonName</td>
-                                                <td class="na-person" data-PersonId="@item.PersonId" hidden>
-                                                    @item.PersonName
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex">
-                                                        <div class="d-flex">
-                                                            <div class="form-check col-md-5 form-check-success form-check-inline">
-                                                                @if (!item.IsPaid)
-                                                                {
-                                                                    <input class="form-check-input IsPaid-checkbox checkbox-group" type="checkbox"
-                                                                           data-input-id="@item.PersonId">
-                                                                }
-                                                                else
-                                                                {
-                                                                    <input class="form-check-input IsPaid-checkbox checkbox-group" type="checkbox"
-                                                                           oninput="adjustValues(this)"
-                                                                           checked
-                                                                           data-input-id="@item.PersonId">
-                                                                }
-                                                                <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
-                                                            </div>
-                                                            <br />
-                                                            <div class="d-flex" style="display: none;">
-                                                                <label class="col-md-3 col-form-label-sm">المبلغ</label>
-                                                                <div class="col-md-9">
-                                                                    <input class="form-control form-control-sm Amount-inputs PersonId-@item.PersonId" value="@item.Amount" type="number" data-PersonId="@item.PersonId" @(item.IsPaid ? "" : "disabled")>
-                                                                </div>
-                                                                <label class="col-md-2 col-form-label-sm"> ريال </label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        }
-                                    }
-
-                                }
-                                else
-                                {
-                                    <tr>
-                                        <td colspan="2" class="text-center">لا يوجد أسماء مرتبطة بالسبب</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                @if (Model.AllPersonInSystem.Any() || Model.SpendMoneySubmitedAmount.Any())
+                {
+                    <div class="form-check mb-5">
+                        <input class="form-check-input" type="checkbox" checked
+                               id="selectAll">
+                        <label class="form-check-label" for="selectAll">تحديد الجميع وأعادة توزيع مبلغ الأشتراك</label>
                     </div>
-                    <!-- Permission table -->
-                </div>
+                    if (Model.SpendMoneySubmitedAmount is not null && Model.SpendMoneySubmitedAmount.Count > 0)
+                    {
+                        @foreach (var item in Model.SpendMoneySubmitedAmount)
+                        {
+                            <div class="row mb-3">
+                                <label class="col-sm-1 col-form-label na-person" data-PersonId="@item.PersonId">@item.PersonName</label>
+                                <div class="col-sm-8">
+
+                                    <div class="col-md-4">
+                                        <label class="col-form-label-sm col-md-6">دفع المبلغ؟</label>
+                                        <div class="form-check form-check-success form-check-inline">
+                                            <input class="form-check-input IsPaid-checkbox checkbox-group" type="checkbox" data-input-id="@item.PersonId" @(item.IsPaid ? "checked" : "")>
+                                            <label class="form-check-label col-form-label-sm">نعم</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <label class="col-md-2 col-form-label-sm">المبلغ</label>
+                                        <div class="col-md-2">
+                                            <input class="form-control form-control-sm Amount-inputs" value="@item.Amount" type="number" data-PersonId="@item.PersonId" @(item.IsPaid ? "" : "disabled")>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        @foreach (var item in Model.AllPersonInSystem)
+                        {
+                            <div class="row mb-3">
+                                <label class="col-sm-1 col-form-label">@item.PersonName</label>
+                                <div class="col-sm-8">
+                                    <div class="col-md-4">
+                                        <label class="col-form-label-sm col-md-6">دفع المبلغ؟</label>
+                                        <div class="form-check form-check-success form-check-inline">
+                                            <input class="form-check-input IsPaid-checkbox checkbox-group" type="checkbox" data-input-id="@item.PersonId" @(item.IsPaid ? "checked" : "")>
+                                            <label class="form-check-label col-form-label-sm">نعم</label>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-md-2 col-form-label-sm">المبلغ</label>
+                                        <div class="col-md-2">
+                                            <input class="form-control form-control-sm Amount-inputs" value="@item.Amount" type="number" data-PersonId="@item.PersonId" @(item.IsPaid ? "" : "disabled")>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+                else
+                {
+                    <div class="row mb-3">
+                        <label class="col-sm-1 col-form-label">لا يوجد أسماء مرتبطة بالسبب</label>
+                    </div>
+                }
+            }
+            @* <div class="card-body">
+            @if (Model.IsSelected)
+            {
+            <div class="col-12">
+            <div class="table-responsive">
+            <table class="table table-flush-spacing">
+            <tbody>
+            @if (Model.AllPersonInSystem.Any() || Model.SpendMoneySubmitedAmount.Any())
+            {
+            <tr>
+            <td class="text-nowrap">
+            تم صرف المبلغ للجميع؟
+            <i class="bx bx-info-circle bx-xs" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="جميع من بلاقائمة تمك صرف لهم المبالغ الدد بجانب اسهم"></i>
+            </td>
+            <td>
+            <div class="form-check">
+            <input class="form-check-input" type="checkbox" checked
+            id="selectAll">
+            <label class="form-check-label" for="selectAll">تحديد الجميع وأعادة توزيع مبلغ الأشتراك</label>
+            </div>
+            </td>
+            </tr>
+
+
+
+            if (Model.SpendMoneySubmitedAmount is not null && Model.SpendMoneySubmitedAmount.Count > 0)
+            {
+            @foreach (var item in Model.SpendMoneySubmitedAmount)
+            {
+            <tr>
+            <td class="na-person" data-PersonId="@item.PersonId" hidden>
+            @item.PersonName
+            </td>
+            <td class="text-nowrap">@item.PersonName</td>
+            <td class="row">
+            <div class="d-flex">
+            <div class="form-check col-md-5 form-check-success form-check-inline">
+            <input class="form-check-input IsPaid-checkbox" type="checkbox" data-input-id="@item.PersonId" @(item.IsPaid ? "checked" : "")>
+            <label class="form-check-label col-form-label-sm">دفع المبلغ؟</label>
+            </div>
+            <div class="d-flex" style="display: none;">
+            <label class="col-md-3 col-form-label-sm">المبلغ</label>
+            <div class="col-md-10">
+            <input class="form-control form-control-sm Amount-inputs" value="@item.Amount" type="number" data-PersonId="@item.PersonId" @(item.IsPaid ? "" : "disabled")>
+            </div>
+            </div>
+            </div>
+            </td>
+            </tr>
+            }
+            }
+            else
+            {
+            @foreach (var item in Model.AllPersonInSystem)
+            {
+            <tr>
+            <td class="text-nowrap">@item.PersonName</td>
+            <td class="na-person" data-PersonId="@item.PersonId" hidden>
+            @item.PersonName
+            </td>
+            <td>
+            <div class="d-flex gap-2">
+            <label class="form-check-label col-form-label-sm col-md-1">دفع المبلغ؟</label>
+            <div class="form-check col-md-1 form-check-success form-check-inline">
+            <input class="form-check-input IsPaid-checkbox checkbox-group" type="checkbox" data-input-id="@item.PersonId" @(item.IsPaid ? "checked" : "")>
+            <label class="form-check-label col-form-label-sm">نعم</label>
+            </div>
+            </div>
+            <br />
+            <div class="d-flex gap-4">
+            <label class="col-form-label-sm">المبلغ</label>
+            <div class="col-md-2">
+            <input class="form-control form-control-sm Amount-inputs PersonId-@item.PersonId" value="@item.Amount" type="number" data-PersonId="@item.PersonId" @(item.IsPaid ? "" : "disabled")>
+            </div>
+            </div>
+            </td>
+            </tr>
+            }
+            }
 
             }
+            else
+            {
+            <tr>
+            <td colspan="2" class="text-center">لا يوجد أسماء مرتبطة بالسبب</td>
+            </tr>
+            }
+            </tbody>
+            </table>
+            </div>
+            <!-- Permission table -->
+            </div>
+
+            }
+            </div> *@
         </div>
     </div>
 </div>
