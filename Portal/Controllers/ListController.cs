@@ -81,7 +81,7 @@ namespace Portal.Controllers
                     name = p.Name,
                     phone = p.PhoneNumber,
                     civilnumber = p.CivilNumber,
-                    date = p.RegisterDate,
+                    date = DateTime.Parse(p.RegisterDate).ToString("yyyy-MM-dd"),
                     amount = p.SubscriptionAmount
                 })
                 .OrderByDescending(x => x.id)
@@ -190,7 +190,7 @@ namespace Portal.Controllers
                     id = p.Id,
                     name = p.Name.Name,
                     amount = p.Amount,
-                    date = p.Date,
+                    date = DateTime.Parse(p.Date).ToString("yyyy-MM-dd"),
                     description = p.Description
                 })
                 .OrderByDescending(x => x.id)
@@ -282,7 +282,7 @@ namespace Portal.Controllers
                     id = p.Id,
                     name = p.Person.Name,
                     amount = p.Amount,
-                    date = DateTime.Parse(p.Date, null, System.Globalization.DateTimeStyles.RoundtripKind),
+                    date = DateTime.Parse(p.Date).ToString("yyyy-MM-dd"),
                     description = p.Description
                 })
                 .OrderByDescending(x => x.id)
