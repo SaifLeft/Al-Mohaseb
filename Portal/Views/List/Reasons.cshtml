@@ -25,6 +25,7 @@
                         <tr>
                             <th scope="col">السبب</th>
                             <th scope="col">مبلغ الصرف</th>
+                            <th scope="col">تاريخ الإضافة</th>
                             <th scope="col">التحكم</th>
                         </tr>
                     </thead>
@@ -34,11 +35,12 @@
                             @foreach (var item in Model.Reasons)
                             {
                                 <tr>
-                                    <td>@item.Item2</td>
-                                    <td>@item.Item3 ريال</td>
+                                    <td>@item.Name</td>
+                                    <td>@item.Amount ريال</td>
+                                    <td>@item.Date</td>
                                     <td>
-                                        <a style="color:azure" onclick="Edit('@item.Item1','@item.Item2','@item.Item3')" class="btn btn-dark">تعديل السبب</a>
-                                        <a style="color:azure" onclick="Delete('@item.Item1')" class="btn btn-danger">حذف</a>
+                                        <a style="color:azure" onclick="Edit('@item.Id','@item.Id','@item.Id')" class="btn btn-dark">تعديل السبب</a>
+                                        <a style="color:azure" onclick="Delete('@item.Id')" class="btn btn-danger">حذف</a>
                                     </td>
                                 </tr>
                             }
@@ -134,7 +136,7 @@
                 paging: false,
                 columnDefs: [
                     // Center align both header and body content of columns 1, 2 & 3
-                    { className: "dt-center", targets: [0, 1, 2] }
+                    { className: "dt-center", targets: [0, 1, 2,3] }
                 ]
             });
 

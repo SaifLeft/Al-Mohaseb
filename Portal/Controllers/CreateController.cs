@@ -645,7 +645,7 @@ namespace Portal.Controllers
         #endregion MonthlyReceivePayments
 
         #region TransferMoney
-        public async Task<IActionResult> TransferMoney()
+        public IActionResult TransferMoney()
         {
             TransferMoneyVM VM = new();
             return View(VM);

@@ -101,8 +101,12 @@ namespace Portal.Controllers
             var reasons = _context.MosbReasons.ToList();
             var VM = new ReasonVM
             {
-                Reasons = reasons.Select(r => (r.Id, r.Name, r.Amount)).OrderByDescending(r => r.Id)
-                .ToList()
+                Reasons = reasons.Select(r => new ReasonsTable{
+                    Id = r.Id,
+                    Name = r.Name,
+                    Date = r.Date,
+                    Amount = r.Amount
+                }).OrderByDescending(r => r.Id).ToList()
             };
             VM.AddStatus = add;
             VM.UpdateStatus = update;
