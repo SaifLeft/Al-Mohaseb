@@ -6,45 +6,40 @@
 
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="card p-4">
-        <div class="divider divider-info">
-            <div class="divider-text">الصفحة الرئسية</div>
-        </div>
-        <div class="col-6">
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">اضافة شخص الى النظام</h5>
-                    <h5 class="float-end"><a class="text-danger" asp-action="Names" asp-controller="List">جميع الأسماء</a></h5>
-                </div>
-                <div class="card-body">
-                    <form asp-controller="Edit" asp-action="EditPerson" method="POST">
-                        <input type="text" name="NameId" asp-for="NameId" hidden />
-                        <div class="mb-3">
-                            <label class="form-label" for="fullname">الأسم الكامل</label>
-                            <input asp-for=Name type="text" class="form-control" id="fullname">
-                        </div>
-                        <span asp-validation-for="Name" class="text-danger"></span>
+    <div class="col-6">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">اضافة شخص الى النظام</h5>
+                <h5 class="float-end"><a class="text-danger" asp-action="Names" asp-controller="List">جميع الأسماء</a></h5>
+            </div>
+            <div class="card-body">
+                <form asp-controller="Edit" asp-action="EditPerson" method="POST">
+                    <input type="text" name="NameId" asp-for="NameId" hidden />
+                    <div class="mb-3">
+                        <label class="form-label" for="fullname">الأسم الكامل</label>
+                        <input asp-for=Name type="text" class="form-control" id="fullname">
+                    </div>
+                    <span asp-validation-for="Name" class="text-danger"></span>
 
-                        <div class="mb-3">
-                            <label class="form-label" for="civil-number">الرقم المدني</label>
-                            <input asp-for="CivilNumber" maxlength="10" type="text" class="form-control">
-                            <span asp-validation-for="CivilNumber" class="text-danger"></span>
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="civil-number">الرقم المدني</label>
+                        <input asp-for="CivilNumber" maxlength="10" type="text" class="form-control">
+                        <span asp-validation-for="CivilNumber" class="text-danger"></span>
+                    </div>
 
-                        <div class="mb-3">
-                            <label class="form-label" for="Phone">الرقم الهاتف</label>
-                            <input asp-for="Phone" maxlength="8" type="text" class="form-control">
-                            <span asp-validation-for="Phone" class="text-danger"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="SubscriptionAmount">مبلغ الأشتراك</label>
-                            <input asp-for="SubscriptionAmount" maxlength="8" type="text" class="form-control">
-                            <span asp-validation-for="SubscriptionAmount" class="text-danger"></span>
-                        </div>
-                        <button type="submit" class="btn btn-primary">حفظ</button>
+                    <div class="mb-3">
+                        <label class="form-label" for="Phone">الرقم الهاتف</label>
+                        <input asp-for="Phone" maxlength="8" type="text" class="form-control">
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="SubscriptionAmount">مبلغ الأشتراك</label>
+                        <input asp-for="SubscriptionAmount" maxlength="8" type="text" class="form-control">
+                        <span asp-validation-for="SubscriptionAmount" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
 
-                    </form>
-                </div>
+                </form>
             </div>
         </div>
     </div>
