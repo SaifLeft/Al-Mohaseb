@@ -27,9 +27,19 @@
                     تسجيل الخروج من النظام <span class="bx bx-log-out"></span>
                 </span>
             </a>
-            <a class=" style-switcher-toggle hide-arrow" href="javascript:void(0);">
+            <a class="style-switcher-toggle hide-arrow mb-3" href="javascript:void(0);">
                 <span class="menu-header-text">الوضع الليلي | النهاري</span>
                 <i class="bx bx-sm"></i>
+            </a>
+            <a class="mb-3" asp-action="DawnloadDB" asp-controller="Statistics" target="_blank">
+                <span class="menu-header-text">
+                    تحميل قاعدة البيانات <span class="bx bx-download"></span><span class="bx bx-data"></span>
+                </span>
+            </a>
+            <a asp-action="DawnloadAllDataAsPDF" asp-controller="Statistics" target="_blank">
+                <span class="menu-header-text">
+                    جميع بيانات كملف PDF <span class="bx bx-download"></span><span class="bx bx-file"></span>
+                </span>
             </a>
         </li>
         <li class="menu-header small text-uppercase">

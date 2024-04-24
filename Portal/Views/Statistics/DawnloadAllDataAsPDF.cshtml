@@ -1,0 +1,497 @@
+﻿@model DawnloadAllDataAsPDFVM;
+@{
+    ViewData["Title"] = "جاري تحميل البيانات";
+}
+<!-- Content Page -->
+<div class="container-xxl flex-grow-1 container-p-y container-print">
+    @* userTable *@
+    <div class="card p-4 mb-3">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="userTable" class="table  table-sm table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>رقم الهاتف</th>
+                            <th>الرقم المدني</th>
+                            <th>تاريخ التسجيل</th>
+                            <th>مبلغ الأشتراك</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="card p-4 mb-3">
+        <div class="card-body">
+            <table id="ReasonsTable" class="table  table-sm table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">السبب</th>
+                        <th scope="col">مبلغ الصرف</th>
+                        <th scope="col">تاريخ الإضافة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Reasons.Any())
+                    {
+                        @foreach (var item in Model.Reasons)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td>@item.Amount ريال</td>
+                                <td>@item.Date</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center">لا يوجد أسباب</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card p-4 mb-3">
+        <div class="card-body ">
+            <div class="table-responsive">
+                <table id="ReceivePaymentsTable" class="table table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>تاريخ الدفع</th>
+                            <th>دفع مبلغ وقدره</th>
+                            <th>السبب</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    @* SpendMoneyTable *@
+    <div class="card p-4 mb-3">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="SpendMoneyTable" class="table table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>تاريخ الصرف</th>
+                            <th>مبلغ الصرف</th>
+                            <th>الصرف لسبب</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    @* جميع الايداعات العامة *@
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="card-title mb-3">الرصيد العام (كل السنوات)</h5>
+        </div>
+        <div class="card-body">
+            <div id="GeneralBalanceDiv" class="d-flex  align-items-center justify-content-center flex-wrap gap-2 py-5">
+                <div class="d-flex align-items-center mb-3 form-inline" style="font-size:large">
+                    <div>
+                        <span>جميع الايداعات العامة</span>
+                        <span class="text-info">@Model.AllReceivePaymentsAmount</span>
+                    </div>
+                    <span class="mx-5 mt-2">-</span>
+                    <div>
+                        <span>جميع الصرفيات العامة</span>
+                        <span class="text-warning">@Model.AllSpendMoneyAmount</span>
+                    </div>
+                    <span class="mx-5 mt-2">=</span>
+                    <div class="mx-1">
+                        <span>الرصيد العام</span>
+                        @if (@Model.GeneralBalance < 0)
+                        {
+                            <span class="text-danger">@Model.GeneralBalance</span>
+                        }
+                        else if (@Model.GeneralBalance == 0)
+                        {
+                            <span class="text-warning">@Model.GeneralBalance</span>
+                        }
+                        else if (@Model.GeneralBalance > 0)
+                        {
+                            <span class="text-success">@Model.GeneralBalance</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <h5>
+                <span>الرصيد العام لكل سنة</span>
+            </h5>
+            <div class="table-responsive">
+                <table id="YearlyBalanceTable" class="table table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>السنة</th>
+                            <th>الايداعات</th>
+                            <th>الصرفيات</th>
+                            <th>الرصيد</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.AllBalanceForEveryYear.Any())
+                        {
+                            @foreach (var item in Model.AllBalanceForEveryYear)
+                            {
+                                <tr>
+                                    <td>@item.Year</td>
+                                    <td>@item.ReceivePayments ريال</td>
+                                    <td>@item.SpendMoney ريال</td>
+                                    <td>
+                                        @if (@item.TotalAmount < 0)
+                                        {
+                                            <span class="text-danger">@item.TotalAmount</span>
+                                        }
+                                        else if (@item.TotalAmount == 0)
+                                        {
+                                            <span class="text-warning">@item.TotalAmount</span>
+                                        }
+                                        else if (@item.TotalAmount > 0)
+                                        {
+                                            <span class="text-success">@item.TotalAmount</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center">لا يوجد بيانات</td>
+                            </tr>
+                        }
+                </table>
+            </div>
+        </div>
+    </div>
+    @* رصيد جميع الأشخاص *@
+    <div class="card mb-3 ">
+        <div class="card-body" id="PersonsBalanceCardBody">
+            <div class="align-items-center justify-content-center ">
+                <div class="table-responsive">
+                    <table id="PersonsBalanceDataTable" class="table table-striped table-bordered" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>الشخص</th>
+                                <th>رقم الهاتف</th>
+                                <th>جميع الايداعات</th>
+                                <th>جميع المصروفات</th>
+                                <th>الرصيد الشخصي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.PersonsBalance)
+                            {
+                                <tr>
+                                    <td>@item.Name</td>
+                                    <td>@item.PhoneNumber</td>
+                                    <td>@item.ReceivePayment ريال</td>
+                                    <td>@item.SpendMoney ريال</td>
+                                    <td>@item.TotalAmount</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Stylesheet {
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/typeahead-js/typeahead.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/select2/select2.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/formvalidation/dist/css/formValidation.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/sweetalert2/sweetalert2.css">
+    <link rel="stylesheet" href="~/assets/vendor/libs/loading-modal/jquery.loadingModal.css">
+
+
+}
+
+@section Scripts {
+    <script src="~/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="~/assets/vendor/libs/datatables/jquery.dataTables.js"></script>
+    <script src="~/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive/datatables.responsive.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/moment/moment.js"></script>
+    <script src="~/assets/vendor/libs/datatables/jquery.dataTables.js"></script>
+    <script src="~/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive/datatables.responsive.js"></script>
+    <script src="~/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/datatables-buttons/datatables-buttons.js"></script>
+    <script src="~/assets/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.js"></script>
+    <script src="~/assets/vendor/libs/jszip/jszip.js"></script>
+    <script src="~/lib/datatablesRTL/pdfmake.js"></script>
+    <script src="~/lib/datatablesRTL/vfs_fonts.js"></script>
+    <script src="~/lib/datatablesRTL/buttons.print.min.js"></script>
+    <script src="~/lib/datatablesRTL/buttons.html5.min.js"></script>
+    <script src="~/assets/vendor/libs/select2/select2.js"></script>
+    <script src="~/assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js"></script>
+    <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js"></script>
+    <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js"></script>
+    <script src="~/assets/vendor/libs/cleavejs/cleave.js"></script>
+    <script src="~/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/printThis/1.15.0/printThis.min.js"></script>
+    <script src="~/assets/vendor/libs/loading-modal/jquery.loadingModal.js"></script>
+
+
+    <script>
+        $(document).ready(function () {
+            $('#userTable').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "filter": true,
+                "pageLength": 50,
+                "paging": false,
+                "orderMulti": false,
+                "searching": false,
+                "ajax": {
+                    "url": "@Url.Action("GetUserDetails", "List")",
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "language": {
+                    "sProcessing": "جاري التحميل...",
+                    "sLengthMenu": "إظهار _MENU_ المدخلات",
+                    "sZeroRecords": "لا يوجد سجلات مطابقة",
+                    "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                    "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+                    "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                    "sInfoPostFix": "",
+                    "sSearch": "ابحث:",
+                    "sUrl": "",
+                    "oPaginate": {
+                        "sFirst": "الأول",
+                        "sPrevious": "السابق",
+                        "sNext": "التالي",
+                        "sLast": "الأخير"
+                    }
+                },
+                columnDefs: [
+                    // Center align both header and body content of columns 1, 2 & 3
+                    { className: "dt-center", targets: [0, 1, 2, 3, 4] }
+                ],
+                "columns": [
+                    { "data": "name", "name": "Name", "autoWidth": true, "className": 'dt-body-center' },
+                    { "data": "phone", "name": "Phone", "autoWidth": true, "className": 'dt-body-center' },
+                    { "data": "civilnumber", "name": "CivilNumber", "autoWidth": true, "className": 'dt-body-center' },
+                    { "data": "date", "date": "date", "autoWidth": true, "className": 'dt-body-center' },
+                    { "data": "amount", "date": "amount", "autoWidth": true, "className": 'dt-body-center' }
+                ]
+            });
+            $('#ReceivePaymentsTable').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "filter": true,
+                "paging": false,
+                "orderMulti": false,
+                "searching": false,
+                "ajax": {
+                    "url": "@Url.Action("GetReceivePaymentsDetails", "List")",
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                columnDefs: [
+                    // Center align both header and body content of columns 1, 2 & 3
+                    { className: "dt-center", targets: [0, 1, 2, 3] }
+                ],
+                "language": {
+                    "sProcessing": "جاري التحميل...",
+                    "sLengthMenu": "إظهار _MENU_ المدخلات",
+                    "sZeroRecords": "لا يوجد سجلات مطابقة",
+                    "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                    "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+                    "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                    "sInfoPostFix": "",
+                    "sSearch": "ابحث:",
+                    "sUrl": "",
+                    "oPaginate": {
+                        "sFirst": "الأول",
+                        "sPrevious": "السابق",
+                        "sNext": "التالي",
+                        "sLast": "الأخير"
+                    }
+                },
+                "columns": [
+                    { "data": "name", "name": "Name", "autoWidth": true },
+                    { "data": "date", "name": "date", "autoWidth": true },
+                    {
+                        "render": function (data, type, full, meta) { return full.amount + ' ريال'; }
+                    },
+                    { "data": "description", "name": "description", "width": "35%" },
+                ]
+            });
+            $('#SpendMoneyTable').DataTable({
+                "processing": true,
+                "serverSide": true,
+                "filter": true,
+                "paging": false,
+                "orderMulti": false,
+                "searching": false,
+                "ajax": {
+                    "url": "@Url.Action("GetSpendMoneyDetails", "List")",
+                    "type": "POST",
+                    "datatype": "json"
+                },
+                "language": {
+                    "sProcessing": "جاري التحميل...",
+                    "sLengthMenu": "إظهار _MENU_ المدخلات",
+                    "sZeroRecords": "لا يوجد سجلات مطابقة",
+                    "sInfo": "إظهار _START_ إلى _END_ من أصل _TOTAL_ مدخل",
+                    "sInfoEmpty": "يعرض 0 إلى 0 من أصل 0 سجل",
+                    "sInfoFiltered": "(منتقاة من مجموع _MAX_ مُدخل)",
+                    "sInfoPostFix": "",
+                    "sSearch": "ابحث:",
+                    "sUrl": "",
+                    "oPaginate": {
+                        "sFirst": "الأول",
+                        "sPrevious": "السابق",
+                        "sNext": "التالي",
+                        "sLast": "الأخير"
+                    }
+                },
+                "columns": [
+                    { "data": "name", "name": "Name", "autoWidth": true },
+                    { "data": "date", "name": "date", "autoWidth": true },
+                    {
+                        "render": function (data, type, full, meta) { return full.amount + ' ريال'; }
+                    },
+                    { "data": "description", "name": "description", "width": "25%" }
+                ],
+                columnDefs: [
+                    // Center align both header and body content of columns 1, 2 & 3
+                    { className: "dt-center", targets: [0, 1, 2, 3] }
+                ],
+            });
+            var conternar = document.querySelector('.container-print');
+            //hide the container-print
+            conternar.style.display = 'none';
+            $('body').loadingModal({
+                position: 'auto',
+                text: 'جاري جمع البيانات وتحميلها كملف PDF',
+                color: '#fff',
+                opacity: '1',
+                backgroundColor: 'rgb(0,0,0)',
+                animation: 'fadingCircle'
+            });
+            setTimeout(PrintingProcess, 1000);
+
+
+        });
+        function PrintingProcess() {
+
+
+
+
+
+            var userTable = $('#userTable').clone();
+            var ReasonsTable = $('#ReasonsTable').clone();
+            var ReceivePaymentsTable = $('#ReceivePaymentsTable').clone();
+            var SpendMoneyTable = $('#SpendMoneyTable').clone();
+            var GeneralBalanceDiv = $('#GeneralBalanceDiv').clone();
+            var YearlyBalanceTable = $('#YearlyBalanceTable').clone();
+            var PersonsBalanceDataTable = $('#PersonsBalanceDataTable').clone();
+
+            //print each table in page
+            var printContent = document.createElement('div');
+            var brk = document.createElement('br');
+
+
+            // table rtl direction
+            userTable.css('direction', 'rtl');
+            ReasonsTable.css('direction', 'rtl');
+            ReceivePaymentsTable.css('direction', 'rtl');
+            SpendMoneyTable.css('direction', 'rtl');
+            GeneralBalanceDiv.css('direction', 'rtl');
+            YearlyBalanceTable.css('direction', 'rtl');
+            PersonsBalanceDataTable.css('direction', 'rtl');
+            // add h1 "بيانات النظام" بتاريخ الي -- و الساعة م\ص"
+            var TodayDate = "التاريخ: " + new Date().toLocaleDateString("ar-EG");
+            var TodayTime = "الوقت: " + new Date().toLocaleTimeString("ar-EG");
+
+            var h1 = document.createElement('h1');
+            h1.textContent = "بيانات النظام";
+            h1.style.textAlign = 'center';
+            h1.style.marginBottom = '30px';
+            h1.style.fontSize = '30px';
+            h1.style.fontWeight = 'bold';
+            h1.style.direction = 'rtl';
+            h1.classList.add('mb-1');
+            printContent.appendChild(h1);
+
+            var h2d = document.createElement('h5');
+            h2d.textContent = TodayDate;
+            h2d.style.textAlign = 'center';
+            h2d.style.direction = 'rtl';
+            h2d.classList.add('mb-0');
+            printContent.appendChild(h2d);
+
+            var h2t = document.createElement('h5');
+            h2t.textContent = TodayTime;
+            h2t.style.direction = 'rtl';
+            h2t.style.textAlign = 'center';
+            printContent.appendChild(h2t);
+
+            var h3 = document.createElement('h3');
+            h3.textContent = "بيانات الأعضاء";
+            h3.style.textAlign = 'center';
+            h3.classList.add('mb-0');
+
+            printContent.appendChild(userTable[0]);
+            printContent.appendChild(brk);
+            printContent.appendChild(ReasonsTable[0]);
+            printContent.appendChild(brk);
+            printContent.appendChild(ReceivePaymentsTable[0]);
+            printContent.appendChild(brk);
+            printContent.appendChild(SpendMoneyTable[0]);
+            printContent.appendChild(brk);
+            printContent.appendChild(GeneralBalanceDiv[0]);
+            printContent.appendChild(brk);
+            printContent.appendChild(YearlyBalanceTable[0]);
+            printContent.appendChild(brk);
+            printContent.appendChild(PersonsBalanceDataTable[0]);
+
+            //print the content
+            $(printContent).printThis({
+                importCSS: true,
+                importStyle: true,
+                loadCSS: "",
+                header: null,
+                footer: null,
+                pageTitle: "جميع البيانات",
+                removeInline: false,
+                printDelay: 333,
+                formValues: true
+            });
+
+            //show the container-print
+            conternar.style.display = 'block';
+            $('body').loadingModal('hide');
+
+
+
+
+
+
+
+
+
+        }
+    </script>
+}

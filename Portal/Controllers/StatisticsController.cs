@@ -355,5 +355,71 @@ namespace Portal.Controllers
 
         #endregion Semple
 
+
+        public IActionResult DawnloadDB()
+        {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "AlMohaseb-ERD.db");
+            // copy as backup in 'DB Backup' folder
+            var backupPath = Path.Combine(Directory.GetCurrentDirectory(), "DB Backup", $"AlMohaseb-ERD-{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.db");
+            System.IO.File.Copy(path, backupPath);
+            // download the backup db file
+            return PhysicalFile(backupPath, "application/octet-stream", Path.GetFileName(backupPath));
+        }
+
+        public async Task<IActionResult> DawnloadAllDataAsPDF()
+        {
+            DawnloadAllDataAsPDFVM VM = new();
+
+            VM.Reasons = await _context.MosbReasons.Select(r => new ReasonsTable
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Date = r.Date,
+                Amount = r.Amount
+            }).OrderByDescending(r => r.Id).ToListAsync();
+
+            var ReceivePayments = await _context.MosbReceivePayments
+                    .Include(x => x.Name)
+                    .Include(x => x.ReceivePaymentsReasonsMapping)
+                    .ToListAsync();
+
+            var SpendMoney = await _context.MosbSpendMoney
+                .Include(x => x.Person)
+                .Include(x => x.Reasons)
+                .ToListAsync();
+
+            var Names = await _context.MosbName.ToListAsync();
+
+            VM.AllReceivePaymentsAmount = Math.Round(ReceivePayments.Sum(x => x.Amount), 4);
+            VM.AllSpendMoneyAmount = Math.Round(SpendMoney.Sum(x => x.Amount), 4);
+            VM.GeneralBalance = Math.Round(VM.AllReceivePaymentsAmount - VM.AllSpendMoneyAmount, 4);
+
+
+            List<SelectListModel> AllYears = new();
+            AddYearsToListModel(ReceivePayments, ref AllYears, x => DateTime.Parse(x.Date).Year,null);
+            AddYearsToListModel(SpendMoney, ref AllYears, x => DateTime.Parse(x.Date).Year, null);
+            var YearsList = AllYears.GroupBy(x => x.Value).Select(x => x.First()).ToList();
+
+            VM.AllBalanceForEveryYear = YearsList.Select(year => new YearlyBalanceDTO
+            {
+                Year = year.Text,
+                ReceivePayments = Math.Round(ReceivePayments.Where(x => DateTime.Parse(x.Date).Year == year.Value).Sum(x => x.Amount), 4),
+                SpendMoney = Math.Round(SpendMoney.Where(x => DateTime.Parse(x.Date).Year == year.Value).Sum(x => x.Amount), 4),
+                TotalAmount = Math.Round(ReceivePayments.Where(x => DateTime.Parse(x.Date).Year == year.Value).Sum(x => x.Amount) - SpendMoney.Where(x => DateTime.Parse(x.Date).Year == year.Value).Sum(x => x.Amount), 4)
+            }).ToList();
+
+            VM.PersonsBalance = Names.Select(x => new ShowPersonsTotal
+            {
+                PhoneNumber = x.PhoneNumber,
+                Name = x.Name,
+                ReceivePayment = Math.Round(x.MosbReceivePayments.Sum(x => x.Amount), 4),
+                SpendMoney = Math.Round(x.MosbSpendMoney.Sum(x => x.Amount), 4),
+                TotalAmount = Math.Round((x.MosbReceivePayments.Sum(x => x.Amount) - x.MosbSpendMoney.Sum(x => x.Amount)), 4),
+                LastActivity = GetLastActivity(ReceivePayments, SpendMoney, x.Id)
+            }).ToList();
+
+            return View(VM);
+        }
+
     }
 }
