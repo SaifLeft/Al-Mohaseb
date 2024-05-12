@@ -253,6 +253,9 @@
 
     <script>
         $(document).ready(function () {
+            var conternar = document.querySelector('.container-print');
+            //hide the container-print
+            conternar.style.display = 'none';
             $('#userTable').DataTable({
                 "processing": true,
                 "serverSide": true,
@@ -379,9 +382,7 @@
                     { className: "dt-center", targets: [0, 1, 2, 3] }
                 ],
             });
-            var conternar = document.querySelector('.container-print');
-            //hide the container-print
-            conternar.style.display = 'none';
+            
             $('body').loadingModal({
                 position: 'auto',
                 text: 'جاري جمع البيانات وتحميلها كملف PDF',
@@ -395,10 +396,6 @@
 
         });
         function PrintingProcess() {
-
-
-
-
 
             var userTable = $('#userTable').clone();
             var ReasonsTable = $('#ReasonsTable').clone();
@@ -439,7 +436,7 @@
             h2d.textContent = TodayDate;
             h2d.style.textAlign = 'center';
             h2d.style.direction = 'rtl';
-            h2d.classList.add('mb-0');
+            h2d.classList.add('mb-2');
             printContent.appendChild(h2d);
 
             var h2t = document.createElement('h5');
@@ -448,23 +445,65 @@
             h2t.style.textAlign = 'center';
             printContent.appendChild(h2t);
 
-            var h3 = document.createElement('h3');
-            h3.textContent = "بيانات الأعضاء";
-            h3.style.textAlign = 'center';
-            h3.classList.add('mb-0');
-
+            var userHeader = document.createElement('h3');
+            userHeader.textContent = "بيانات الأعضاء";
+            userHeader.style.textAlign = 'center';
+            userHeader.classList.add('mb-2');
+            printContent.appendChild(userHeader);
             printContent.appendChild(userTable[0]);
+
             printContent.appendChild(brk);
+
+            var ReasonsHeader = document.createElement('h3');
+            ReasonsHeader.textContent = "بيانات الأسباب";
+            ReasonsHeader.style.textAlign = 'center';
+            ReasonsHeader.classList.add('mb-2');
+            printContent.appendChild(ReasonsHeader);
             printContent.appendChild(ReasonsTable[0]);
+
             printContent.appendChild(brk);
+
+            var ReceivePaymentsHeader = document.createElement('h3');
+            ReceivePaymentsHeader.textContent = "بيانات الايداعات";
+            ReceivePaymentsHeader.style.textAlign = 'center';
+            ReceivePaymentsHeader.classList.add('mb-2');
+            printContent.appendChild(ReceivePaymentsHeader);
             printContent.appendChild(ReceivePaymentsTable[0]);
+
             printContent.appendChild(brk);
+
+            var SpendMoneyHeader = document.createElement('h3');
+            SpendMoneyHeader.textContent = "بيانات الصرفيات";
+            SpendMoneyHeader.style.textAlign = 'center';
+            SpendMoneyHeader.classList.add('mb-2');
+            printContent.appendChild(SpendMoneyHeader);
             printContent.appendChild(SpendMoneyTable[0]);
+
             printContent.appendChild(brk);
+
+            var GeneralBalanceHeader = document.createElement('h3');
+            GeneralBalanceHeader.textContent = "الرصيد العام";
+            GeneralBalanceHeader.style.textAlign = 'center';
+            GeneralBalanceHeader.classList.add('mb-2');
+            printContent.appendChild(GeneralBalanceHeader);
             printContent.appendChild(GeneralBalanceDiv[0]);
+
             printContent.appendChild(brk);
+
+            var YearlyBalanceHeader = document.createElement('h3');
+            YearlyBalanceHeader.textContent = "الرصيد العام لكل سنة";
+            YearlyBalanceHeader.style.textAlign = 'center';
+            YearlyBalanceHeader.classList.add('mb-2');
+            printContent.appendChild(YearlyBalanceHeader);
             printContent.appendChild(YearlyBalanceTable[0]);
+
             printContent.appendChild(brk);
+
+            var PersonsBalanceHeader = document.createElement('h3');
+            PersonsBalanceHeader.textContent = "رصيد جميع الأشخاص";
+            PersonsBalanceHeader.style.textAlign = 'center';
+            PersonsBalanceHeader.classList.add('mb-2');
+            printContent.appendChild(PersonsBalanceHeader);
             printContent.appendChild(PersonsBalanceDataTable[0]);
 
             //print the content
@@ -483,15 +522,6 @@
             //show the container-print
             conternar.style.display = 'block';
             $('body').loadingModal('hide');
-
-
-
-
-
-
-
-
-
         }
     </script>
 }

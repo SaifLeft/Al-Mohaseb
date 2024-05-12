@@ -44,7 +44,7 @@
             }
         </div>
     </div>
-    <div class="card" id="CardDetailsDiv" style="display:none;">
+    <div class="card border-secondary border-3" id="CardDetailsDiv" style="display:none;">
         <div class="card-header d-flex align-items-center justify-content-between">
             <h5 class="mb-0">جميع الأسماء للإيداع الشهري</h5>
             <div>
@@ -55,7 +55,7 @@
                         طباعة النتيجة
                     </button>
                 }
-                <button type="button" class="btn btn-primary" onclick="CollectData()">حفظ</button>
+                <button type="button" class="btn btn-primary" onclick="CollectData()">مراجعة</button>
             </div>
         </div>
 
@@ -73,7 +73,7 @@
                                     </td>
                                     <td>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" checked id="selectAll">
+                                            <input class="form-check-input" type="checkbox" id="selectAll">
                                             <label class="form-check-label" for="selectAll">تحديد الجميع وأعادة توزيع مبلغ الأشتراك</label>
                                         </div>
                                     </td>
@@ -236,12 +236,10 @@
             }
             // Get the current year and month in the format 'yyyy-MM'
             var YearMonth = '@Model.YearMonth'; // Example: '2021-01'
-            var year2digit = new Date().getFullYear().toString()
-            var dayNow = year2digit + '-' + (new Date().getMonth() + 1);
-            var dateformat = YearMonth === '' ? dayNow : YearMonth;
             var flatpickrDate = flatpickr('#flatpickr-date', {
                 altInput: true,
-                defaultDate: dateformat,
+                defaultDate: YearMonth === '' ? null : YearMonth,
+                placeholder: 'الرجاء اختيار التاريخ',
                 plugins: [
                     new monthSelectPlugin({
                         shorthand: true, // Use shorthand month names

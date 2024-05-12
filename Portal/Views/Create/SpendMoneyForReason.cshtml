@@ -229,14 +229,11 @@
 
             // Get the current year and month in the format 'yyyy-MM'
             var YearMonth = '@Model.YearMonth'; // Example: '2021-01'
-            var year2digit = new Date().getFullYear().toString()
-            var dayNow = year2digit + '-' + (new Date().getMonth() + 1);
-            var dateformat = YearMonth === '' ? dayNow : YearMonth;
 
             // Initialize the flatpickr date picker
             flatpickr("#flatpickr-date", {
                 altInput: true,
-                defaultDate: dateformat,
+                defaultDate: YearMonth === '' ? null : YearMonth,
                 plugins: [
                     new monthSelectPlugin({
                         shorthand: true, // Use shorthand month names

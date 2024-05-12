@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -178,7 +179,7 @@ namespace Portal.Controllers
         }
         private List<double> GetMonthlyAmountData<T>(List<T> data, string datePropertyName, string amountPropertyName, int year)
         {
-            List<double> yearlyData = new List<double>();
+            List<double> yearlyData = new();
             for (int month = 1; month <= 12; month++)
             {
                 //AmountBerMonth: [TotalAmountInJun, TotalAmountInFeb, 12, 17, 9, 17, 26, 21, 10, 12, 18, 4]
@@ -250,6 +251,50 @@ namespace Portal.Controllers
         }
 
         #endregion Reason
+
+
+        #region GeneralBalance
+        public async Task<IActionResult> GeneralBalance(int? Year)
+        {
+            var VM = new GeneralBalanceVM();
+            Year = Year == 0000 ? null : Year;
+            var ReceivePayments = await _context.MosbReceivePayments
+                   .Include(x => x.Name)
+                   .Include(x => x.ReceivePaymentsReasonsMapping)
+                   .ToListAsync();
+
+            var SpendMoney = await _context.MosbSpendMoney
+                .Include(x => x.Person)
+                .Include(x => x.Reasons)
+                .ToListAsync();
+
+
+            int? year = Year.HasValue ? Year.Value : null;
+            List<SelectListModel> AllYears = new();
+            AddYearsToListModel(ReceivePayments, ref AllYears, x => DateTime.Parse(x.Date).Year, year);
+            AddYearsToListModel(SpendMoney, ref AllYears, x => DateTime.Parse(x.Date).Year, year);
+            VM.YearsList = AllYears.GroupBy(x => x.Value).Select(x => x.First()).ToList();
+
+
+            if (Year.HasValue)
+            {
+                ReceivePayments = ReceivePayments.Where(x => DateTime.Parse(x.Date).Year == Year).ToList();
+                SpendMoney = SpendMoney.Where(x => DateTime.Parse(x.Date).Year == Year).ToList();
+            }
+
+
+            VM.AllReceivePaymentsAmount = Math.Round(ReceivePayments.Sum(x => x.Amount), 4);
+            VM.AllSpendMoneyAmount = Math.Round(SpendMoney.Sum(x => x.Amount), 4);
+            VM.GeneralBalance = Math.Round(VM.AllReceivePaymentsAmount - VM.AllSpendMoneyAmount, 4);
+
+
+
+
+
+            return View(VM);
+        }
+        #endregion GeneralBalance
+
 
 
         #region Semple
@@ -396,7 +441,7 @@ namespace Portal.Controllers
 
 
             List<SelectListModel> AllYears = new();
-            AddYearsToListModel(ReceivePayments, ref AllYears, x => DateTime.Parse(x.Date).Year,null);
+            AddYearsToListModel(ReceivePayments, ref AllYears, x => DateTime.Parse(x.Date).Year, null);
             AddYearsToListModel(SpendMoney, ref AllYears, x => DateTime.Parse(x.Date).Year, null);
             var YearsList = AllYears.GroupBy(x => x.Value).Select(x => x.First()).ToList();
 
@@ -420,6 +465,287 @@ namespace Portal.Controllers
 
             return View(VM);
         }
+
+        // using CloseXML package
+        public async Task<IActionResult> DownloadAllDataAsExcel()
+        {
+            var Reasons = await _context.MosbReasons.Select(r => new ReasonsTable
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Date = r.Date,
+                Amount = r.Amount
+            }).OrderByDescending(r => r.Id).ToListAsync();
+
+            var ReceivePayments = await _context.MosbReceivePayments
+                    .Include(x => x.Name)
+                    .Include(x => x.ReceivePaymentsReasonsMapping)
+                    .Where(x => x.IsPaid == true.GetHashCode())
+                    .ToListAsync();
+
+            var SpendMoney = await _context.MosbSpendMoney
+                .Include(x => x.Person)
+                .Include(x => x.Reasons)
+                .Where(x => x.IsPaid == true.GetHashCode())
+                .ToListAsync();
+
+            var Names = await _context.MosbName.ToListAsync();
+
+            var AllReceivePaymentsAmount = Math.Round(ReceivePayments.Sum(x => x.Amount), 4);
+            var AllSpendMoneyAmount = Math.Round(SpendMoney.Sum(x => x.Amount), 4);
+            var GeneralBalance = Math.Round(AllReceivePaymentsAmount - AllSpendMoneyAmount, 4);
+
+
+            List<SelectListModel> AllYears = new();
+            AddYearsToListModel(ReceivePayments, ref AllYears, x => DateTime.Parse(x.Date).Year, null);
+            AddYearsToListModel(SpendMoney, ref AllYears, x => DateTime.Parse(x.Date).Year, null);
+            var YearsList = AllYears.GroupBy(x => x.Value).Select(x => x.First()).ToList();
+
+            var AllBalanceForEveryYear = YearsList.Select(year => new YearlyBalanceDTO
+            {
+                Year = year.Text,
+                ReceivePayments = Math.Round(ReceivePayments.Where(x => DateTime.Parse(x.Date).Year == year.Value).Sum(x => x.Amount), 4),
+                SpendMoney = Math.Round(SpendMoney.Where(x => DateTime.Parse(x.Date).Year == year.Value).Sum(x => x.Amount), 4),
+                TotalAmount = Math.Round(ReceivePayments.Where(x => DateTime.Parse(x.Date).Year == year.Value).Sum(x => x.Amount) - SpendMoney.Where(x => DateTime.Parse(x.Date).Year == year.Value).Sum(x => x.Amount), 4)
+            }).ToList();
+
+            var PersonsBalance = Names.Select(x => new ShowPersonsTotal
+            {
+                PhoneNumber = x.PhoneNumber,
+                Name = x.Name,
+                ReceivePayment = Math.Round(x.MosbReceivePayments.Sum(x => x.Amount), 4),
+                SpendMoney = Math.Round(x.MosbSpendMoney.Sum(x => x.Amount), 4),
+                TotalAmount = Math.Round((x.MosbReceivePayments.Sum(x => x.Amount) - x.MosbSpendMoney.Sum(x => x.Amount)), 4),
+                LastActivity = GetLastActivity(ReceivePayments, SpendMoney, x.Id)
+            }).ToList();
+
+
+
+
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("الرصيد العام");
+
+            //worksheet right to left
+            worksheet.RightToLeft = true;
+
+            worksheet.Cell("A1").Value = "الرصيد العام";
+            worksheet.Cell("A1").Style.Font.Bold = true;
+            worksheet.Cell("A1").Style.Font.FontSize = 20;
+            worksheet.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            worksheet.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            worksheet.Range("A1:B1").Merge();
+
+            worksheet.Cell("A2").Value = "الرصيد الكلي للمدفوعات";
+            worksheet.Cell("B2").Value = AllReceivePaymentsAmount;
+
+            worksheet.Cell("A3").Value = "الرصيد الكلي للمصروفات";
+            worksheet.Cell("B3").Value = AllSpendMoneyAmount;
+
+            worksheet.Cell("A4").Value = "الرصيد العام";
+            worksheet.Cell("B4").Value = GeneralBalance;
+
+            worksheet.Columns().AdjustToContents();
+
+            var worksheet2 = workbook.Worksheets.Add("الرصيد السنوي");
+
+            //worksheet right to left
+            worksheet2.RightToLeft = true;
+
+            worksheet2.Cell("A1").Value = "الرصيد السنوي";
+            worksheet2.Cell("A1").Style.Font.Bold = true;
+            worksheet2.Cell("A1").Style.Font.FontSize = 20;
+            worksheet2.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            worksheet2.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            worksheet2.Range("A1:D1").Merge();
+
+            worksheet2.Cell("A2").Value = "السنة";
+            worksheet2.Cell("B2").Value = "المدفوعات";
+            worksheet2.Cell("C2").Value = "المصروفات";
+            worksheet2.Cell("D2").Value = "الرصيد السنوي";
+
+            for (int i = 0; i < AllBalanceForEveryYear.Count; i++)
+            {
+                worksheet2.Cell(i + 3, 1).Value = AllBalanceForEveryYear[i].Year;
+                worksheet2.Cell(i + 3, 2).Value = AllBalanceForEveryYear[i].ReceivePayments;
+                worksheet2.Cell(i + 3, 3).Value = AllBalanceForEveryYear[i].SpendMoney;
+                worksheet2.Cell(i + 3, 4).Value = AllBalanceForEveryYear[i].TotalAmount;
+            }
+
+            // create table for the data
+            var table = worksheet2.Range("A2:D" + (AllBalanceForEveryYear.Count + 2)).CreateTable();
+            table.ShowAutoFilter = true;
+            table.Theme = XLTableTheme.TableStyleMedium2;
+
+            worksheet2.Columns().AdjustToContents();
+
+            var worksheet3 = workbook.Worksheets.Add("بيانات الاساسية للأعضاء");
+
+            //worksheet right to left
+            worksheet3.RightToLeft = true;
+
+            worksheet3.Cell("A1").Value = "بيانات الاساسية للأعضاء";
+            worksheet3.Cell("A1").Style.Font.Bold = true;
+            worksheet3.Cell("A1").Style.Font.FontSize = 20;
+            worksheet3.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            worksheet3.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            worksheet3.Range("A1:E1").Merge();
+
+            worksheet3.Cell("A2").Value = "الاسم";
+            worksheet3.Cell("B2").Value = "رقم الهاتف";
+            worksheet3.Cell("C2").Value = "المدفوعات";
+            worksheet3.Cell("D2").Value = "المصروفات";
+            worksheet3.Cell("E2").Value = "الرصيد الكلي";
+
+            for (int i = 0; i < PersonsBalance.Count; i++)
+            {
+                worksheet3.Cell(i + 3, 1).Value = PersonsBalance[i].Name;
+                worksheet3.Cell(i + 3, 2).Value = PersonsBalance[i].PhoneNumber;
+                worksheet3.Cell(i + 3, 3).Value = PersonsBalance[i].ReceivePayment;
+                worksheet3.Cell(i + 3, 4).Value = PersonsBalance[i].SpendMoney;
+                worksheet3.Cell(i + 3, 5).Value = PersonsBalance[i].TotalAmount;
+            }
+
+            // create table for the data
+            var table1 = worksheet3.Range("A2:E" + (PersonsBalance.Count + 2)).CreateTable();
+            table1.ShowAutoFilter = true;
+            table1.Theme = XLTableTheme.TableStyleMedium2;
+
+            worksheet3.Columns().AdjustToContents();
+
+            var worksheet4 = workbook.Worksheets.Add("جميع الأسباب");
+
+            //worksheet right to left
+            worksheet4.RightToLeft = true;
+
+            worksheet4.Cell("A1").Value = "جميع الأسباب";
+            worksheet4.Cell("A1").Style.Font.Bold = true;
+            worksheet4.Cell("A1").Style.Font.FontSize = 20;
+            worksheet4.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            worksheet4.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            worksheet4.Range("A1:D1").Merge();
+
+            worksheet4.Cell("A2").Value = "الاسم";
+            worksheet4.Cell("B2").Value = "التاريخ";
+            worksheet4.Cell("C2").Value = "المبلغ";
+
+            for (int i = 0; i < Reasons.Count; i++)
+            {
+                worksheet4.Cell(i + 3, 1).Value = Reasons[i].Name;
+                worksheet4.Cell(i + 3, 2).Value = Reasons[i].Date;
+                worksheet4.Cell(i + 3, 3).Value = Reasons[i].Amount;
+            }
+            // create table for the data
+            var table2 = worksheet4.Range("A2:C" + (Reasons.Count + 2)).CreateTable();
+            table2.ShowAutoFilter = true;
+            table2.Theme = XLTableTheme.TableStyleMedium2;
+
+            worksheet4.Columns().AdjustToContents();
+
+            var worksheet5 = workbook.Worksheets.Add("جميع الايداعات");
+
+            //worksheet right to left
+            worksheet5.RightToLeft = true;
+
+            worksheet5.Cell("A1").Value = "جميع الايداعات";
+            worksheet5.Cell("A1").Style.Font.Bold = true;
+            worksheet5.Cell("A1").Style.Font.FontSize = 20;
+            worksheet5.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            worksheet5.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            worksheet5.Range("A1:C1").Merge();
+
+            worksheet5.Cell("A2").Value = "الاسم";
+            worksheet5.Cell("B2").Value = "التاريخ الايداع";
+            worksheet5.Cell("C2").Value = "المبلغ الايداع";
+
+            for (int i = 0; i < ReceivePayments.Count; i++)
+            {
+                worksheet5.Cell(i + 3, 1).Value = ReceivePayments[i].Name.Name;
+                worksheet5.Cell(i + 3, 2).Value = ReceivePayments[i].Date;
+                worksheet5.Cell(i + 3, 3).Value = ReceivePayments[i].Amount;
+            }
+            // create table for the data
+            var table3 = worksheet5.Range("A2:C" + (ReceivePayments.Count + 2)).CreateTable();
+            table3.ShowAutoFilter = true;
+            table3.Theme = XLTableTheme.TableStyleMedium2;
+
+            worksheet5.Columns().AdjustToContents();
+
+            var worksheet6 = workbook.Worksheets.Add("جميع المصروفات");
+
+            //worksheet right to left
+            worksheet6.RightToLeft = true;
+
+            worksheet6.Cell("A1").Value = "جميع المصروفات";
+            worksheet6.Cell("A1").Style.Font.Bold = true;
+            worksheet6.Cell("A1").Style.Font.FontSize = 20;
+            worksheet6.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            worksheet6.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            worksheet6.Range("A1:C1").Merge();
+
+            worksheet6.Cell("A2").Value = "الاسم";
+            worksheet6.Cell("B2").Value = "التاريخ الصرف";
+            worksheet6.Cell("C2").Value = "مبلغ الصرف";
+
+            for (int i = 0; i < SpendMoney.Count; i++)
+            {
+                worksheet6.Cell(i + 3, 1).Value = SpendMoney[i].Person.Name;
+                worksheet6.Cell(i + 3, 2).Value = SpendMoney[i].Date;
+                worksheet6.Cell(i + 3, 3).Value = SpendMoney[i].Amount;
+            }
+            // create table for the data
+            var table4 = worksheet6.Range("A2:C" + (SpendMoney.Count + 2)).CreateTable();
+            table4.ShowAutoFilter = true;
+            table4.Theme = XLTableTheme.TableStyleMedium2;
+
+            worksheet6.Columns().AdjustToContents();
+
+
+            var worksheet7 = workbook.Worksheets.Add("رصيد الأعضاء");
+
+            //worksheet right to left
+            worksheet7.RightToLeft = true;
+
+            worksheet7.Cell("A1").Value = "رصيد الأعضاء المنتسبين";
+            worksheet7.Cell("A1").Style.Font.Bold = true;
+            worksheet7.Cell("A1").Style.Font.FontSize = 20;
+            worksheet7.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            worksheet7.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+            worksheet7.Range("A1:E1").Merge();
+
+            worksheet7.Cell("A2").Value = "الاسم";
+            worksheet7.Cell("B2").Value = "رقم الهاتف";
+            worksheet7.Cell("C2").Value = "المدفوعات";
+            worksheet7.Cell("D2").Value = "المصروفات";
+            worksheet7.Cell("E2").Value = "الرصيد الكلي";
+
+            for (int i = 0; i < PersonsBalance.Count; i++)
+            {
+                worksheet7.Cell(i + 3, 1).Value = PersonsBalance[i].Name;
+                worksheet7.Cell(i + 3, 2).Value = PersonsBalance[i].PhoneNumber;
+                worksheet7.Cell(i + 3, 3).Value = PersonsBalance[i].ReceivePayment;
+                worksheet7.Cell(i + 3, 4).Value = PersonsBalance[i].SpendMoney;
+                worksheet7.Cell(i + 3, 5).Value = PersonsBalance[i].TotalAmount;
+            }
+
+            // create table for the data
+            var table5 = worksheet7.Range("A2:E" + (PersonsBalance.Count + 2)).CreateTable();
+            table5.ShowAutoFilter = true;
+            table5.Theme = XLTableTheme.TableStyleMedium2;
+
+            worksheet7.Columns().AdjustToContents();
+
+            var fileTitle = $"بيانات النطام - {DateTime.Now.ToString("yyyy-MM-dd-(HH-mm-ss)")}.xlsx";
+            using (var stream = new MemoryStream())
+            {
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileTitle);
+            }
+
+
+        }
+
 
     }
 }

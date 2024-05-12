@@ -1,6 +1,6 @@
 ﻿@model SempleVM;
 @{
-    ViewData["Title"] = "أحصائيات بأسم معين";
+    ViewData["Title"] = "الإحصائيات البسيطة";
     string display = Model.PersonalBalanceIsAvailable ? "block" : "none";
     string display2 = Model.YearIsAvailable ? "block" : "none";
     string Personalbadge = Model.PersonalTotalAmount < 0
@@ -12,97 +12,6 @@
 }
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    @* جميع الايداعات العامة *@
-    <div class="card mb-3">
-        <div class="card-header">
-            <h5 class="card-title mb-3">الرصيد العام (كل السنوات)</h5>
-        </div>
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-5">
-                <div class="d-flex align-items-center mb-3 form-inline" style="font-size:x-large">
-                    <div>
-                        <span>جميع الايداعات العامة</span>
-                        <span class="badge rounded-pill bg-info">@Model.AllReceivePaymentsAmount</span>
-                    </div>
-                    <span class="mx-5 mt-2">-</span>
-                    <div>
-                        <span>جميع الصرفيات العامة</span>
-                        <span class="badge rounded-pill bg-warning">@Model.AllSpendMoneyAmount</span>
-                    </div>
-                    <span class="mx-5 mt-2">=</span>
-                    <div class="mx-1">
-                        <span>الرصيد العام</span>
-                        @if (@Model.GeneralBalance < 0)
-                        {
-                            <span class="badge rounded-pill bg-danger">@Model.GeneralBalance</span>
-                        }
-                        else if (@Model.GeneralBalance == 0)
-                        {
-                            <span class="badge rounded-pill bg-warning">@Model.GeneralBalance</span>
-                        }
-                        else if (@Model.GeneralBalance > 0)
-                        {
-                            <span class="badge rounded-pill bg-success">@Model.GeneralBalance</span>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    @* جميع الايداعات السنوية *@
-    <div class="card mb-3">
-        <div class="d-flex card-header">
-            <h5 class="card-title col-md-6">الرصيد السنوي للحساب العام</h5>
-            <label class="mb-3 text-uppercase col-md-2" style="font-size:x-large">بحث في سنة المعنية</label>
-            <div class="col-md-4">
-                <select id="YearList" class="select2 form-select">
-                    <option value="">اختر سنة</option>
-                    @foreach (var item in Model.YearsList)
-                    {
-                        if (item.IsSelected)
-                        {
-                            <option selected value="@item.Value">@item.Text</option>
-                        }
-                        else
-                        {
-                            <option value="@item.Value">@item.Text</option>
-                        }
-                    }
-                </select>
-            </div>
-        </div>
-        <div class="card-body" style="display:@display2">
-            <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-5">
-                <div class="d-flex align-items-center mb-3 form-inline" style="font-size:x-large">
-                    <div>
-                        <span>جميع الايداعات السنة</span>
-                        <span class="badge rounded-pill bg-info">@Model.ReceivePaymentsYearlyData</span>
-                    </div>
-                    <span class="mx-5 mt-2">-</span>
-                    <div>
-                        <span>جميع الصرفيات السنة</span>
-                        <span class="badge rounded-pill bg-warning">@Model.SpendMoneyYearlyData</span>
-                    </div>
-                    <span class="mx-5 mt-2">=</span>
-                    <div class="mx-1">
-                        <span>الرصيد السنوي</span>
-                        @if (@Model.TotalAmountYearlyData < 0)
-                        {
-                            <span class="badge rounded-pill bg-danger">@Model.TotalAmountYearlyData</span>
-                        }
-                        else if (@Model.TotalAmountYearlyData == 0)
-                        {
-                            <span class="badge rounded-pill bg-warning">@Model.TotalAmountYearlyData</span>
-                        }
-                        else if (@Model.TotalAmountYearlyData > 0)
-                        {
-                            <span class="badge rounded-pill bg-success">@Model.TotalAmountYearlyData</span>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     @* الرصيد الشخصي *@
     <div class="card mb-3">
         <div class="card-header ">
@@ -176,18 +85,14 @@
     </div>
     @* رصيد جميع الأشخاص *@
     <div class="card mb-3 ">
-        <div class="d-flex card-header">
-            <div class="d-flex col-md-10">
-                <h5 class="form-label-lg">رصيد جميع الأشخاص</h5>
-            </div>
-            <div class="col-md-2">
-                <button class="mb-3 text-uppercase btn btn-outline-warning btn-sm" id="ShowPersonsBalanceDataBtn">عرض البيانات</button>
-                <label class="mb-3 text-uppercase btn btn-outline-primary btn-sm" id="PrintTableBtn">
-                    طباعة الجدول
-                </label>
-            </div>
+        <div class="card-header">
+            <h5 class="form-label-lg">رصيد جميع الأشخاص</h5>
+            <button class="btn btn-outline-dark float-end" id="PrintTableBtn">
+                <i class="bx bx-printer"></i>
+                <span class="d-lg-inline-block">طباعة الجدول</span>
+            </button>
         </div>
-        <div class="card-body" id="PersonsBalanceCardBody" style="display:none;"
+        <div class="card-body">
             <div class="align-items-center justify-content-center ">
                 <div class="table-responsive">
                     <table id="PersonsBalanceDataTable" class="table table-striped table-bordered" style="width:100%">
@@ -204,30 +109,30 @@
                         <tbody>
                             @foreach (var item in Model.PersonsBalance)
                             {
-                                                                                        <tr>
-                                                                                            <td>@item.Name</td>
-                                                                                                <td>@item.PhoneNumber</td>
-                                                                                                <td>@item.ReceivePayment ريال</td>
-                                                                                                <td>@item.SpendMoney ريال</td>
-                                                                                                <td>@item.TotalAmount</td>
+                                <tr>
+                                    <td>@item.Name</td>
+                                    <td>@item.PhoneNumber</td>
+                                    <td>@item.ReceivePayment ريال</td>
+                                    <td>@item.SpendMoney ريال</td>
+                                    <td>@item.TotalAmount</td>
                                     @*
-                                                                            <td>
-                                        @{
-                                            var LastReceivePayment = item.LastActivity.LastReceivePayment;
-                                            var LastSpendMoney = item.LastActivity.LastSpendMoney;
-                                            var Txt1 = (LastReceivePayment != null) ? "أخر ايداع بتاريخ " + LastReceivePayment : "";
-                                            var Txt2 = (LastSpendMoney != null) ? "أخر صرف بتاريخ " + LastSpendMoney : "";
+                                <td>
+                                @{
+                                var LastReceivePayment = item.LastActivity.LastReceivePayment;
+                                var LastSpendMoney = item.LastActivity.LastSpendMoney;
+                                var Txt1 = (LastReceivePayment != null) ? "أخر ايداع بتاريخ " + LastReceivePayment : "";
+                                var Txt2 = (LastSpendMoney != null) ? "أخر صرف بتاريخ " + LastSpendMoney : "";
 
-                                            if (!string.IsNullOrEmpty(Txt1) || !string.IsNullOrEmpty(Txt2))
-                                            {
-                                                                                                                                                                        <span>@Txt1</span>
-                                                                                                                                                                        <br />
-                                                                                                                                                                        <span>@Txt2</span>
-                                            }
-                                        }
-                                                                            </td> *@
+                                if (!string.IsNullOrEmpty(Txt1) || !string.IsNullOrEmpty(Txt2))
+                                {
+                                <span>@Txt1</span>
+                                <br />
+                                <span>@Txt2</span>
+                                }
+                                }
+                                </td> *@
 
-                                                                                        </tr>
+                                </tr>
                             }
                     </table>
 
@@ -346,25 +251,6 @@
                 table.printThis()
             });
 
-            $('#ShowPersonsBalanceDataBtn').on('click', function () {
-                var PersonsBalanceCardBody = document.getElementById('PersonsBalanceCardBody');
-                if (PersonsBalanceCardBody.style.display === "none") {
-                    PersonsBalanceCardBody.style.display = "block";
-                    $('#ShowPersonsBalanceDataBtn').text('إخفاء البيانات');
-                    // chenge btn class to btn-outline-warning
-                    $('#ShowPersonsBalanceDataBtn').removeClass('btn-outline-warning').addClass('btn-outline-danger');
-                } else {
-                    PersonsBalanceCardBody.style.display = "none";
-                    $('#ShowPersonsBalanceDataBtn').text('عرض البيانات');
-                    // chenge btn class to btn-outline-warning
-                    $('#ShowPersonsBalanceDataBtn').removeClass('btn-outline-danger').addClass('btn-outline-warning');
-
-
-
-
-                }
-
-            });
 
 
 

@@ -156,7 +156,7 @@ namespace Portal.Controllers
             }
             return Ok(1);
         }
-    
+
         #endregion Reason
 
         #region ReceivePayments
@@ -185,7 +185,7 @@ namespace Portal.Controllers
 
                     await _context.MosbReceivePayments.AddAsync(newReceivePayments);
                     var saveChangesResult = await _context.SaveChangesAsync();
-                    
+
                     return RedirectToAction("ReceivePayments", "List", new { add = saveChangesResult == 1 });
                 }
                 else
@@ -229,7 +229,7 @@ namespace Portal.Controllers
 
                     await _context.MosbSpendMoney.AddAsync(newSpendMoney);
                     var saveChangesResult = await _context.SaveChangesAsync();
-                    
+
                     return RedirectToAction("SpendMoney", "List", new { add = saveChangesResult == 1 });
                 }
                 else
@@ -259,8 +259,7 @@ namespace Portal.Controllers
                         Value = x.Id,
                         IsSelected = false,
                         Text = x.Name
-                    }).ToListAsync(),
-                    YearMonth = DateTime.Now.ToString("yyyy-MM")
+                    }).ToListAsync()
                 };
                 return View(VMnew);
             }
@@ -739,7 +738,7 @@ namespace Portal.Controllers
 
                 await transaction.CommitAsync();
                 return RedirectToAction("SpendMoney", "List", new { add = true });
-                
+
             }
             catch (Exception)
             {

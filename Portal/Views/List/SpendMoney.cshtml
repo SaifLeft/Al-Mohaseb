@@ -25,7 +25,7 @@
         <div class="col-md-3">
             <div class="row mb-2">
                 <h6>بحث بأسم المستخدم</h6>
-                <select id="NamesList" class="select2 form-select">
+                <select id="NamesList" class="select2 NamesSelect2 form-select">
                     <option value="">بحث بأسم</option>
                     @foreach (var item in Model.NamesList)
                     {
@@ -35,7 +35,7 @@
             </div>
             <div class="row mb-3">
                 <h6>بحث بسنة محدد</h6>
-                <select id="YearList" class="select2 form-select">
+                <select id="YearList" class="select2 YearSelect2 form-select">
                     <option value="">بحث بسنة معينة</option>
                     @foreach (var item in Model.YearList)
                     {
@@ -162,9 +162,13 @@
                     { className: "dt-center", targets: [0, 1, 2, 3, 4] }
                 ],
             });
-            $('.select2').select2({
+            $('.NamesSelect2').select2({
                 allowClear: true,
-                placeholder: "اختر اسم المستخدم",
+                placeholder: "اختر اسم المستخدم"
+            });
+            $('.YearSelect2').select2({
+                allowClear: true,
+                placeholder: "اختر السنة"
             });
             $('#Searchbtn').on('click', function () {
                 var selectedValue = $('#NamesList').find("option:selected").val() || '';

@@ -36,9 +36,14 @@
                     تحميل قاعدة البيانات <span class="bx bx-download"></span><span class="bx bx-data"></span>
                 </span>
             </a>
-            <a asp-action="DawnloadAllDataAsPDF" asp-controller="Statistics" target="_blank">
+            <a class="mb-3" asp-action="DawnloadAllDataAsPDF" asp-controller="Statistics" target="_blank">
                 <span class="menu-header-text">
                     جميع بيانات كملف PDF <span class="bx bx-download"></span><span class="bx bx-file"></span>
+                </span>
+            </a>
+            <a class="mb-3" asp-action="DownloadAllDataAsExcel" asp-controller="Statistics" target="_blank">
+                <span class="menu-header-text">
+                    جميع بيانات كـExcel <span class="bx bx-download"></span><span class="bx bx-file"></span>
                 </span>
             </a>
         </li>
@@ -98,6 +103,12 @@
         </li>
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">أحصائيات</span>
+        </li>
+        <li class='menu-item@(currentPage == "GeneralBalance" ? " active" : "")'>
+            <a asp-controller="Statistics" asp-action="GeneralBalance" class="menu-link">
+                <i class='menu-icon  bx bx-bold'></i>
+                <div>الرصيد العام</div>
+            </a>
         </li>
         <li class='menu-item@(currentPage == "Semple" ? " active" : "")'>
             <a asp-controller="Statistics" asp-action="Semple" class="menu-link">
