@@ -7,5 +7,7 @@
         public double? Amount { get; internal set; }
         public long? SpendMoneyId { get; internal set; }
         public bool IsPaid { get; internal set; }
+        public bool IsFixed { get; internal set; }
+
     }
 }

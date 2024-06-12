@@ -2,7 +2,6 @@
    "CodeGenerationMode": 2,
    "ContextClassName": "AlMohasebDBContext",
    "ContextNamespace": null,
-   "DefaultDacpacSchema": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
    "ModelNamespace": null,
@@ -40,8 +39,9 @@
          "ObjectType": 0
       }
    ],
-   "UiHint": "C:\\Users\\hayzh\\Source\\Repos\\SaifLeft\\Al-Mohaseb\\Portal\\AlMohaseb-ERD.db",
+   "UiHint": null,
    "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": false,
    "UseDateOnlyTimeOnly": false,
@@ -58,6 +58,7 @@
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
    "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
    "UseSchemaFolders": false,
    "UseSchemaNamespaces": false,
    "UseSpatial": false,

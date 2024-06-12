@@ -5,6 +5,7 @@ using Portal.Data;
 using Portal.Models;
 using Portal.Models.ViewModels;
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace Portal.Controllers
@@ -300,6 +301,7 @@ namespace Portal.Controllers
                         PersonName = x.Person.Name,
                         Amount = Math.Round(x.Amount, 2),
                         IsPaid = x.IsPaid == true.GetHashCode() ? true : false,
+                        IsFixed = x.IsFixed == true.GetHashCode() ? true : false
                     })
                     .ToList();
                 VM.AmountSubscribed = spendMoneyForReason.Select(x => x.MonthlyAmount).First();
@@ -313,7 +315,8 @@ namespace Portal.Controllers
                         PersonId = x.Id,
                         PersonName = x.Name,
                         Amount = 0,
-                        IsPaid = false
+                        IsPaid = false,
+                        IsFixed = false
                     })
                     .ToListAsync();
             }
@@ -343,6 +346,7 @@ namespace Portal.Controllers
                     Date = YearMonthDate.ToString("yyyy-MM-dd"),
                     Amount = x.IsPaid ? x.Amount : 0,
                     IsPaid = x.IsPaid,
+                    IsFixed = x.IsFixed,
                     MonthlyAmountRecord = record.MonthlyAmountRecord
                 }).ToList();
                 ModifyStatus = await NewRecordOnSpendMoneyForReason(DTO);
@@ -386,6 +390,7 @@ namespace Portal.Controllers
                         Date = item.Date,
                         Amount = newAmount,
                         IsPaid = item.IsPaid.GetHashCode(),
+                        IsFixed = item.IsFixed.GetHashCode(),
                         IsForReason = true.GetHashCode(),
                         MonthlyAmount = item.MonthlyAmountRecord,
                         Description = item.IsPaid ? PaidDescription : NotPaidDescription
@@ -439,6 +444,7 @@ namespace Portal.Controllers
                         recordToEdit.Description = !item.IsPaid ? ZeroAmountDescription : EditDescription;
                         recordToEdit.IsPaid = item.IsPaid.GetHashCode();
                     }
+                    recordToEdit.IsFixed = item.IsFixed.GetHashCode();
                     _context.MosbSpendMoney.Update(recordToEdit);
                     await _context.SaveChangesAsync();
                 }

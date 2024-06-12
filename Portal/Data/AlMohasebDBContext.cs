@@ -142,6 +142,8 @@ namespace Portal.Data
                     .HasColumnType("varchar(255)")
                     .HasColumnName("DESCRIPTION");
 
+                entity.Property(e => e.IsFixed).HasColumnName("IS_FIXED");
+
                 entity.Property(e => e.IsForReason)
                     .HasColumnType("integer(1)")
                     .HasColumnName("IS_FOR_REASON");

@@ -12,6 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="efpt.config.json.user" />
 		<None Include="wwwroot\assets\vendor\libs\loader\.github\CODE_OF_CONDUCT.md" />
 		<None Include="wwwroot\assets\vendor\libs\loader\.github\CONTRIBUTING.md" />
 		<None Include="wwwroot\assets\vendor\libs\loader\.github\ISSUE_TEMPLATE\bug_report.md" />

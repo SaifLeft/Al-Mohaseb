@@ -8,5 +8,6 @@
         public double Amount { get; set; }
         public double MonthlyAmountRecord { get; set; }
         public bool IsPaid { get; set; }
+        public bool IsFixed { get; set; }
     }
 }
