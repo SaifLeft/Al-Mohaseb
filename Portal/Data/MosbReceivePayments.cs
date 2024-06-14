@@ -21,6 +21,10 @@ namespace Portal.Data
         public long IsMonthly { get; set; }
         public long IsPaid { get; set; }
         public long? IsTransaction { get; set; }
+        public string CreatedDate { get; set; }
+        public string ModifiedDate { get; set; }
+        public string OtherName { get; set; }
+        public double? OriginalAmount { get; set; }
 
         public virtual MosbName Name { get; set; }
         public virtual ICollection<ReceivePaymentsReasonsMapping> ReceivePaymentsReasonsMapping { get; set; }

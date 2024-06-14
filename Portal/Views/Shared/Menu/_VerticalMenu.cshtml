@@ -41,7 +41,7 @@
                     جميع بيانات كملف PDF <span class="bx bx-download"></span><span class="bx bx-file"></span>
                 </span>
             </a>
-            <a class="mb-3" asp-action="DownloadAllDataAsExcel" asp-controller="Statistics" target="_blank">
+            <a asp-action="DownloadAllDataAsExcel" asp-controller="Statistics" target="_blank">
                 <span class="menu-header-text">
                     جميع بيانات كـExcel <span class="bx bx-download"></span><span class="bx bx-file"></span>
                 </span>
@@ -72,8 +72,8 @@
                 <div>الايداعات الشهرية</div>
             </a>
         </li>
-        <li class='menu-item @(currentPage == "ReceivePayments" ? " active" : "")'>
-            <a asp-controller="Create" asp-action="ReceivePayments" class="menu-link">
+        <li class='menu-item @(currentPage == "PersonalDeposit" ? " active" : "")'>
+            <a asp-controller="Create" asp-action="PersonalDeposit" class="menu-link">
                 <i class='menu-icon bx bxs-map-pin'></i>
                 <div>ايداع شخصي</div>
             </a>
@@ -83,8 +83,8 @@
             <span class="menu-header-text">المصروفات</span>
         </li>
 
-        <li class='menu-item @(currentPage == "SpendMoney" ? " active" : "")'>
-            <a asp-controller="Create" asp-action="SpendMoney" class="menu-link">
+        <li class='menu-item @(currentPage == "PersonalSpendMoney" ? " active" : "")'>
+            <a asp-controller="Create" asp-action="PersonalSpendMoney" class="menu-link">
                 <i class='menu-icon bx bxl-slack-old'></i>
                 <div>الصرف الشخصي</div>
             </a>
@@ -110,10 +110,18 @@
                 <div>الرصيد العام</div>
             </a>
         </li>
+        <li class='menu-item@(currentPage == "PersonalBalance" ? " active" : "")'>
+            <a asp-controller="Statistics" asp-action="PersonalBalance" class="menu-link">
+                <i class='menu-icon bx bx-user'></i>
+                <div>الرصيد الشخصي</div>
+            </a>
+        </li>
         <li class='menu-item@(currentPage == "Semple" ? " active" : "")'>
             <a asp-controller="Statistics" asp-action="Semple" class="menu-link">
                 <i class='menu-icon  bx bx-adjust'></i>
-                <div>الأحصائيات بسيطة</div>
+                <div>
+                    رصيد جميع الأشخاص
+                </div>
             </a>
         </li>
         <li class='menu-item@(currentPage == "SpendMoney" ? " active" : "")'>

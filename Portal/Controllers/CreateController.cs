@@ -160,13 +160,13 @@ namespace Portal.Controllers
 
         #endregion Reason
 
-        #region ReceivePayments
-        public IActionResult ReceivePayments(long? ReasonId = null)
+        #region PersonalDeposit
+        public IActionResult PersonalDeposit(long? ReasonId = null)
         {
             return View();
         }
         [HttpPost]
-        public async Task<ActionResult> ReceivePayments(CreateReceivePaymentsVM VM)
+        public async Task<ActionResult> PersonalDeposit(CreatePersonalDepositVM VM)
         {
             try
             {
@@ -205,12 +205,12 @@ namespace Portal.Controllers
         #endregion ReceivePayments
 
         #region SpendMoney
-        public IActionResult SpendMoney()
+        public IActionResult PersonalSpendMoney()
         {
             return View();
         }
         [HttpPost]
-        public async Task<ActionResult> SpendMoney(CreateSpendMoneyVM VM)
+        public async Task<ActionResult> PersonalSpendMoney(CreatePersonalSpendMoneyVM VM)
         {
             try
             {
@@ -225,7 +225,12 @@ namespace Portal.Controllers
                         Description = VM.Description,
                         IsForReason = false.GetHashCode(),
                         IsPaid = true.GetHashCode(),
-                        IsTransaction = false.GetHashCode()
+                        IsTransaction = false.GetHashCode(),
+                        CreatedDate = DateTime.Now.ToString("yyyy-MM-dd"),
+                        OriginalAmount = VM.Amount,
+                        OtherName = null,
+                        
+
                     };
 
                     await _context.MosbSpendMoney.AddAsync(newSpendMoney);
@@ -694,41 +699,34 @@ namespace Portal.Controllers
                 string? ToName = ToPerson?.Name;
                 double TransferMoneyAmount = VM.Amount;
 
-                Message = string.Concat(" تم تحويل مبلغ ",
-                    TransferMoneyAmount, " ريال ",
-                    " من ", FromName,
-                    " إلى ", ToName,
-                    " بتاريخ ", VM.Date.ToString("yyyy-MM-dd"),
-                    " بسبب ", VM.description);
-
                 MosbSpendMoney newSpend = new()
                 {
                     PersonId = VM.FromNameId,
                     Date = VM.Date.ToString("yyyy-MM-dd"),
                     Amount = VM.Amount,
-                    Description = Message,
+                    Description = VM.description,
                     IsForReason = false.GetHashCode(),
                     IsPaid = true.GetHashCode(),
                     IsTransaction = true.GetHashCode(),
+                    CreatedDate = VM.Date.ToString("yyyy-MM-dd"),
+                    OriginalAmount = VM.Amount,
+                    OtherName = ToName,
                 };
                 await _context.MosbSpendMoney.AddAsync(newSpend);
 
-                Message = string.Concat(" تم أستلام مبلغ ",
-                    TransferMoneyAmount, " ريال ",
-                    " من ", FromName,
-                    " إلى ", ToName,
-                    " بتاريخ ", VM.Date.ToString("yyyy-MM-dd"),
-                    " بسبب ", VM.description);
 
                 MosbReceivePayments newReceive = new()
                 {
                     NameId = VM.ToNameId,
                     Date = VM.Date.ToString("yyyy-MM-dd"),
                     Amount = VM.Amount,
-                    Description = Message,
+                    Description = VM.description,
                     IsMonthly = false.GetHashCode(),
                     IsPaid = true.GetHashCode(),
                     IsTransaction = true.GetHashCode(),
+                    CreatedDate = VM.Date.ToString("yyyy-MM-dd"),
+                    OriginalAmount = VM.Amount,
+                    OtherName = ToName
                 };
 
                 await _context.MosbReceivePayments.AddAsync(newReceive);

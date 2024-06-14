@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Portal.Data;
+using Portal.Models;
 using Portal.Models.ViewModels;
 using System.ComponentModel.Design;
 using System.Xml.Linq;
@@ -72,7 +73,7 @@ namespace Portal.Controllers
                 _dbContext.Update(name);
 
                 var saveStatus = await _dbContext.SaveChangesAsync();
-               
+
                 return RedirectToAction("Names", "List", new { update = saveStatus == 1 });
             }
             catch (Exception ex)
@@ -129,7 +130,12 @@ namespace Portal.Controllers
 
                 // Update receivePayment properties
                 if (receivePayment.NameId != VM.NameId) receivePayment.NameId = VM.NameId;
-                if (receivePayment.Amount != VM.Amount) receivePayment.Amount = VM.Amount;
+                receivePayment.IsPaid = VM.Amount == 0 ? false.GetHashCode() : true.GetHashCode();
+                if (receivePayment.Amount != VM.Amount)
+                {
+                    receivePayment.Amount = VM.Amount;
+                    receivePayment.ModifiedDate = DateTime.Now.ToString("yyyy-MM-dd");
+                }
                 if (receivePayment.Date != VM.Date) receivePayment.Date = VM.Date;
                 if (receivePayment.Description != VM.Description) receivePayment.Description = VM.Description;
 
@@ -138,7 +144,7 @@ namespace Portal.Controllers
                 var saveStatus = await _dbContext.SaveChangesAsync();
                 return RedirectToAction("ReceivePayments", "List", new { update = saveStatus == 1 });
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }
@@ -189,9 +195,16 @@ namespace Portal.Controllers
 
                 // Update spendMoney properties
                 if (spendMoney.PersonId != VM.NameId) spendMoney.PersonId = VM.NameId;
-                if (spendMoney.Amount != VM.Amount) spendMoney.Amount = VM.Amount;
+                spendMoney.IsPaid = VM.Amount == 0 ? false.GetHashCode() : true.GetHashCode();
+                if (spendMoney.Amount != VM.Amount)
+                {
+                    spendMoney.Amount = VM.Amount;
+                    spendMoney.ModifiedDate = DateTime.Now.ToString("yyyy-MM-dd");
+                }
                 if (spendMoney.Date != VM.Date) spendMoney.Date = VM.Date;
                 if (spendMoney.Description != VM.Description) spendMoney.Description = VM.Description;
+
+
 
                 _dbContext.Update(spendMoney);
 
@@ -199,11 +212,10 @@ namespace Portal.Controllers
 
                 return RedirectToAction("SpendMoney", "List", new { update = Status == 1 });
             }
-            catch (Exception ex)
+            catch
             {
                 throw;
             }
         }
-
     }
 }

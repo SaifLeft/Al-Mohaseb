@@ -101,7 +101,8 @@ namespace Portal.Controllers
             var reasons = _context.MosbReasons.ToList();
             var VM = new ReasonVM
             {
-                Reasons = reasons.Select(r => new ReasonsTable{
+                Reasons = reasons.Select(r => new ReasonsTable
+                {
                     Id = r.Id,
                     Name = r.Name,
                     Date = r.Date,
@@ -195,7 +196,8 @@ namespace Portal.Controllers
                     name = p.Name.Name,
                     amount = p.Amount,
                     date = DateTime.Parse(p.Date).ToString("yyyy-MM-dd"),
-                    description = p.Description
+                    isTransaction = p.IsTransaction,
+                    text = GeneratePaymentSummary(p)
                 })
                 .OrderByDescending(x => x.id)
                 .ToListAsync();
@@ -209,6 +211,25 @@ namespace Portal.Controllers
 
             return Ok(returnObj);
         }
+
+        private static string GeneratePaymentSummary(MosbReceivePayments p)
+        {
+            string RPFormat = "تم ايداع مبلغ {0} ريال لسبب: {1}";
+            string TransFormat = "تم تحويل مبلغ {0} ريال من {1} لسبب: {2}";
+            if (p.IsTransaction == true.GetHashCode())
+            {
+                return string.Format(TransFormat, p.Amount, p.OtherName, p.Description);
+            }
+            else
+            {
+                return string.Format(RPFormat, p.Amount, p.Description);
+            }
+
+        }
+
+
+
+        #region SpendMoney Table
         public async Task<IActionResult> SpendMoney(bool? add, bool? update)
         {
             SpendMoneyVM VM = new SpendMoneyVM();
@@ -241,6 +262,7 @@ namespace Portal.Controllers
 
             var data = _context.MosbSpendMoney
                         .Where(x => x.IsPaid == true.GetHashCode())
+                        .Include(n => n.Person)
                         .AsQueryable();
             totalRecord = await data.CountAsync();
             filterRecord = totalRecord;
@@ -286,8 +308,9 @@ namespace Portal.Controllers
                     id = p.Id,
                     name = p.Person.Name,
                     amount = p.Amount,
-                    date = DateTime.Parse(p.Date).ToString("yyyy-MM-dd"),
-                    description = p.Description
+                    date = p.Date,
+                    isTransaction = p.IsTransaction,
+                    text = GenerateSpendMoneySummaryV1(p)
                 })
                 .OrderByDescending(x => x.id)
                 .ToListAsync();
@@ -303,6 +326,55 @@ namespace Portal.Controllers
 
             return Ok(returnObj);
         }
+        public static string GenerateSpendMoneySummaryV1(MosbSpendMoney p)
+        {
+            bool isModefiled = p.Amount != p.OriginalAmount;
+            string SmFormat = "تم صرف مبلغ: {0} ريال<br />بتاريخ:{1}<br />وذلك بسبب:{2}<br />";
+            string EditSmFormat = "تم تعديل صرف من: {0} ريال<br />الى مبلغ: {1} ريال<br />بتاريخ:{2}<br />وذلك بسبب:{3}<br />";
+            string TransFormat = "تم تحويل مبلغ: {0} ريال<br />بتاريخ:{1}<br />من:{2}<br />الى:{3}<br />وذلك بسبب:{4}<br />";
+            string EditTransFormat = "تم تعديل التحويل مبلغ: {0} ريال<br />الذي حصل بتاريخ:{1}<br />من:{2}<br />الى:{3}<br />وذلك بسبب:{4}<br />المبلغ الجديد:{5} ريال<br />التعديل حصل بتاريخ:{6}<br />";
+
+            if (p.IsTransaction == true.GetHashCode())
+            {
+                if (isModefiled)
+                {
+                    return string.Format(EditTransFormat, p.OriginalAmount, p.CreatedDate, p.Person.Name, p.OtherName, p.Description, p.Amount, p.ModifiedDate);
+                }
+                else
+                {
+                    return string.Format(TransFormat, p.Amount, p.CreatedDate, p.Person.Name, p.OtherName, p.Description);
+                }
+            }
+            else
+            {
+                if (isModefiled)
+                {
+                    return string.Format(EditSmFormat,
+                        p.OriginalAmount, p.Amount, p.CreatedDate, p.Description, p.ModifiedDate);
+                }
+                else
+                {
+                    return string.Format(SmFormat, p.Amount, p.CreatedDate, p.Description);
+                }
+            }
+        }
+        public static string BuildTransactionSummaryV2(MosbSpendMoney p)
+        {
+            string SmFormat = "تم صرف مبلغ {0} ريال لسبب: {1}";
+            string TransFormat = "تم تحويل مبلغ {0} ريال الى {1} لسبب: {2}";
+            if (p.IsTransaction == true.GetHashCode())
+            {
+                return string.Format(TransFormat, p.Amount, p.OtherName, p.Description);
+            }
+            else
+            {
+                return string.Format(SmFormat, p.Amount, p.Description);
+            }
+        }
+
+        #endregion SpendMoney Table
+
+
 
     }
 }

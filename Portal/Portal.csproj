@@ -9,6 +9,7 @@
 	<ItemGroup>
 		<Folder Include="Data\" />
 		<Folder Include="DB Backup\" />
+		<Folder Include="wwwroot\assets\vendor\libs\printThis\" />
 	</ItemGroup>
 
 	<ItemGroup>

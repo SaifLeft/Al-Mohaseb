@@ -38,12 +38,13 @@
             </div>
             @if (Model.AmountSubscribed > 0)
             {
-                <div class="row mb-3">
+                <div class="row mb-3 AmountSubscribedDiv">
                     <label class="col-sm-2 col-form-label-lg">مبلغ الصرف</label>
 
                     <div class="col-sm-3">
                         <div class="input-group">
                             <input type="number" id="totalAmount" value="@Model.AmountSubscribed" class="form-control col-md-5">
+                            <button type="button" class="btn btn-warning" id="distribute">توزيع</button>
                         </div>
                     </div>
                 </div>
@@ -288,7 +289,7 @@
             // Function to hide all related elements
             function hideAll() {
                 $("#flatpickr-date").val(null);
-                $("#AmountSubscribedDiv").hide();
+                $(".AmountSubscribedDiv").hide();
                 $("#flatpickrDiv").hide();
                 $("#ShowAllNamesBtn").prop("disabled", true);
                 $("#ClearAll").prop("disabled", true);
@@ -323,17 +324,27 @@
             });
 
 
-
-
-            $('#totalAmount').on('input', function () {
-                distributeAmount();
-            });
-
             $('.amount').on('input', function () {
                 updateAmountsBasedOnInput($(this));
             });
 
             $('#distribute').click(function () {
+                let totalAmount = parseFloat($('#totalAmount').val());
+                if (totalAmount === 0 || totalAmount === '') {
+                    toastr.error('الرجاء إدخال مبلغ الصرف');
+                    return;
+                }
+                var individualCount = $('.individual').length;
+                if (individualCount === 0) {
+                    toastr.error('لا يوجد أسماء للتوزيع عليها');
+                    return;
+                }
+                var selectIndividualCount = $('.select-individual:checked').length;
+                if (selectIndividualCount === 0) {
+                    toastr.error('الرجاء تحديد أسماء للتوزيع عليها');
+                    return;
+                }
+
                 distributeAmount();
             });
 
@@ -401,11 +412,12 @@
                 $('.individual').each(function () {
                     let $fixCheckbox = $(this).find('.fix-individual');
                     let $amountInput = $(this).find('.amount');
+                    let $checkbox = $(this).find('.select-individual');
 
                     if ($fixCheckbox.is(':checked')) {
                         let fixedAmount = parseFloat($amountInput.val());
                         fixedAmounts += fixedAmount;
-                    } else if ($amountInput[0] !== changedInput[0]) {
+                    } else if ($amountInput[0] !== changedInput[0] && $checkbox.is(':checked')) {
                         variableIndividuals.push($amountInput);
                     }
                 });

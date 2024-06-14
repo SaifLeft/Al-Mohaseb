@@ -18,6 +18,10 @@ namespace Portal.Data
         public double? MonthlyAmount { get; set; }
         public long? IsTransaction { get; set; }
         public long? IsFixed { get; set; }
+        public string CreatedDate { get; set; }
+        public string ModifiedDate { get; set; }
+        public string OtherName { get; set; }
+        public double? OriginalAmount { get; set; }
 
         public virtual MosbName Person { get; set; }
         public virtual MosbReasons Reasons { get; set; }

@@ -9,7 +9,7 @@
     <div class="card p-4">
         <div class="d-flex card-header">
             <div class="col-md-12">
-                <a class="btn btn-dark" asp-controller="Create" asp-action="SpendMoney">
+                <a class="btn btn-dark" asp-controller="Create" asp-action="PersonalSpendMoney">
                     <i class="bx bx-plus"></i>
                     <span class="d-lg-inline-block">
                         صرف مبلغ لشخص
@@ -24,7 +24,6 @@
 
         <div class="col-md-3">
             <div class="row mb-2">
-                <h6>بحث بأسم المستخدم</h6>
                 <select id="NamesList" class="select2 NamesSelect2 form-select">
                     <option value="">بحث بأسم</option>
                     @foreach (var item in Model.NamesList)
@@ -34,7 +33,6 @@
                 </select>
             </div>
             <div class="row mb-3">
-                <h6>بحث بسنة محدد</h6>
                 <select id="YearList" class="select2 YearSelect2 form-select">
                     <option value="">بحث بسنة معينة</option>
                     @foreach (var item in Model.YearList)
@@ -58,7 +56,7 @@
                             <th>الاسم</th>
                             <th>تاريخ الصرف</th>
                             <th>مبلغ الصرف</th>
-                            <th>الصرف لسبب</th>
+                            <th>الوصف</th>
                             <th>الأجراء</th>
                         </tr>
                     </thead>
@@ -111,14 +109,10 @@
     <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js"></script>
     <script src="~/assets/vendor/libs/cleavejs/cleave.js"></script>
     <script src="~/assets/vendor/libs/cleavejs/cleave-phone.js"></script>
-
-    @*    <script src="~/assets/js/app-user-list.js"></script>
-*@
-
-
+    <script src="~/assets/vendor/libs/printThis/printThis.min.js"></script>
     <script>
         $(document).ready(function () {
-            var table = $('#userTable').DataTable({
+            $('#userTable').DataTable({
                 "processing": true,
                 "serverSide": true,
                 "filter": true,
@@ -146,13 +140,34 @@
                         "sLast": "الأخير"
                     }
                 },
-                "columns": [
+                columns: [
                     { "data": "name", "name": "Name", "autoWidth": true },
                     { "data": "date", "name": "date", "autoWidth": true },
                     {
                         "render": function (data, type, full, meta) { return full.amount + ' ريال'; }
                     },
-                    { "data": "description", "name": "description", "width": "25%" },
+                    {
+                        "data": null,
+                        "render": function (data, type, full, meta) {
+                            var text = full.text
+                            var isTransaction = full.isTransaction;
+                            var Transbadge = `<span class="badge rounded-pill bg-warning">تحويل</span>`
+                            var Smbadge = `<span class="badge rounded-pill bg-info">صرف</span>`
+                            var retText = ''
+                            // allow '\n' to be displayed as new line
+                            text = text.replace(/\\n/g, "<br />");
+                            if (isTransaction) {
+                                retText = Transbadge + '<br />' + text
+                            }
+                            else {
+                                retText = Smbadge + '<br />' + text
+                            }
+                            
+
+                            return retText
+
+                        }
+                    },
                     {
                         "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="@Url.Action("EditSpendMoney", "Edit")?id=' + full.id + '">تعديل</a>'; }
                     }
@@ -240,9 +255,9 @@
             if (selectedtext != '' && selectedValue != '') {
                 IsNamesListSelected = true;
             }
-            var Title = 'جميع المصروفات في النظام';
+            var Title = 'جميع الايداعات في النظام';
             if (IsNamesListSelected) {
-                Title = 'جميع مصروفات الخاصة بـ ' + selectedtext;
+                Title = 'جميع الايداعات الخاصة بـ ' + selectedtext;
             }
 
             // Export data with column header formatting
@@ -289,15 +304,8 @@
 
                     printWin.document.write('</tbody>');
                     printWin.document.write('</table>');
-
-                    // number of rows in the table
-                    var RowsCount = table.rows({ search: 'applied' }).data().length;
-                    printWin.document.write('<h3>عدد المصروفات: ' + RowsCount + '</h3>');
-
                     if (!IsNamesListSelected) {
-                        var NamesCount = table.column(0, { search: 'applied' }).data().unique().length;
-                        printWin.document.write('<h3>عدد الأسماء في الجدول: ' + NamesCount + '</h3>');
-
+                        printWin.document.write('<h3>عدد الأسماء في النظام : ' + data.body.length + '</h3>');
                     }
 
 

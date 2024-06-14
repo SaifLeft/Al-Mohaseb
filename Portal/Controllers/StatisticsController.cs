@@ -1,4 +1,5 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -296,6 +297,65 @@ namespace Portal.Controllers
         #endregion GeneralBalance
 
 
+        #region PersonalBalance
+        public async Task<IActionResult> PersonalBalance(long? NameId, int? Year)
+        {
+            PersonalBalanceVM VM = new();
+                                                                                
+            Year = Year == 0000 ? null : Year;
+            var ReceivePayments = await _context.MosbReceivePayments
+                   .Include(x => x.Name)
+                   .Include(x => x.ReceivePaymentsReasonsMapping)
+                   .ToListAsync();
+
+            var SpendMoney = await _context.MosbSpendMoney
+                .Include(x => x.Person)
+                .Include(x => x.Reasons)
+                .ToListAsync();
+
+            var Names = await _context
+                .MosbName
+                .ToListAsync();
+
+
+
+            int? year = Year.HasValue ? Year : null;
+
+            List<SelectListModel> AllYears = new();
+            AddYearsToListModel(ReceivePayments, ref AllYears, x => DateTime.Parse(x.Date).Year, year);
+            AddYearsToListModel(SpendMoney, ref AllYears, x => DateTime.Parse(x.Date).Year, year);
+            VM.YearsList = AllYears.GroupBy(x => x.Value).Select(x => x.First()).ToList();
+
+
+            if (Year.HasValue)
+            {
+                ReceivePayments = ReceivePayments.Where(x => DateTime.Parse(x.Date).Year == Year).ToList();
+                SpendMoney = SpendMoney.Where(x => DateTime.Parse(x.Date).Year == Year).ToList();
+            }
+
+
+            VM.NamesList = Names.Select(x => new SelectListModel { Text = x.Name, Value = x.Id, IsSelected = x.Id == NameId }).ToList();
+
+
+            VM.NamesList = Names.Select(x => new SelectListModel { Text = x.Name, Value = x.Id, IsSelected = x.Id == NameId }).ToList();
+
+            VM.PersonalBalanceIsAvailable = false;
+
+            if (NameId.HasValue)
+            {
+                VM.PersonalBalanceIsAvailable = true;
+                VM.PersonalReceivePayment = Math.Round(ReceivePayments.Where(x => x.NameId == NameId && (Year == null || DateTime.Parse(x.Date).Year == Year)).Sum(x => x.Amount), 4);
+                VM.PersonalSpendMoney = Math.Round(SpendMoney.Where(x => x.PersonId == NameId
+                && (Year == null || DateTime.Parse(x.Date).Year == Year)).Sum(x => x.Amount), 4);
+                VM.PersonalTotalAmount = Math.Round(VM.PersonalReceivePayment - VM.PersonalSpendMoney, 4);
+            }
+
+
+            return View(VM);
+        }
+
+
+        #endregion PersonalBalance
 
         #region Semple
         public async Task<IActionResult> Semple(SempleSearchModel model)
@@ -322,23 +382,6 @@ namespace Portal.Controllers
                 VM.GeneralBalance = Math.Round(VM.AllReceivePaymentsAmount - VM.AllSpendMoneyAmount, 4);
 
 
-                VM.NamesList = Names.Select(x => new SelectListModel { Text = x.Name, Value = x.Id, IsSelected = x.Id == model?.PersonalNameId }).ToList();
-
-                VM.PersonalBalanceIsAvailable = false;
-
-                if (model.PersonalNameId.HasValue)
-                {
-                    VM.PersonalBalanceIsAvailable = true;
-                    VM.PersonalReceivePayment = Math.Round(ReceivePayments.Where(x => x.NameId == model.PersonalNameId
-                    &&
-                    (model.PersonalYear == 0000 || DateTime.Parse(x.Date).Year == model.PersonalYear)
-                    ).Sum(x => x.Amount), 4);
-                    VM.PersonalSpendMoney = Math.Round(SpendMoney.Where(x => x.PersonId == model.PersonalNameId
-                    &&
-                    (model.PersonalYear == 0000 || DateTime.Parse(x.Date).Year == model.PersonalYear)
-                    ).Sum(x => x.Amount), 4);
-                    VM.PersonalTotalAmount = Math.Round(VM.PersonalReceivePayment - VM.PersonalSpendMoney, 4);
-                }
 
                 int? year = model.StatisticsYear.HasValue ? model.StatisticsYear.Value : model.PersonalYear;
                 List<SelectListModel> AllYears = new();

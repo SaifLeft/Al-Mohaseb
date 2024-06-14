@@ -87,6 +87,8 @@ namespace Portal.Data
                     .HasColumnType("double(10)")
                     .HasColumnName("AMOUNT");
 
+                entity.Property(e => e.CreatedDate).HasColumnName("CREATED_DATE");
+
                 entity.Property(e => e.Date)
                     .IsRequired()
                     .HasColumnType("varchar(50)")
@@ -109,9 +111,17 @@ namespace Portal.Data
                     .HasColumnType("integer(19)")
                     .HasColumnName("IS_TRANSACTION");
 
+                entity.Property(e => e.ModifiedDate).HasColumnName("MODIFIED_DATE");
+
                 entity.Property(e => e.NameId)
                     .HasColumnType("integer(10)")
                     .HasColumnName("NAME_ID");
+
+                entity.Property(e => e.OriginalAmount)
+                    .HasColumnType("DOUBLE")
+                    .HasColumnName("ORIGINAL_AMOUNT");
+
+                entity.Property(e => e.OtherName).HasColumnName("OTHER_NAME");
 
                 entity.Property(e => e.ReasonsId)
                     .HasColumnType("integer(10)")
@@ -132,6 +142,8 @@ namespace Portal.Data
                 entity.Property(e => e.Amount)
                     .HasColumnType("double(10)")
                     .HasColumnName("AMOUNT");
+
+                entity.Property(e => e.CreatedDate).HasColumnName("CREATED_DATE");
 
                 entity.Property(e => e.Date)
                     .IsRequired()
@@ -156,9 +168,17 @@ namespace Portal.Data
                     .HasColumnType("integer(19)")
                     .HasColumnName("IS_TRANSACTION");
 
+                entity.Property(e => e.ModifiedDate).HasColumnName("MODIFIED_DATE");
+
                 entity.Property(e => e.MonthlyAmount)
                     .HasColumnType("double(10)")
                     .HasColumnName("MONTHLY_AMOUNT");
+
+                entity.Property(e => e.OriginalAmount)
+                    .HasColumnType("DOUBLE")
+                    .HasColumnName("ORIGINAL_AMOUNT");
+
+                entity.Property(e => e.OtherName).HasColumnName("OTHER_NAME");
 
                 entity.Property(e => e.PersonId)
                     .HasColumnType("integer(10)")

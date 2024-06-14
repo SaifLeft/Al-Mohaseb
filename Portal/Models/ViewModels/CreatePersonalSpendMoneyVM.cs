@@ -2,14 +2,13 @@
 
 namespace Portal.Models.ViewModels
 {
-    public class CreateReceivePaymentsVM
+    public class CreatePersonalSpendMoneyVM
     {
         [Required(ErrorMessage = "السبب مطلوب")]
         public long NameId { get; set; }
 
         [Required(ErrorMessage = "التاريخ مطلوب")]
         public string Date { get; set; }
-
         [Required(ErrorMessage = "السبب مطلوب")]
         public string Description { get; set; }
 

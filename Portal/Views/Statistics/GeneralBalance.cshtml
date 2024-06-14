@@ -6,10 +6,10 @@
 <div class="container-xxl flex-grow-1 container-p-y">
     @* جميع الايداعات العامة *@
     <div class="card mb-3">
-        <div class="d-flex card-header">
-            <h5 class="card-title col-md-6">الرصيد العام</h5>
-            <label class="mb-3 text-uppercase col-md-2" style="font-size:x-large">بحث في سنة المعنية</label>
-            <div class="col-md-4">
+        <div class="card-body">
+        <div class="card-title header-elements">
+            <h5 class="m-0 me-2">الرصيد العام</h5>
+            <div class="card-title-elements ms-auto">
                 <select id="YearList" class="select2 form-select">
                     <option value="0000">كل السنوات</option>
                     @foreach (var item in Model.YearsList)
@@ -26,36 +26,55 @@
                 </select>
             </div>
         </div>
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-5">
-                <div class="d-flex align-items-center mb-3 form-inline" style="font-size:x-large">
-                    <div>
-                        <span>جميع الايداعات العامة</span>
-                        <span class="badge rounded-pill bg-info">@Model.AllReceivePaymentsAmount</span>
-                    </div>
-                    <span class="mx-5 mt-2">-</span>
-                    <div>
-                        <span>جميع الصرفيات العامة</span>
-                        <span class="badge rounded-pill bg-warning">@Model.AllSpendMoneyAmount</span>
-                    </div>
-                    <span class="mx-5 mt-2">=</span>
-                    <div class="mx-1">
-                        <span>الرصيد العام</span>
-                        @if (@Model.GeneralBalance < 0)
-                        {
-                            <span class="badge rounded-pill bg-danger">@Model.GeneralBalance</span>
-                        }
-                        else if (@Model.GeneralBalance == 0)
-                        {
-                            <span class="badge rounded-pill bg-warning">@Model.GeneralBalance</span>
-                        }
-                        else if (@Model.GeneralBalance > 0)
-                        {
-                            <span class="badge rounded-pill bg-success">@Model.GeneralBalance</span>
-                        }
-                    </div>
+            <div class="col">
+                <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-1 h-px-200">
+                    <table style="font-size:x-large">
+                        <tr>
+                            <td colspan="2" class="text-center">
+                                <label class="label">جميع الايداعات</label>
+                                <i class='bx bx-left-arrow-alt'></i>
+                                <span class="badge rounded-pill bg-info">@Model.AllReceivePaymentsAmount</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-center">
+                                <span class="badge rounded-pill bg-dark">-</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-center">
+                                <label class="label">جميع المصروفات</label>
+                                <i class='bx bx-left-arrow-alt'></i>
+                                <span class="badge rounded-pill bg-warning">@Model.AllSpendMoneyAmount</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-center">
+                                <span class="badge rounded-pill bg-dark">=</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="text-center">
+                                <label class="label">الرصيد العام</label>
+                                <i class='bx bx-left-arrow-alt'></i>
+                                @if (@Model.GeneralBalance < 0)
+                                {
+                                    <span class="badge rounded-pill bg-danger">@Model.GeneralBalance</span>
+                                }
+                                else if (@Model.GeneralBalance == 0)
+                                {
+                                    <span class="badge rounded-pill bg-warning">@Model.GeneralBalance</span>
+                                }
+                                else if (@Model.GeneralBalance > 0)
+                                {
+                                    <span class="badge rounded-pill bg-success">@Model.GeneralBalance</span>
+                                }
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

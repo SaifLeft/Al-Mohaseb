@@ -21,14 +21,12 @@
             </div>
             <div class="mb-3">
                 <label class="form-label" for="fullname">تحويل مبلغ من</label>
-                <select class="select2 form-select" name="FromNameId" id="PersonSelect1">
-                    <option value=""></option>
+                <select class="select2 form-select" name="FromNameId" id="FromNameId">
                 </select>
             </div>
             <div class="mb-3">
                 <label class="form-label" for="fullname">الى</label>
-                <select class="select2 form-select" name="ToNameId" id="PersonSelect2">
-                    <option value=""></option>
+                <select class="select2 form-select" name="ToNameId" id="ToNameId">
                 </select>
             </div>
             <div class="mb-3">
@@ -79,37 +77,43 @@
             });
             $('#Date').flatpickr({
                 dateFormat: 'Y-m-d',
+                maxDate: 'today',
                 monthSelectorType: 'static',
-                maxDate: 'today'
+
             });
 
             SetNames();
 
 
-            // Event handlers
-            $('#PersonSelect1').on('change', function () {
-                synchronizeDropdowns($(this), $('#PersonSelect2'));
-            });
 
-            $('#PersonSelect2').on('change', function () {
-                synchronizeDropdowns($(this), $('#PersonSelect1'));
-            });
+            $('#FromNameId').on('change', function () {
+                // الحصول على القيمة المحددة
+                var selectedValue = $(this).val();
 
-            function synchronizeDropdowns(sourceDropdown, targetDropdown) {
-                var selectedId = sourceDropdown.val();
-                var targetSelectedId = targetDropdown.val();
-
-                removeSelectedId(selectedId, targetDropdown);
-
-                if (selectedId !== null && targetSelectedId !== null && selectedId !== targetSelectedId) {
-                    // Check if the change event is not already in progress to avoid the infinite loop
-                    if (!targetDropdown.data('changing')) {
-                        targetDropdown.data('changing', true);
-                        targetDropdown.val(targetSelectedId).trigger("change");
-                        targetDropdown.data('changing', false);
+                // تعطيل الخيار المحدد
+                $('#ToNameId').find('option').each(function () {
+                    if ($(this).val() == selectedValue) {
+                        $(this).attr('disabled', true).siblings().attr('disabled', false);
+                    } else {
+                        $(this).attr('disabled', false)
                     }
-                }
-            }
+                });
+            });
+
+            $('#ToNameId').on('change', function () {
+                // الحصول على القيمة المحددة
+                var selectedValue = $(this).val();
+
+                // تعطيل الخيار المحدد
+                $('#FromNameId').find('option').each(function () {
+                    if ($(this).val() == selectedValue) {
+                        $(this).attr('disabled', true).siblings().attr('disabled', false);
+                    } else {
+                        $(this).attr('disabled', false)
+                    }
+                });
+            });
+
 
 
             const formAuthentication = document.querySelector('#formRequest');
@@ -128,14 +132,14 @@
                                 }
                             }
                         },
-                        PersonSelect1: {
+                        FromNameId: {
                             validators: {
                                 notEmpty: {
                                     message: 'الرجاء اختيار الشخص المحول منه'
                                 }
                             }
                         },
-                        PersonSelect2: {
+                        ToNameId: {
                             validators: {
                                 notEmpty: {
                                     message: 'الرجاء اختيار الشخص المحول اليه'
@@ -230,8 +234,8 @@
         }
         function SetNames() {
             var nameList = GetNames();
-            var dropdown1 = $('#PersonSelect1');
-            var dropdown2 = $('#PersonSelect2');
+            var dropdown1 = $('#FromNameId');
+            var dropdown2 = $('#ToNameId');
             dropdown1.empty();
             dropdown2.empty();
             populateDropdown(nameList, dropdown1);
@@ -243,8 +247,8 @@
 
         function ConfirmTransfer() {
             var date = $('#Date').val();
-            var fromPersonId = $('#PersonSelect1').val();
-            var toPersonId = $('#PersonSelect2').val();
+            var fromPersonId = $('#FromNameId').val();
+            var toPersonId = $('#ToNameId').val();
             var amount = $('#Amount').val();
             var description = $('#Description').val();
 
@@ -264,7 +268,7 @@
                 Description: description
             };
             console.log(data);
-            var Text = 'هل انت متأكد من صرف من رصيد ' + $('#PersonSelect1 option:selected').text() + ' الى رصيد ' + $('#PersonSelect2 option:selected').text() + ' مبلغ ' + amount + ' ريال؟';
+            var Text = 'هل انت متأكد من صرف من رصيد ' + $('#FromNameId option:selected').text() + ' الى رصيد ' + $('#ToNameId option:selected').text() + ' مبلغ ' + amount + ' ريال؟';
             //sweetalert2
             Swal.fire({
                 title: 'هل انت متأكد؟',
@@ -316,8 +320,8 @@
         }
         function ValidateTransferRequest() {
             var date = $('#Date').val();
-            var fromPersonId = $('#PersonSelect1').val();
-            var toPersonId = $('#PersonSelect2').val();
+            var fromPersonId = $('#FromNameId').val();
+            var toPersonId = $('#ToNameId').val();
             var amount = $('#Amount').val();
             var description = $('#Description').val();
             // Validation
