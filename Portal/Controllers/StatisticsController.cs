@@ -287,6 +287,7 @@ namespace Portal.Controllers
             VM.AllReceivePaymentsAmount = Math.Round(ReceivePayments.Sum(x => x.Amount), 4);
             VM.AllSpendMoneyAmount = Math.Round(SpendMoney.Sum(x => x.Amount), 4);
             VM.GeneralBalance = Math.Round(VM.AllReceivePaymentsAmount - VM.AllSpendMoneyAmount, 4);
+            VM.Zakat = Math.Round((VM.AllReceivePaymentsAmount - VM.AllSpendMoneyAmount) * 0.025, 4);
 
 
 
@@ -301,7 +302,7 @@ namespace Portal.Controllers
         public async Task<IActionResult> PersonalBalance(long? NameId, int? Year)
         {
             PersonalBalanceVM VM = new();
-                                                                                
+
             Year = Year == 0000 ? null : Year;
             var ReceivePayments = await _context.MosbReceivePayments
                    .Include(x => x.Name)
@@ -348,6 +349,10 @@ namespace Portal.Controllers
                 VM.PersonalSpendMoney = Math.Round(SpendMoney.Where(x => x.PersonId == NameId
                 && (Year == null || DateTime.Parse(x.Date).Year == Year)).Sum(x => x.Amount), 4);
                 VM.PersonalTotalAmount = Math.Round(VM.PersonalReceivePayment - VM.PersonalSpendMoney, 4);
+                VM.Zakat = Math.Round((VM.PersonalReceivePayment - VM.PersonalSpendMoney) * 0.025, 4);
+                VM.Name = Names.FirstOrDefault(x => x.Id == NameId)?.Name;
+                VM.Year = Year;
+
             }
 
 

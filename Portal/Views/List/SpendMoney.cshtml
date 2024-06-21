@@ -56,6 +56,7 @@
                             <th>الاسم</th>
                             <th>تاريخ الصرف</th>
                             <th>مبلغ الصرف</th>
+                            <th>نوع الصرف</th>
                             <th>الوصف</th>
                             <th>الأجراء</th>
                         </tr>
@@ -146,25 +147,12 @@
                     {
                         "render": function (data, type, full, meta) { return full.amount + ' ريال'; }
                     },
+                    { "data": "typeDetails", "name": "typeDetails", "autoWidth": true },
                     {
                         "data": null,
                         "render": function (data, type, full, meta) {
                             var text = full.text
-                            var isTransaction = full.isTransaction;
-                            var Transbadge = `<span class="badge rounded-pill bg-warning">تحويل</span>`
-                            var Smbadge = `<span class="badge rounded-pill bg-info">صرف</span>`
-                            var retText = ''
-                            // allow '\n' to be displayed as new line
-                            text = text.replace(/\\n/g, "<br />");
-                            if (isTransaction) {
-                                retText = Transbadge + '<br />' + text
-                            }
-                            else {
-                                retText = Smbadge + '<br />' + text
-                            }
-                            
-
-                            return retText
+                            return text;
 
                         }
                     },

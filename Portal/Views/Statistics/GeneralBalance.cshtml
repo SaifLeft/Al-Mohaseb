@@ -7,27 +7,27 @@
     @* جميع الايداعات العامة *@
     <div class="card mb-3">
         <div class="card-body">
-        <div class="card-title header-elements">
-            <h5 class="m-0 me-2">الرصيد العام</h5>
-            <div class="card-title-elements ms-auto">
-                <select id="YearList" class="select2 form-select">
-                    <option value="0000">كل السنوات</option>
-                    @foreach (var item in Model.YearsList)
-                    {
-                        if (item.IsSelected)
+            <div class="card-title header-elements">
+                <h5 class="m-0 me-2">الرصيد العام</h5>
+                <div class="card-title-elements ms-auto">
+                    <select id="YearList" class="select2 form-select">
+                        <option value="0000">كل السنوات</option>
+                        @foreach (var item in Model.YearsList)
                         {
-                            <option selected value="@item.Value">@item.Text</option>
+                            if (item.IsSelected)
+                            {
+                                <option selected value="@item.Value">@item.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
                         }
-                        else
-                        {
-                            <option value="@item.Value">@item.Text</option>
-                        }
-                    }
-                </select>
+                    </select>
+                </div>
             </div>
-        </div>
             <div class="col">
-                <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-1 h-px-200">
+                <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-1 h-px-250">
                     <table style="font-size:x-large">
                         <tr>
                             <td colspan="2" class="text-center">
@@ -67,8 +67,15 @@
                                 }
                                 else if (@Model.GeneralBalance > 0)
                                 {
-                                    <span class="badge rounded-pill bg-success">@Model.GeneralBalance</span>
+                                    <span class="badge rounded-pill bg-success ">@Model.GeneralBalance</span>
                                 }
+                            </td>
+                        </tr>
+                        <tr class="pt-5">
+                            <td colspan="2" class="text-center">
+                                <label class="label">الزكاة</label>
+                                <i class='bx bx-left-arrow-alt'></i>
+                                <span class="badge rounded-pill bg-success">@Model.Zakat</span>
                             </td>
                         </tr>
                     </table>

@@ -41,6 +41,7 @@
                             <th>الاسم</th>
                             <th>تاريخ ايداع</th>
                             <th>ايداع مبلغ وقدره</th>
+                            <th>نوع الايداع</th>
                             <th>السبب</th>
                             <th>الأجراء</th>
                         </tr>
@@ -114,7 +115,7 @@
                 },
                 columnDefs: [
                     // Center align both header and body content of columns 1, 2 & 3
-                    { className: "dt-center", targets: [0, 1, 2, 3, 4] }
+                    { className: "dt-center", targets: [0, 1, 2, 3, 4, 5] }
                 ],
                 "language": {
                     "sProcessing": "جاري التحميل...",
@@ -139,25 +140,12 @@
                     {
                         "render": function (data, type, full, meta) { return full.amount + ' ريال'; }
                     },
+                    { "data": "typeDetails", "name": "typeDetails", "autoWidth": true },
                     {
                         "data": null,
                         "render": function (data, type, full, meta) {
                             var text = full.text
-                            var isTransaction = full.isTransaction;
-                            var Transbadge = `<span class="badge rounded-pill bg-warning">تحويل</span>`
-                            var Smbadge = `<span class="badge rounded-pill bg-info">ايداع</span>`
-                            var retText = ''
-                            // allow '\n' to be displayed as new line
-                            text = text.replace(/\\n/g, "<br />");
-                            if (isTransaction) {
-                                retText = Transbadge + text
-                            }
-                            else {
-                                retText = Smbadge + text
-                            }
-
-
-                            return retText
+                            return text
 
                         }
                     },

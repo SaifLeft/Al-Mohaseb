@@ -386,8 +386,7 @@ namespace Portal.Controllers
                     var newAmount = item.IsPaid ? Math.Round(item.Amount, 2) : 0;
                     var name = _context.MosbName.Where(x => x.Id == item.PersonId).Select(x => x.Name).FirstOrDefault();
                     var reason = _context.MosbReasons.Where(x => x.Id == item.ReasonsId).Select(x => x.Name).FirstOrDefault();
-                    var NotPaidDescription = string.Concat("الفاضل ", name, "لم يتم خصم مبلغ له لسبب ", reason, " بتاريخ ", item.Date);
-                    var PaidDescription = string.Concat("تم خصم مبلغ ", newAmount, " لـ ", name, " لسبب ", reason, " بتاريخ ", item.Date);
+                   
                     var newRecord = new MosbSpendMoney
                     {
                         PersonId = item.PersonId,
@@ -398,7 +397,7 @@ namespace Portal.Controllers
                         IsFixed = item.IsFixed.GetHashCode(),
                         IsForReason = true.GetHashCode(),
                         MonthlyAmount = item.MonthlyAmountRecord,
-                        Description = item.IsPaid ? PaidDescription : NotPaidDescription
+                        Description = (await _context.MosbReasons.FirstAsync(x => x.Id == item.ReasonsId)).Name
                     };
                     await _context.MosbSpendMoney.AddAsync(newRecord);
 
@@ -726,7 +725,7 @@ namespace Portal.Controllers
                     IsTransaction = true.GetHashCode(),
                     CreatedDate = VM.Date.ToString("yyyy-MM-dd"),
                     OriginalAmount = VM.Amount,
-                    OtherName = ToName
+                    OtherName = FromName,
                 };
 
                 await _context.MosbReceivePayments.AddAsync(newReceive);

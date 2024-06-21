@@ -162,6 +162,7 @@ namespace Portal.Controllers
 
             var data = _context.MosbReceivePayments
                 .Where(x => x.IsPaid == true.GetHashCode())
+                .Include(n => n.Name)
                 .Include(n => n.ReceivePaymentsReasonsMapping)
                 .AsQueryable();
 
@@ -196,6 +197,7 @@ namespace Portal.Controllers
                     name = p.Name.Name,
                     amount = p.Amount,
                     date = DateTime.Parse(p.Date).ToString("yyyy-MM-dd"),
+                    typeDetails = GetTypeDetails(p),
                     isTransaction = p.IsTransaction,
                     text = GeneratePaymentSummary(p)
                 })
@@ -212,17 +214,37 @@ namespace Portal.Controllers
             return Ok(returnObj);
         }
 
+        private static string GetTypeDetails(MosbReceivePayments p)
+        {
+            if (p.IsMonthly == true.GetHashCode())
+                return @"<span class='badge rounded-pill bg-info'>اشتراك شهري</span>";
+            else if (p.IsMonthly == false.GetHashCode())
+            {
+                if (p.IsTransaction == true.GetHashCode()) return @"<span class='badge rounded-pill bg-warning'>تحويل</span>";
+                else return @"<span class='badge rounded-pill bg-secondary'>ايداع شخصي</span>";
+            }
+            else return "اخرى";
+        }
+
         private static string GeneratePaymentSummary(MosbReceivePayments p)
         {
-            string RPFormat = "تم ايداع مبلغ {0} ريال لسبب: {1}";
-            string TransFormat = "تم تحويل مبلغ {0} ريال من {1} لسبب: {2}";
+            string TransFormat = "تم إيداع المبلغ الى حساب: {0} بتحويله من حساب: {1} وذلك لـ{2}";
+            string EditTransFormat = "تم تعديل التحويل مبلغ: {0} ريال الذي حصل بتاريخ:{1} من:{2} الى:{3} وذلك بسبب:{4} المبلغ الجديد:{5} ريال التعديل حصل بتاريخ:{6} ";
+            
             if (p.IsTransaction == true.GetHashCode())
             {
-                return string.Format(TransFormat, p.Amount, p.OtherName, p.Description);
+                if(p.Amount == p.OriginalAmount)
+                {
+                    return string.Format(TransFormat, p.Name.Name,p.OtherName, p.Description);
+                }
+                else
+                {
+                    return string.Format(EditTransFormat, p.OriginalAmount, p.CreatedDate, p.Name.Name, p.OtherName, p.Description, p.Amount, p.ModifiedDate);
+                }
             }
             else
             {
-                return string.Format(RPFormat, p.Amount, p.Description);
+                return p.Description;
             }
 
         }
@@ -309,6 +331,7 @@ namespace Portal.Controllers
                     name = p.Person.Name,
                     amount = p.Amount,
                     date = p.Date,
+                    typeDetails = GetTypeDetails(p),
                     isTransaction = p.IsTransaction,
                     text = GenerateSpendMoneySummaryV1(p)
                 })
@@ -326,13 +349,22 @@ namespace Portal.Controllers
 
             return Ok(returnObj);
         }
+        private static string GetTypeDetails(MosbSpendMoney p)
+        {
+            if (p.IsForReason == true.GetHashCode())
+                return @"<span class='badge rounded-pill bg-info'>صرف لسبب</span>";
+            else if (p.IsForReason == false.GetHashCode())
+            {
+                if (p.IsTransaction == true.GetHashCode()) return @"<span class='badge rounded-pill bg-warning'>تحويل</span>";
+                else return @"<span class='badge rounded-pill bg-secondary'>صرف شخصي</span>";
+            }
+            else return "اخرى";
+        }
         public static string GenerateSpendMoneySummaryV1(MosbSpendMoney p)
         {
             bool isModefiled = p.Amount != p.OriginalAmount;
-            string SmFormat = "تم صرف مبلغ: {0} ريال<br />بتاريخ:{1}<br />وذلك بسبب:{2}<br />";
-            string EditSmFormat = "تم تعديل صرف من: {0} ريال<br />الى مبلغ: {1} ريال<br />بتاريخ:{2}<br />وذلك بسبب:{3}<br />";
-            string TransFormat = "تم تحويل مبلغ: {0} ريال<br />بتاريخ:{1}<br />من:{2}<br />الى:{3}<br />وذلك بسبب:{4}<br />";
-            string EditTransFormat = "تم تعديل التحويل مبلغ: {0} ريال<br />الذي حصل بتاريخ:{1}<br />من:{2}<br />الى:{3}<br />وذلك بسبب:{4}<br />المبلغ الجديد:{5} ريال<br />التعديل حصل بتاريخ:{6}<br />";
+            string TransFormat = "تم سحب المبلغ من حساب: {0} بتحويله الى حساب: {1} وذلك لـ{2}";
+            string EditTransFormat = "تم تعديل التحويل مبلغ: {0} ريال الذي حصل بتاريخ:{1} من:{2} الى:{3} وذلك بسبب:{4} المبلغ الجديد:{5} ريال التعديل حصل بتاريخ:{6} ";
 
             if (p.IsTransaction == true.GetHashCode())
             {
@@ -342,20 +374,12 @@ namespace Portal.Controllers
                 }
                 else
                 {
-                    return string.Format(TransFormat, p.Amount, p.CreatedDate, p.Person.Name, p.OtherName, p.Description);
+                    return string.Format(TransFormat, p.Person.Name, p.OtherName, p.Description);
                 }
             }
             else
             {
-                if (isModefiled)
-                {
-                    return string.Format(EditSmFormat,
-                        p.OriginalAmount, p.Amount, p.CreatedDate, p.Description, p.ModifiedDate);
-                }
-                else
-                {
-                    return string.Format(SmFormat, p.Amount, p.CreatedDate, p.Description);
-                }
+                return p.Description;
             }
         }
         public static string BuildTransactionSummaryV2(MosbSpendMoney p)

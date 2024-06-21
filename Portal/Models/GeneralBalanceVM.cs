@@ -7,5 +7,6 @@ namespace Portal.Models
         public double AllSpendMoneyAmount { get; internal set; }
         public double GeneralBalance { get; internal set; }
         public List<SelectListModel> YearsList { get; internal set; }
+        public double Zakat { get; internal set; }
     }
 }
