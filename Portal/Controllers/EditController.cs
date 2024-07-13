@@ -23,7 +23,6 @@ namespace Portal.Controllers
         public async Task<IActionResult> EditPerson(long id)
         {
             var name = await _dbContext.MosbName
-                .Include(x => x.PersonReasonMapping)
                 .FirstOrDefaultAsync(n => n.Id == id);
 
             if (name == null)
@@ -56,7 +55,6 @@ namespace Portal.Controllers
                 }
                 var name = await _dbContext
                     .MosbName
-                    .Include(x => x.PersonReasonMapping)
                     .FirstOrDefaultAsync(n => n.Id == VM.NameId);
 
                 if (name == null)
@@ -85,7 +83,6 @@ namespace Portal.Controllers
         public async Task<IActionResult> EditReceivePayments(long id)
         {
             var receivePayment = await _dbContext.MosbReceivePayments
-                .Include(x => x.ReceivePaymentsReasonsMapping)
                 .FirstOrDefaultAsync(n => n.Id == id);
 
             if (receivePayment == null)
@@ -102,7 +99,6 @@ namespace Portal.Controllers
             };
             ViewBag.Date = DateTime.Parse(receivePayment.Date).ToString("yyyy-MM-dd");
             ViewBag.SelectedName = receivePayment.NameId;
-            ViewBag.selectedReasonsList = receivePayment.ReceivePaymentsReasonsMapping.Select(x => x.ReasonsId).ToList();
             ViewBag.Id = id;
 
             return View(VM);
@@ -120,7 +116,6 @@ namespace Portal.Controllers
 
                 var receivePayment = await _dbContext
                     .MosbReceivePayments
-                    .Include(x => x.ReceivePaymentsReasonsMapping)
                     .FirstOrDefaultAsync(n => n.Id == VM.ReceivePaymentId);
 
                 if (receivePayment == null)
@@ -217,5 +212,85 @@ namespace Portal.Controllers
                 throw;
             }
         }
+
+        public async Task<IActionResult> EditTransferMoney(long? SpendMoneyId, long? ReceivePaymentId)
+        {
+            if (SpendMoneyId == 0 || ReceivePaymentId == 0 || SpendMoneyId == null || ReceivePaymentId == null) return BadRequest();
+
+            var spendMoney = await _dbContext.MosbSpendMoney
+                .FirstOrDefaultAsync(n => n.Id == SpendMoneyId);
+
+            var receivePayment = await _dbContext.MosbReceivePayments
+                .FirstOrDefaultAsync(n => n.Id == ReceivePaymentId);
+
+            if (spendMoney == null || receivePayment == null) return NotFound();
+
+            EditTransferMoneyVM VM = new()
+            {
+                SpendMoneyId = spendMoney.Id,
+                ReceivePaymentId = receivePayment.Id,
+                FromNameId = spendMoney.PersonId,
+                ToNameId = receivePayment.NameId,
+                Amount = spendMoney.Amount,
+                Date = spendMoney.Date,
+                Description = spendMoney.Description,
+            };
+
+            return View(VM);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditTransferMoney(EditTransferMoneyVM VM)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(VM);
+                }
+
+                var spendMoney = await _dbContext.MosbSpendMoney.FirstOrDefaultAsync(n => n.Id == VM.SpendMoneyId);
+                var receivePayment = await _dbContext.MosbReceivePayments.FirstOrDefaultAsync(n => n.Id == VM.ReceivePaymentId);
+
+                if (spendMoney == null || receivePayment == null)
+                {
+                    return NotFound();
+                }
+
+                // Update spendMoney properties
+                if (spendMoney.PersonId != VM.FromNameId) spendMoney.PersonId = VM.FromNameId;
+                spendMoney.IsPaid = VM.Amount == 0 ? false.GetHashCode() : true.GetHashCode();
+                if (spendMoney.Amount != VM.Amount)
+                {
+                    spendMoney.Amount = VM.Amount;
+                    spendMoney.ModifiedDate = DateTime.Now.ToString("yyyy-MM-dd");
+                }
+                if (spendMoney.Date != VM.Date) spendMoney.Date = VM.Date;
+                if (spendMoney.Description != VM.Description) spendMoney.Description = VM.Description;
+
+                // Update receivePayment properties
+                if (receivePayment.NameId != VM.ToNameId) receivePayment.NameId = VM.ToNameId;
+                receivePayment.IsPaid = VM.Amount == 0 ? false.GetHashCode() : true.GetHashCode();
+                if (receivePayment.Amount != VM.Amount)
+                {
+                    receivePayment.Amount = VM.Amount;
+                    receivePayment.ModifiedDate = DateTime.Now.ToString("yyyy-MM-dd");
+                }
+                if (receivePayment.Date != VM.Date) receivePayment.Date = VM.Date;
+                if (receivePayment.Description != VM.Description) receivePayment.Description = VM.Description;
+
+                _dbContext.Update(spendMoney);
+                _dbContext.Update(receivePayment);
+
+                var saveStatus = await _dbContext.SaveChangesAsync();
+
+                return RedirectToAction("TransferMoney", "List", new { update = saveStatus == 1 });
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
     }
 }

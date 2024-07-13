@@ -194,65 +194,6 @@ namespace Portal.Controllers
         #endregion Index
 
 
-        #region Person
-
-        public async Task<IActionResult> Person(int? PersonId = null)
-        {
-            PersonVM VM = new();
-
-            if (PersonId != null)
-            {
-                VM.FromQuery = true;
-
-                MosbName? PersonDetails = await _context.MosbName
-                    .Include(x => x.MosbReceivePayments)
-                    .ThenInclude(x => x.ReceivePaymentsReasonsMapping)
-                    .Include(x => x.MosbSpendMoney)
-                    .Include(x => x.PersonReasonMapping)
-                    .ThenInclude(x => x.Reasons)
-                    .FirstOrDefaultAsync(x => x.Id == PersonId);
-
-                VM.FromQearyDetails = PersonDetails;
-                VM.PersonId = PersonId.Value;
-            }
-
-            // Rest of your code
-
-            return View(VM); // or however you want to return the result
-        }
-
-
-        #endregion Person
-
-
-        #region Reason
-
-        public async Task<IActionResult> Reason(int? ReasonId = null)
-        {
-            ReasonVM VM = new();
-
-            if (ReasonId != null)
-            {
-                VM.FromQuery = true;
-
-                MosbReasons? ReasonDetails = await _context.MosbReasons
-                    .Include(x => x.PersonReasonMapping)
-                    .ThenInclude(x => x.Name)
-                    .Include(x => x.ReceivePaymentsReasonsMapping)
-                    .ThenInclude(x => x.ReceivePayments)
-                    .FirstOrDefaultAsync(x => x.Id == ReasonId);
-
-                VM.FromQearyDetails = ReasonDetails;
-                VM.ReasonId = ReasonId.Value;
-            }
-
-            // Rest of your code
-
-            return View(VM); // or however you want to return the result
-        }
-
-        #endregion Reason
-
 
         #region GeneralBalance
         public async Task<IActionResult> GeneralBalance(int? Year)
@@ -261,7 +202,6 @@ namespace Portal.Controllers
             Year = Year == 0000 ? null : Year;
             var ReceivePayments = await _context.MosbReceivePayments
                    .Include(x => x.Name)
-                   .Include(x => x.ReceivePaymentsReasonsMapping)
                    .ToListAsync();
 
             var SpendMoney = await _context.MosbSpendMoney
@@ -306,7 +246,6 @@ namespace Portal.Controllers
             Year = Year == 0000 ? null : Year;
             var ReceivePayments = await _context.MosbReceivePayments
                    .Include(x => x.Name)
-                   .Include(x => x.ReceivePaymentsReasonsMapping)
                    .ToListAsync();
 
             var SpendMoney = await _context.MosbSpendMoney
@@ -371,7 +310,6 @@ namespace Portal.Controllers
 
                 var ReceivePayments = await _context.MosbReceivePayments
                     .Include(x => x.Name)
-                    .Include(x => x.ReceivePaymentsReasonsMapping)
                     .ToListAsync();
 
                 var SpendMoney = await _context.MosbSpendMoney
@@ -473,7 +411,6 @@ namespace Portal.Controllers
 
             var ReceivePayments = await _context.MosbReceivePayments
                     .Include(x => x.Name)
-                    .Include(x => x.ReceivePaymentsReasonsMapping)
                     .ToListAsync();
 
             var SpendMoney = await _context.MosbSpendMoney
@@ -527,7 +464,6 @@ namespace Portal.Controllers
 
             var ReceivePayments = await _context.MosbReceivePayments
                     .Include(x => x.Name)
-                    .Include(x => x.ReceivePaymentsReasonsMapping)
                     .Where(x => x.IsPaid == true.GetHashCode())
                     .ToListAsync();
 

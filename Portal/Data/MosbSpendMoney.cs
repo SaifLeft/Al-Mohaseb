@@ -7,6 +7,11 @@ namespace Portal.Data
 {
     public partial class MosbSpendMoney
     {
+        public MosbSpendMoney()
+        {
+            MosbReceivePayments = new HashSet<MosbReceivePayments>();
+        }
+
         public long Id { get; set; }
         public long PersonId { get; set; }
         public long? ReasonsId { get; set; }
@@ -20,10 +25,12 @@ namespace Portal.Data
         public long? IsFixed { get; set; }
         public string CreatedDate { get; set; }
         public string ModifiedDate { get; set; }
-        public string OtherName { get; set; }
+        public long? ReceivePaymentsTargetId { get; set; }
         public double? OriginalAmount { get; set; }
 
         public virtual MosbName Person { get; set; }
         public virtual MosbReasons Reasons { get; set; }
+        public virtual MosbReceivePayments ReceivePaymentsTarget { get; set; }
+        public virtual ICollection<MosbReceivePayments> MosbReceivePayments { get; set; }
     }
 }

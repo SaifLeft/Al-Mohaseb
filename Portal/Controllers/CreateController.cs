@@ -228,9 +228,7 @@ namespace Portal.Controllers
                         IsTransaction = false.GetHashCode(),
                         CreatedDate = DateTime.Now.ToString("yyyy-MM-dd"),
                         OriginalAmount = VM.Amount,
-                        OtherName = null,
-                        
-
+                        ReceivePaymentsTargetId = null
                     };
 
                     await _context.MosbSpendMoney.AddAsync(newSpendMoney);
@@ -386,7 +384,7 @@ namespace Portal.Controllers
                     var newAmount = item.IsPaid ? Math.Round(item.Amount, 2) : 0;
                     var name = _context.MosbName.Where(x => x.Id == item.PersonId).Select(x => x.Name).FirstOrDefault();
                     var reason = _context.MosbReasons.Where(x => x.Id == item.ReasonsId).Select(x => x.Name).FirstOrDefault();
-                   
+
                     var newRecord = new MosbSpendMoney
                     {
                         PersonId = item.PersonId,
@@ -664,41 +662,45 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTransferMoney(TransferMoneyVM VM)
         {
+            if (VM == null)
+            {
+                ModelState.AddModelError("", "The transfer money view model is null.");
+                return View(VM);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                ModelState.AddModelError("", "Invalid data.");
+                return View(VM);
+            }
+
+            if (VM.FromNameId == VM.ToNameId)
+            {
+                ModelState.AddModelError("", "Sender and receiver cannot be the same person.");
+                return View(VM);
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                if (VM == null)
+                // Fetch FromPerson
+                var fromPerson = await _context.MosbName.FirstOrDefaultAsync(x => x.Id == VM.FromNameId);
+                if (fromPerson == null)
                 {
-                    ModelState.AddModelError("", "حدث خطأ أثناء تعديل البيانات");
-                    return View(VM);
-                }
-                using var transaction = await _context.Database.BeginTransactionAsync();
-
-                // FromPerson
-                MosbName? FromPerson = await _context.MosbName.FirstAsync(x => x.Id == VM.FromNameId);
-                if (FromPerson == null)
-                {
-                    ModelState.AddModelError("", "حدث خطأ أثناء تعديل البيانات");
-                    return View(VM);
-                }
-                MosbName? ToPerson = await _context.MosbName.FirstAsync(x => x.Id == VM.ToNameId);
-                if (ToPerson == null)
-                {
-                    ModelState.AddModelError("", "حدث خطأ أثناء تعديل البيانات");
+                    ModelState.AddModelError("", "Sender not found.");
                     return View(VM);
                 }
 
-                if (VM.FromNameId == VM.ToNameId)
+                // Fetch ToPerson
+                var toPerson = await _context.MosbName.FirstOrDefaultAsync(x => x.Id == VM.ToNameId);
+                if (toPerson == null)
                 {
-                    ModelState.AddModelError("", "حدث خطأ أثناء تعديل البيانات");
+                    ModelState.AddModelError("", "Receiver not found.");
                     return View(VM);
                 }
 
-                string Message = string.Empty;
-                string? FromName = FromPerson?.Name;
-                string? ToName = ToPerson?.Name;
-                double TransferMoneyAmount = VM.Amount;
-
-                MosbSpendMoney newSpend = new()
+                // Create and add spend money record
+                var newSpend = new MosbSpendMoney
                 {
                     PersonId = VM.FromNameId,
                     Date = VM.Date.ToString("yyyy-MM-dd"),
@@ -709,12 +711,13 @@ namespace Portal.Controllers
                     IsTransaction = true.GetHashCode(),
                     CreatedDate = VM.Date.ToString("yyyy-MM-dd"),
                     OriginalAmount = VM.Amount,
-                    OtherName = ToName,
                 };
-                await _context.MosbSpendMoney.AddAsync(newSpend);
 
+                var spendMoneyEntry = await _context.MosbSpendMoney.AddAsync(newSpend);
+                await _context.SaveChangesAsync();
 
-                MosbReceivePayments newReceive = new()
+                // Create and add receive payment record
+                var newReceive = new MosbReceivePayments
                 {
                     NameId = VM.ToNameId,
                     Date = VM.Date.ToString("yyyy-MM-dd"),
@@ -725,29 +728,37 @@ namespace Portal.Controllers
                     IsTransaction = true.GetHashCode(),
                     CreatedDate = VM.Date.ToString("yyyy-MM-dd"),
                     OriginalAmount = VM.Amount,
-                    OtherName = FromName,
+                    SpendMoneyTargetId = spendMoneyEntry.Entity.Id
                 };
 
-                await _context.MosbReceivePayments.AddAsync(newReceive);
+                var receivePaymentEntry = await _context.MosbReceivePayments.AddAsync(newReceive);
+                await _context.SaveChangesAsync();
 
-                int saveChangesResult = await _context.SaveChangesAsync();
-
-                if (saveChangesResult == 0)
+                // Update spend money with the receive payment target ID
+                var spendMoneyData = await _context.MosbSpendMoney.FirstOrDefaultAsync(x => x.Id == spendMoneyEntry.Entity.Id);
+                if (spendMoneyData != null)
                 {
-                    await transaction.RollbackAsync();
-                    ModelState.AddModelError("", "حدث خطأ أثناء تعديل البيانات");
-                    return View(VM);
+                    spendMoneyData.ReceivePaymentsTargetId = receivePaymentEntry.Entity.Id;
+                    await _context.SaveChangesAsync();
                 }
 
                 await transaction.CommitAsync();
                 return RedirectToAction("SpendMoney", "List", new { add = true });
-
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                await transaction.RollbackAsync();
+                // Log the exception (assuming a logger is available)
+                // _logger.LogError(ex, "An error occurred while creating a money transfer.");
+                ModelState.AddModelError("", "An error occurred while processing the transaction.");
+                return View(VM);
+            }
+            finally
+            {
+                await transaction.DisposeAsync();
             }
         }
+
 
         #endregion TransferMoney
     }

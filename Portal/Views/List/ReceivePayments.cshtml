@@ -35,7 +35,7 @@
             <div class="row ">
             </div>
             <div class="table-responsive mt-5">
-                <table id="userTable" class="table table-sm table-bordered table-striped justify-content-xl-center dataTables_wrapper" style="width:100%">
+                <table id="userTable" class="table table-sm table-bordered table-striped justify-content-xl-center" style="width:100%">
                     <thead>
                         <tr>
                             <th>الاسم</th>
@@ -114,7 +114,6 @@
                     "datatype": "json"
                 },
                 columnDefs: [
-                    // Center align both header and body content of columns 1, 2 & 3
                     { className: "dt-center", targets: [0, 1, 2, 3, 4, 5] }
                 ],
                 "language": {
@@ -146,11 +145,18 @@
                         "render": function (data, type, full, meta) {
                             var text = full.text
                             return text
-
                         }
                     },
                     {
-                        "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="/Edit/EditReceivePayments?id=' + full.id + '">تعديل</a>'; }
+                        "data": null,
+                        "render": function (data, type, full, meta) {
+                            var receivePaymentId = full.id;
+                            var spendMoneyId = full.spendMoneyTargetId;
+                            var isTransaction = full.isTransaction;
+                            return isTransaction == '1'
+                                ? '<a class="btn btn-primary" asp-controller="Edit" target="_blank" asp-action="EditTransferMoney" asp-route-SpendMoneyId="' + spendMoneyId + '" asp-route-ReceivePaymentId="' + receivePaymentId + '">تعديل</a>'
+                                : '<a class="btn btn-primary" target="_blank" asp-controller="Edit" asp-action="EditReceivePayment" asp-route-Id="' + receivePaymentId + '">تعديل</a>';
+                        }
                     }
                 ]
             });

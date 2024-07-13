@@ -10,8 +10,6 @@ namespace Portal.Data
         public MosbReasons()
         {
             MosbSpendMoney = new HashSet<MosbSpendMoney>();
-            PersonReasonMapping = new HashSet<PersonReasonMapping>();
-            ReceivePaymentsReasonsMapping = new HashSet<ReceivePaymentsReasonsMapping>();
         }
 
         public long Id { get; set; }
@@ -20,7 +18,5 @@ namespace Portal.Data
         public string Date { get; set; }
 
         public virtual ICollection<MosbSpendMoney> MosbSpendMoney { get; set; }
-        public virtual ICollection<PersonReasonMapping> PersonReasonMapping { get; set; }
-        public virtual ICollection<ReceivePaymentsReasonsMapping> ReceivePaymentsReasonsMapping { get; set; }
     }
 }
