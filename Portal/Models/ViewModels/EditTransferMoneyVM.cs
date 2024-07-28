@@ -1,13 +1,23 @@
-﻿namespace Portal.Models.ViewModels
+﻿using Portal.Data;
+
+namespace Portal.Models.ViewModels
 {
     public class EditTransferMoneyVM
     {
-        public long SpendMoneyId { get; internal set; }
-        public long ReceivePaymentId { get; internal set; }
-        public double Amount { get; internal set; }
-        public string Date { get; internal set; }
-        public string Description { get; internal set; }
-        public long FromNameId { get; internal set; }
-        public long ToNameId { get; internal set; }
+        public long SpendMoneyId { get; set; }
+        public long ReceivePaymentId { get; set; }
+        public string Date { get; set; }
+        public string Description { get; set; }
+        public double Amount { get; set; }
+        public string FromNameText { get; internal set; }
+        public string ToNameText { get; internal set; }
+    }
+    public class TransferMoneyEditRequest
+    {
+
+        public long SpendMoneyId { get; set; }
+        public long ReceivePaymentId { get; set; }
+        public string Description { get; set; }
+        public double Amount { get; set; }
     }
 }

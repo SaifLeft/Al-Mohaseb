@@ -1,44 +1,34 @@
-﻿@model EditTransferMoneyVM;
+﻿@using Portal.Data
+@model EditTransferMoneyVM;
 @{
     ViewData["Title"] = "تحويل مبلغ";
+    var names = ViewData["Names"] as List<MosbName>;
 }
 
 <!-- Content Page -->
 <div class="container-xxl flex-grow-1 container-p-y ">
     <div class="d-flex align-items-center justify-content-center h-px-600">
-        <form id="formRequest" asp-action="EditTransferMoney" asp-controller="Edit" class="card border-danger border-3 w-px-600 border rounded p-3 p-md-5" method="POST">
+        <form id="formRequest" class="card border-danger border-3 w-px-600 border rounded p-3 p-md-5" method="post">
             <h5 class="mb-5">تحويل مبلغ من رصيد الى رصيد اخر</h5>
-            <input type="hidden" name="SpendMoneyId" value="@Model.SpendMoneyId" />
-            <input type="hidden" name="ReceivePaymentId" value="@Model.ReceivePaymentId" />
-            <div class="mb-3">
-                <label class="form-label">
-                    التاريخ
-                </label>
-                <input type="text"
-                       id="Date"
-                       value="@Model.Date"
-                       name="Date"
-                       placeholder="yyyy-MM-dd" readonly="readonly"
-                       required
-                       class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">تحويل مبلغ من</label>
-                <select class="select2 form-select" name="FromNameId"  id="FromNameId" value="@Model.FromNameId">
-                </select>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">الى</label>
-                <select class="select2 form-select" name="ToNameId"  id="ToNameId" value="@Model.ToNameId">
-                </select>
-            </div>
+            <input type="hidden" asp-for="SpendMoneyId" name="SpendMoneyId" value="@Model.SpendMoneyId" />
+            <input type="hidden" asp-for="ReceivePaymentId" name="ReceivePaymentId" value="@Model.ReceivePaymentId" />
+            التاريخ: @Model.Date
+            <h2 class="mb-2 mt-2">
+                @Model.FromNameText
+                <i class='bx bxs-left-arrow-alt'></i>
+                @Model.ToNameText
+            </h2>
             <div class="mb-3">
                 <label class="form-label">المبلغ</label>
-                <input type="number" id="Amount" name="Amount" class="form-control" placeholder="0.00" value="@Model.Amount" />
+                <input type="number" id="Amount" name="Amount" class="form-control" asp-for="Amount" placeholder="0.00" value="@Model.Amount" required />
             </div>
             <div class="mb-4">
                 <label class="form-label">السبب</label>
-                <textarea id="Description" name="Description" class="form-control" value="@Model.Description" rows="2"></textarea>
+                <textarea id="Description"
+                          name="Description"
+                          class="form-control"
+                          asp-for="Description"
+                          rows="3" required>@Model.Description</textarea>
             </div>
             <div class="mb-3">
                 <button type="submit" class="btn btn-primary float-end">حفظ</button>
@@ -59,311 +49,109 @@
 }
 
 @section Scripts {
-    <script src="~/assets/vendor/libs/datatables/jquery.dataTables.js"></script>
-    <script src="~/assets/vendor/libs/select2/select2.js"></script>
     <script src="~/assets/vendor/libs/formvalidation/dist/js/FormValidation.js"></script>
     <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js"></script>
     <script src="~/assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js"></script>
     <script src="~/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-    <script src="~/assets/vendor/libs/flatpickr/flatpickr.js"></script>
 
 
     <script>
-
         $(document).ready(function () {
-            // Select2 initialization
-            $('.select2').each(function () {
-                $(this).select2({
-                    placeholder: 'اختر',
-                    allowClear: true
-                });
+
+            $("#formRequest").submit(function (e) {
+                if (!ValidateData()) return;
+                e.preventDefault();
+                ConfirmEditTransfer();
             });
-            $('#Date').flatpickr({
-                dateFormat: 'Y-m-d',
-                maxDate: 'today',
-                monthSelectorType: 'static',
-
-            });
-
-            SetNames();
-
-            var FromNameIdv = '@Model.FromNameId'
-            var ToNameIdv = '@Model.ToNameId'
-
-            // set FromNameIdv and ToNameIdv to the dropdowns
-            $('#FromNameId').val(FromNameIdv).trigger('change');
-            $('#ToNameId').val(ToNameIdv).trigger('change');
-
-            // disable FromNameId and ToNameId
-            $('#FromNameId').prop('disabled', true);
-            $('#ToNameId').prop('disabled', true);
-
-
-            const formAuthentication = document.querySelector('#formRequest');
-
-            if (formAuthentication) { // Check if formRequest exists and is not empty
-                const fv = FormValidation.formValidation(formAuthentication, {
-                    fields: {
-                        Date: {
-                            validators: {
-                                notEmpty: {
-                                    message: 'الرجاء اختيار التاريخ'
-                                },
-                                date: {
-                                    format: 'YYYY-MM-DD',
-                                    message: 'الرجاء ادخال تاريخ صحيح'
-                                }
-                            }
-                        },
-                        FromNameId: {
-                            validators: {
-                                notEmpty: {
-                                    message: 'الرجاء اختيار الشخص المحول منه'
-                                }
-                            }
-                        },
-                        ToNameId: {
-                            validators: {
-                                notEmpty: {
-                                    message: 'الرجاء اختيار الشخص المحول اليه'
-                                }
-                            }
-                        },
-                        Amount: {
-                            validators: {
-                                notEmpty: {
-                                    message: 'الرجاء ادخال المبلغ'
-                                },
-                                numeric: {
-                                    message: 'الرجاء ادخال قيمة صحيحة بالأرقام مثل 150.654'
-                                }
-                            }
-                        },
-                        Description: {
-                            validators: {
-                                notEmpty: {
-                                    message: 'الرجاء ادخال الوصف'
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        trigger: new FormValidation.plugins.Trigger(),
-                        bootstrap5: new FormValidation.plugins.Bootstrap5({
-                            eleValidClass: '',
-                            rowSelector: '.mb-3'
-                        }),
-                        submitButton: new FormValidation.plugins.SubmitButton(),
-                        defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
-                        autoFocus: new FormValidation.plugins.AutoFocus()
-                    },
-                    init: instance => {
-                        instance.on('plugins.message.placed', function (e) {
-                            if (e.element.parentElement && e.element.parentElement.classList.contains('input-group')) {
-                                e.element.parentElement.insertAdjacentElement('afterend', e.messageElement);
-                            }
-                        });
-                    }
-                });
-            } else {
-                console.error('Form #formAuthentication not found.');
-            }
-
-            // if formAuthentication is valid then call ConfirmTransfer()
-            formAuthentication.addEventListener('submit', function (event) {
-                console.log('Form submitted');
-                event.preventDefault();
-                fv.validate().then(function (status) {
-                    if (status === 'Valid') {
-                        ConfirmTransfer();
-                    }
-                });
-            });
-
-
-
-
         });
-        function GetNames() {
-            var result;
-            $.ajax({
-                url: '@Url.Action("GetNames", "List")',
-                type: 'GET',
-                cache: true,
-                dataType: 'json',
-                async: false, // Wait for the request to complete before proceeding
-                success: function (data) {
-                    result = data;
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    console.log(textStatus, errorThrown);
-                }
-            });
-            return result;
-        }
-        function populateDropdown(nameList, dropdown) {
-            dropdown.empty();
-            $.each(nameList, function () {
-                dropdown.append($("<option />").val(this.id).text(this.name));
-            });
-        }
-        function removeSelectedId(id, dropdown) {
-            var nameList = GetNames();
-            nameList = nameList.filter(function (item) {
-                return item.id != id;
-            });
-            populateDropdown(nameList, dropdown);
-
-        }
-        function SetNames() {
-            var nameList = GetNames();
-            var dropdown1 = $('#FromNameId');
-            var dropdown2 = $('#ToNameId');
-            dropdown1.empty();
-            dropdown2.empty();
-            populateDropdown(nameList, dropdown1);
-            populateDropdown(nameList, dropdown2);
-            dropdown1.val(null).trigger("change");
-            dropdown2.val(null).trigger("change");
-        }
-
-
-        function ConfirmTransfer() {
-            var date = $('#Date').val();
-            var fromPersonId = $('#FromNameId').val();
-            var toPersonId = $('#ToNameId').val();
-            var amount = $('#Amount').val();
-            var description = $('#Description').val();
-
-
-            var isValid = ValidateTransferRequest();
-            if (!isValid) {
-                return;
-            }
-
-
-
+        function GetData() {
             var data = {
-                date: date,
-                FromNameId: fromPersonId,
-                ToNameId: toPersonId,
-                Amount: amount,
-                Description: description
+                SpendMoneyId: $("#SpendMoneyId").val(),
+                ReceivePaymentId: $("#ReceivePaymentId").val(),
+                Amount: $("#Amount").val(),
+                Description: $("#Description").val()
             };
-            console.log(data);
-            var Text = 'هل انت متأكد من صرف من رصيد ' + $('#FromNameId option:selected').text() + ' الى رصيد ' + $('#ToNameId option:selected').text() + ' مبلغ ' + amount + ' ريال؟';
-            //sweetalert2
-            Swal.fire({
-                title: 'هل انت متأكد؟',
-                text: Text,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'نعم',
-                cancelButtonText: 'لا'
-            }).then(function (result) {
-                if (result.isConfirmed) {
-                    CreateTransfer(data);
-                }
-            });
-
+            return data;
         }
-        function CreateTransfer(data) {
-            $.ajax({
-                url: '@Url.Action("CreateTransferMoneyAjax", "Create")',
-                type: 'POST',
-                dataType: 'json',
-                data: data,
-                success: function (data) {
-                    if (data.status) {
-                        Swal.fire({
-                            title: 'تمت العملية بنجاح',
-                            text: 'تمت عملية التحويل بنجاح',
-                            icon: 'success',
-                            confirmButtonText: 'حسناً'
-                        }).then(function (result) {
-                            if (result.isConfirmed) {
-                                // Refresh the page
-                                location.reload();
-                            }
-                        });
-                    }
-                    else {
-                        Swal.fire({
-                            title: 'فشلت العملية',
-                            text: 'فشلت عملية التحويل',
-                            icon: 'error',
-                            confirmButtonText: 'حسناً'
-                        });
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    console.log(textStatus, errorThrown);
-                }
-            });
-        }
-        function ValidateTransferRequest() {
-            var date = $('#Date').val();
-            var fromPersonId = $('#FromNameId').val();
-            var toPersonId = $('#ToNameId').val();
-            var amount = $('#Amount').val();
-            var description = $('#Description').val();
-            // Validation
-            if (date == '') {
+        function ValidateData() {
+            var data = GetData();
+            if (data.Amount == "" || data.Amount == 0) {
                 Swal.fire({
-                    title: 'خطأ',
-                    text: 'الرجاء ادخال التاريخ',
                     icon: 'error',
-                    confirmButtonText: 'حسناً'
+                    title: 'الرجاء ادخال المبلغ',
+                    showConfirmButton: false,
+                    timer: 1500
                 });
-                return;
+                return false;
             }
-            if (fromPersonId == '' || fromPersonId == null) {
+            if (data.Description == "") {
                 Swal.fire({
-                    title: 'خطأ',
-                    text: 'الرجاء اختيار الشخص المحول منه',
                     icon: 'error',
-                    confirmButtonText: 'حسناً'
+                    title: 'الرجاء ادخال السبب',
+                    showConfirmButton: false,
+                    timer: 1500
                 });
-                return;
-            }
-            if (toPersonId == '' || toPersonId == null) {
-                Swal.fire({
-                    title: 'خطأ',
-                    text: 'الرجاء اختيار الشخص المحول اليه',
-                    icon: 'error',
-                    confirmButtonText: 'حسناً'
-                });
-                return;
-            }
-            if (fromPersonId == toPersonId) {
-                Swal.fire({
-                    title: 'خطأ',
-                    text: 'لا يمكن التحويل الى نفس الشخص',
-                    icon: 'error',
-                    confirmButtonText: 'حسناً'
-                });
-                return;
-            }
-            if (amount == '') {
-                Swal.fire({
-                    title: 'خطأ',
-                    text: 'الرجاء ادخال المبلغ',
-                    icon: 'error',
-                    confirmButtonText: 'حسناً'
-                });
-                return;
-            }
-            if (description == '' || description == null) {
-                Swal.fire({
-                    title: 'خطأ',
-                    text: 'الرجاء ادخال السبب',
-                    icon: 'error',
-                    confirmButtonText: 'حسناً'
-                });
-                return;
+                return false;
             }
             return true;
         }
+        function ConfirmEditTransfer() {
+            Swal.fire({
+                title: 'هل انت متأكد؟',
+                text: "هل تريد تعديل البيانات؟",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'نعم',
+                cancelButtonText: 'لا'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    AjaxRequest()
+                }
+                return false;
+            });
+        }
+        function AjaxRequest() {
+            if (!ValidateData()) return;
+            var data = GetData();
+            $.ajax({
+                url: "@Url.Action("EditTransferMoneyAjax", "Edit")",
+                type: "POST",
+                data: data,
+                success: function (response) {
+                    if (response.status) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'تم التعديل بنجاح',
+                            showConfirmButton: false,
+                            timer: 1500,
+                        });
+                        setTimeout(function () {
+                            window.close();
+                        }, 1900);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'حدث خطأ',
+                            text: response.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    }
+                },
+                error: function (response) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'حدث خطأ',
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                }
+            });
+        }
+
 
     </script>
 

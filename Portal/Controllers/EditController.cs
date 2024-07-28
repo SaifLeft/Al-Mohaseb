@@ -223,14 +223,16 @@ namespace Portal.Controllers
             var receivePayment = await _dbContext.MosbReceivePayments
                 .FirstOrDefaultAsync(n => n.Id == ReceivePaymentId);
 
+            ViewData["Names"] = await _dbContext.MosbName.ToListAsync();
+
             if (spendMoney == null || receivePayment == null) return NotFound();
 
             EditTransferMoneyVM VM = new()
             {
                 SpendMoneyId = spendMoney.Id,
                 ReceivePaymentId = receivePayment.Id,
-                FromNameId = spendMoney.PersonId,
-                ToNameId = receivePayment.NameId,
+                FromNameText = spendMoney.Person.Name,
+                ToNameText = receivePayment.Name.Name,
                 Amount = spendMoney.Amount,
                 Date = spendMoney.Date,
                 Description = spendMoney.Description,
@@ -240,56 +242,59 @@ namespace Portal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditTransferMoney(EditTransferMoneyVM VM)
-        {
+        public async Task<IActionResult> EditTransferMoneyAjax(TransferMoneyEditRequest Request)
+         {
             try
             {
-                if (!ModelState.IsValid)
-                {
-                    return View(VM);
-                }
+                ArgumentNullException.ThrowIfNull(Request);
+                ArgumentNullException.ThrowIfNull(Request.ReceivePaymentId);
+                ArgumentNullException.ThrowIfNull(Request.SpendMoneyId);
 
-                var spendMoney = await _dbContext.MosbSpendMoney.FirstOrDefaultAsync(n => n.Id == VM.SpendMoneyId);
-                var receivePayment = await _dbContext.MosbReceivePayments.FirstOrDefaultAsync(n => n.Id == VM.ReceivePaymentId);
+                var spendMoney = await _dbContext.MosbSpendMoney
+                    .Include(n => n.Person)
+                    .FirstOrDefaultAsync(n => n.Id == Request.SpendMoneyId);
 
-                if (spendMoney == null || receivePayment == null)
-                {
-                    return NotFound();
-                }
+                var receivePayment = await _dbContext.MosbReceivePayments
+                    .Include(n => n.Name)
+                    .FirstOrDefaultAsync(n => n.Id == Request.ReceivePaymentId);
 
+                ArgumentNullException.ThrowIfNull(spendMoney);
+                ArgumentNullException.ThrowIfNull(receivePayment);
+
+                long FromNameId = spendMoney.Person.Id;
+                long ToNameId = receivePayment.Name.Id;
+                
                 // Update spendMoney properties
-                if (spendMoney.PersonId != VM.FromNameId) spendMoney.PersonId = VM.FromNameId;
-                spendMoney.IsPaid = VM.Amount == 0 ? false.GetHashCode() : true.GetHashCode();
-                if (spendMoney.Amount != VM.Amount)
+                spendMoney.IsPaid = Request.Amount == 0 ? false.GetHashCode() : true.GetHashCode();
+                if (spendMoney.Amount != Request.Amount)
                 {
-                    spendMoney.Amount = VM.Amount;
+                    spendMoney.Amount = Request.Amount;
                     spendMoney.ModifiedDate = DateTime.Now.ToString("yyyy-MM-dd");
                 }
-                if (spendMoney.Date != VM.Date) spendMoney.Date = VM.Date;
-                if (spendMoney.Description != VM.Description) spendMoney.Description = VM.Description;
+                if (spendMoney.Description != Request.Description) spendMoney.Description = Request.Description;
+
 
                 // Update receivePayment properties
-                if (receivePayment.NameId != VM.ToNameId) receivePayment.NameId = VM.ToNameId;
-                receivePayment.IsPaid = VM.Amount == 0 ? false.GetHashCode() : true.GetHashCode();
-                if (receivePayment.Amount != VM.Amount)
+                receivePayment.IsPaid = Request.Amount == 0 ? false.GetHashCode() : true.GetHashCode();
+                if (receivePayment.Amount != Request.Amount)
                 {
-                    receivePayment.Amount = VM.Amount;
+                    receivePayment.Amount = Request.Amount;
                     receivePayment.ModifiedDate = DateTime.Now.ToString("yyyy-MM-dd");
                 }
-                if (receivePayment.Date != VM.Date) receivePayment.Date = VM.Date;
-                if (receivePayment.Description != VM.Description) receivePayment.Description = VM.Description;
+                if (receivePayment.Description != Request.Description) receivePayment.Description = Request.Description;
+
 
                 _dbContext.Update(spendMoney);
                 _dbContext.Update(receivePayment);
+                _dbContext.SaveChanges();
 
-                var saveStatus = await _dbContext.SaveChangesAsync();
-
-                return RedirectToAction("TransferMoney", "List", new { update = saveStatus == 1 });
+                return Json(new { status = true, message = "تم التعديل بنجاح" });
             }
             catch
             {
-                throw;
+                return BadRequest();
             }
+
         }
 
     }

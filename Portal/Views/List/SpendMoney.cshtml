@@ -157,12 +157,22 @@
                         }
                     },
                     {
-                        "render": function (data, type, full, meta) { return '<a class="btn btn-primary" href="@Url.Action("EditSpendMoney", "Edit")?id=' + full.id + '">تعديل</a>'; }
+                        "data": null,
+                        "render": function (data, type, full, meta) {
+                            var spendMoneyId = full.id;
+                            var receivePaymentId = full.receivePaymentsTargetId;
+                            var isTransaction = full.isTransaction;
+                            var TransUrl = '@Url.Action("EditTransferMoney", "Edit")?SpendMoneyId= ' + spendMoneyId + '&ReceivePaymentId=' + receivePaymentId;
+                            var rrUrl = '@Url.Action("EditSpendMoney", "Edit")' + '?Id=' + receivePaymentId;
+                            return isTransaction == '1'
+                                ? '<a class="btn btn-primary" target="_blank" href="' + TransUrl + '">تعديل</a>'
+                                : '<a class="btn btn-primary" target="_blank" href="' + rrUrl + '">تعديل</a>';
+                        }
                     }
                 ],
                 columnDefs: [
                     // Center align both header and body content of columns 1, 2 & 3
-                    { className: "dt-center", targets: [0, 1, 2, 3, 4] }
+                    { className: "dt-center", targets: [0, 1, 2, 3, 4, 5] }
                 ],
             });
             $('.NamesSelect2').select2({

@@ -153,9 +153,11 @@
                             var receivePaymentId = full.id;
                             var spendMoneyId = full.spendMoneyTargetId;
                             var isTransaction = full.isTransaction;
+                            var TransUrl = '@Url.Action("EditTransferMoney", "Edit")?SpendMoneyId= ' + spendMoneyId + '&ReceivePaymentId=' + receivePaymentId;
+                            var rrUrl = '@Url.Action("EditReceivePayments", "Edit")' + '?Id=' + receivePaymentId;
                             return isTransaction == '1'
-                                ? '<a class="btn btn-primary" asp-controller="Edit" target="_blank" asp-action="EditTransferMoney" asp-route-SpendMoneyId="' + spendMoneyId + '" asp-route-ReceivePaymentId="' + receivePaymentId + '">تعديل</a>'
-                                : '<a class="btn btn-primary" target="_blank" asp-controller="Edit" asp-action="EditReceivePayment" asp-route-Id="' + receivePaymentId + '">تعديل</a>';
+                                ? '<a class="btn btn-primary" target="_blank" href="' + TransUrl + '">تعديل</a>'
+                                : '<a class="btn btn-primary" target="_blank" href="' + rrUrl + '">تعديل</a>';
                         }
                     }
                 ]
@@ -163,7 +165,7 @@
 
             $('.select2').select2({
                 allowClear: true,
-                placeholder: "اختر اسم المستخدم",
+                placeholder: "للبحث: اختر اسم المستخدم",
             });
             $('#NamesList').on('change', function () {
                 var selected = $(this).find("option:selected").val();
