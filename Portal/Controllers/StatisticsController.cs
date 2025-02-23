@@ -13,11 +13,15 @@ namespace Portal.Controllers
     public class StatisticsController : Controller
     {
         private AlMohasebDBContext _context;
+        private readonly IWebHostEnvironment _env;
+        private readonly ILogger<StatisticsController> _logger;
 
         #region Index
-        public StatisticsController(AlMohasebDBContext context)
+        public StatisticsController(AlMohasebDBContext context, IWebHostEnvironment webHostEnvironment, ILogger<StatisticsController> logger)
         {
             _context = context;
+            _env = webHostEnvironment;
+            _logger = logger;
         }
         public async Task<IActionResult> Index(int? RPFirstYear = 0, int? RPSecondYear = 0, int? SMFirstYear = 0, int? SMSecondYear = 0, int? AddCountYear = 0)
         {
@@ -385,14 +389,50 @@ namespace Portal.Controllers
         #endregion Semple
 
 
-        public IActionResult DawnloadDB()
+        public IActionResult DownloadDB()
         {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "AlMohaseb-ERD.db");
-            // copy as backup in 'DB Backup' folder
-            var backupPath = Path.Combine(Directory.GetCurrentDirectory(), "DB Backup", $"AlMohaseb-ERD-{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.db");
-            System.IO.File.Copy(path, backupPath);
-            // download the backup db file
-            return PhysicalFile(backupPath, "application/octet-stream", Path.GetFileName(backupPath));
+            try
+            {
+                // مسار ملف قاعدة البيانات الأصلي
+                var dbFileName = "AlMohaseb-ERD.db";
+                var dbFilePath = Path.Combine(_env.ContentRootPath, dbFileName);
+
+                // تحقّق من وجود ملف قاعدة البيانات
+                if (!System.IO.File.Exists(dbFilePath))
+                {
+                    return NotFound("لم يتم العثور على ملف قاعدة البيانات.");
+                }
+
+                // أنشئ/تأكد من وجود مجلد النسخ الاحتياطي
+                var backupDirPath = Path.Combine(_env.ContentRootPath, "DB Backup");
+                if (!Directory.Exists(backupDirPath))
+                {
+                    Directory.CreateDirectory(backupDirPath);
+                }
+
+                // حدّد اسم ملف النسخة الاحتياطية بحيث يحتوي على توقيت مميز
+                var backupFileName = $"AlMohaseb-ERD-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}.db";
+                var backupFilePath = Path.Combine(backupDirPath, backupFileName);
+
+                // 1) انسخ الملف الأصلي إلى مسار النسخة الاحتياطية
+                //    (copy) دالة متزامنة (Synchronous) تنتظر حتى انتهاء العملية
+                //    مما يضمن إتمام النسخ قبل البدء بالتحميل.
+                System.IO.File.Copy(dbFilePath, backupFilePath);
+
+                // 2) بعد الانتهاء من النسخ، أعد الملف المنسوخ للتحميل
+                return PhysicalFile(
+                    backupFilePath,
+                    "application/octet-stream",
+                    backupFileName
+                );
+            }
+            catch (Exception ex)
+            {
+                // يُستحسن تسجيل الخطأ (Logging) لمعرفة التفاصيل
+                // _logger.LogError(ex, "حدث خطأ أثناء النسخ الاحتياطي أو التحميل.");
+
+                return StatusCode(500, "حدث خطأ أثناء معالجة طلبك.");
+            }
         }
 
         public async Task<IActionResult> DawnloadAllDataAsPDF()
