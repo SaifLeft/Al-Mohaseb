@@ -332,16 +332,16 @@
 
             $('#distribute').click(function () {
                 let totalAmount = parseFloat($('#totalAmount').val());
-                if (totalAmount === 0 || totalAmount === '') {
+                if (isNaN(totalAmount) || totalAmount <= 0) {
                     toastr.error('الرجاء إدخال مبلغ الصرف');
                     return;
                 }
-                var individualCount = $('.individual').length;
+                let individualCount = $('.individual').length;
                 if (individualCount === 0) {
                     toastr.error('لا يوجد أسماء للتوزيع عليها');
                     return;
                 }
-                var selectIndividualCount = $('.select-individual:checked').length;
+                let selectIndividualCount = $('.select-individual:checked').length;
                 if (selectIndividualCount === 0) {
                     toastr.error('الرجاء تحديد أسماء للتوزيع عليها');
                     return;
@@ -367,12 +367,13 @@
                     toastr.warning('تم إلغاء التوزيع');
                 }
             });
+
             function distributeAmount() {
                 let totalAmount = parseFloat($('#totalAmount').val());
-                let selectedIndividuals = [];
                 let fixedAmounts = 0;
                 let variableIndividuals = [];
 
+                // Calculate fixed amounts and identify variable individuals
                 $('.individual').each(function () {
                     let $checkbox = $(this).find('.select-individual');
                     let $fixCheckbox = $(this).find('.fix-individual');
@@ -389,18 +390,29 @@
                     } else {
                         $amountInput.prop("disabled", true);
                         $fixCheckbox.prop("disabled", true);
-                        $amountInput.val(0);
+                        $amountInput.val('0.000'); // Ensuring it shows 0.000 when disabled
                         $checkbox.prop("disabled", false);
                     }
-
                 });
 
+                // Calculate remaining amount and amount per individual
                 let remainingAmount = totalAmount - fixedAmounts;
                 let variableCount = variableIndividuals.length;
+
                 if (variableCount > 0) {
-                    let amountPerIndividual = remainingAmount / variableCount;
-                    variableIndividuals.forEach(function ($amountInput) {
-                        $amountInput.val(amountPerIndividual.toFixed(3));
+                    let amountPerIndividual = Math.floor((remainingAmount / variableCount) * 1000) / 1000; // Round down to 3 decimals
+                    let totalAssigned = 0;
+
+                    // Distribute amounts and handle rounding differences
+                    variableIndividuals.forEach(function ($amountInput, index) {
+                        if (index < variableCount - 1) {
+                            $amountInput.val(amountPerIndividual.toFixed(3)); // Ensures exactly 3 decimal places
+                            totalAssigned += parseFloat(amountPerIndividual.toFixed(3));
+                        } else {
+                            // Adjust the last amount to ensure the total matches
+                            let finalAmount = remainingAmount - totalAssigned;
+                            $amountInput.val(finalAmount.toFixed(3)); // Ensures exactly 3 decimal places
+                        }
                     });
                 }
             }
@@ -411,6 +423,7 @@
                 let variableIndividuals = [];
                 let remainingAmount;
 
+                // Calculate fixed amounts and identify variable individuals
                 $('.individual').each(function () {
                     let $fixCheckbox = $(this).find('.fix-individual');
                     let $amountInput = $(this).find('.amount');
@@ -424,13 +437,23 @@
                     }
                 });
 
+                // Calculate remaining amount and distribute
                 remainingAmount = totalAmount - fixedAmounts - parseFloat(changedInput.val());
                 let variableCount = variableIndividuals.length;
 
                 if (variableCount > 0) {
-                    let amountPerIndividual = remainingAmount / variableCount;
-                    variableIndividuals.forEach(function ($amountInput) {
-                        $amountInput.val(amountPerIndividual.toFixed(3));
+                    let amountPerIndividual = Math.floor((remainingAmount / variableCount) * 1000) / 1000; // Round down to 3 decimals
+                    let totalAssigned = 0;
+
+                    variableIndividuals.forEach(function ($amountInput, index) {
+                        if (index < variableCount - 1) {
+                            $amountInput.val(amountPerIndividual.toFixed(3)); // Ensures exactly 3 decimal places
+                            totalAssigned += parseFloat(amountPerIndividual.toFixed(3));
+                        } else {
+                            // Adjust the last amount to ensure the total matches
+                            let finalAmount = remainingAmount - totalAssigned;
+                            $amountInput.val(finalAmount.toFixed(3)); // Ensures exactly 3 decimal places
+                        }
                     });
                 }
             }
@@ -451,10 +474,11 @@
                 var isChecked = $(this).is(':checked');
                 if (!isChecked) {
                     $(this).closest('.individual').find('.fix-individual').prop('checked', false);
-                    $(this).closest('.individual').find('.amount').val(0);
+                    $(this).closest('.individual').find('.amount').val('0.000'); // Ensures exactly 3 decimal places
                 }
                 distributeAmount();
             });
+
 
 
         });

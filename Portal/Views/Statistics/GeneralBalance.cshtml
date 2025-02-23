@@ -28,35 +28,27 @@
             </div>
             <div class="col">
                 <div class="d-flex align-items-center justify-content-center flex-wrap gap-2 py-1 h-px-250">
-                    <table style="font-size:x-large">
+                    <table style="font-size: x-large; width: 100%;">
                         <tr>
-                            <td colspan="2" class="text-center">
+                            <td class="text-center">
                                 <label class="label">جميع الايداعات</label>
-                                <i class='bx bx-left-arrow-alt'></i>
+                                <i class="bx bx-left-arrow-alt"></i>
                                 <span class="badge rounded-pill bg-info">@Model.AllReceivePaymentsAmount</span>
                             </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-center">
+                            <td class="text-center">
                                 <span class="badge rounded-pill bg-dark">-</span>
                             </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-center">
+                            <td class="text-center">
                                 <label class="label">جميع المصروفات</label>
-                                <i class='bx bx-left-arrow-alt'></i>
+                                <i class="bx bx-left-arrow-alt"></i>
                                 <span class="badge rounded-pill bg-warning">@Model.AllSpendMoneyAmount</span>
                             </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-center">
+                            <td class="text-center">
                                 <span class="badge rounded-pill bg-dark">=</span>
                             </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-center">
+                            <td class="text-center">
                                 <label class="label">الرصيد العام</label>
-                                <i class='bx bx-left-arrow-alt'></i>
+                                <i class="bx bx-left-arrow-alt"></i>
                                 @if (@Model.GeneralBalance < 0)
                                 {
                                     <span class="badge rounded-pill bg-danger">@Model.GeneralBalance</span>
@@ -67,18 +59,17 @@
                                 }
                                 else if (@Model.GeneralBalance > 0)
                                 {
-                                    <span class="badge rounded-pill bg-success ">@Model.GeneralBalance</span>
+                                    <span class="badge rounded-pill bg-success">@Model.GeneralBalance</span>
                                 }
                             </td>
-                        </tr>
-                        <tr class="pt-5">
-                            <td colspan="2" class="text-center">
+                            <td class="text-center">
                                 <label class="label">الزكاة</label>
-                                <i class='bx bx-left-arrow-alt'></i>
+                                <i class="bx bx-left-arrow-alt"></i>
                                 <span class="badge rounded-pill bg-success">@Model.Zakat</span>
                             </td>
                         </tr>
                     </table>
+
                 </div>
             </div>
 

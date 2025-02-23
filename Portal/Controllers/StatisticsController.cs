@@ -1,8 +1,6 @@
 ﻿using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Portal.Data;
 using Portal.Models;
@@ -568,7 +566,7 @@ namespace Portal.Controllers
             //worksheet right to left
             worksheet3.RightToLeft = true;
 
-            worksheet3.Cell("A1").Value = "بيانات الاساسية للأعضاء";
+            worksheet3.Cell("A1").Value = "رصيد الأعضاء المنتسبين";
             worksheet3.Cell("A1").Style.Font.Bold = true;
             worksheet3.Cell("A1").Style.Font.FontSize = 20;
             worksheet3.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
@@ -641,15 +639,17 @@ namespace Portal.Controllers
             worksheet5.Cell("A2").Value = "الاسم";
             worksheet5.Cell("B2").Value = "التاريخ الايداع";
             worksheet5.Cell("C2").Value = "المبلغ الايداع";
+            worksheet5.Cell("D2").Value = "السبب";
 
             for (int i = 0; i < ReceivePayments.Count; i++)
             {
                 worksheet5.Cell(i + 3, 1).Value = ReceivePayments[i].Name.Name;
                 worksheet5.Cell(i + 3, 2).Value = ReceivePayments[i].Date;
                 worksheet5.Cell(i + 3, 3).Value = ReceivePayments[i].Amount;
+                worksheet5.Cell(i + 3, 4).Value = ReceivePayments[i].Description;
             }
             // create table for the data
-            var table3 = worksheet5.Range("A2:C" + (ReceivePayments.Count + 2)).CreateTable();
+            var table3 = worksheet5.Range("A2:D" + (ReceivePayments.Count + 2)).CreateTable();
             table3.ShowAutoFilter = true;
             table3.Theme = XLTableTheme.TableStyleMedium2;
 
@@ -670,54 +670,23 @@ namespace Portal.Controllers
             worksheet6.Cell("A2").Value = "الاسم";
             worksheet6.Cell("B2").Value = "التاريخ الصرف";
             worksheet6.Cell("C2").Value = "مبلغ الصرف";
+            worksheet6.Cell("D2").Value = "السبب";
 
             for (int i = 0; i < SpendMoney.Count; i++)
             {
                 worksheet6.Cell(i + 3, 1).Value = SpendMoney[i].Person.Name;
                 worksheet6.Cell(i + 3, 2).Value = SpendMoney[i].Date;
                 worksheet6.Cell(i + 3, 3).Value = SpendMoney[i].Amount;
+                worksheet6.Cell(i + 3, 4).Value = SpendMoney[i].Description;
             }
             // create table for the data
-            var table4 = worksheet6.Range("A2:C" + (SpendMoney.Count + 2)).CreateTable();
+            var table4 = worksheet6.Range("A2:D" + (SpendMoney.Count + 2)).CreateTable();
             table4.ShowAutoFilter = true;
             table4.Theme = XLTableTheme.TableStyleMedium2;
 
             worksheet6.Columns().AdjustToContents();
 
 
-            var worksheet7 = workbook.Worksheets.Add("رصيد الأعضاء");
-
-            //worksheet right to left
-            worksheet7.RightToLeft = true;
-
-            worksheet7.Cell("A1").Value = "رصيد الأعضاء المنتسبين";
-            worksheet7.Cell("A1").Style.Font.Bold = true;
-            worksheet7.Cell("A1").Style.Font.FontSize = 20;
-            worksheet7.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            worksheet7.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            worksheet7.Range("A1:E1").Merge();
-
-            worksheet7.Cell("A2").Value = "الاسم";
-            worksheet7.Cell("B2").Value = "رقم الهاتف";
-            worksheet7.Cell("C2").Value = "المدفوعات";
-            worksheet7.Cell("D2").Value = "المصروفات";
-            worksheet7.Cell("E2").Value = "الرصيد الكلي";
-
-            for (int i = 0; i < PersonsBalance.Count; i++)
-            {
-                worksheet7.Cell(i + 3, 1).Value = PersonsBalance[i].Name;
-                worksheet7.Cell(i + 3, 2).Value = PersonsBalance[i].PhoneNumber;
-                worksheet7.Cell(i + 3, 3).Value = PersonsBalance[i].ReceivePayment;
-                worksheet7.Cell(i + 3, 4).Value = PersonsBalance[i].SpendMoney;
-                worksheet7.Cell(i + 3, 5).Value = PersonsBalance[i].TotalAmount;
-            }
-
-            // create table for the data
-            var table5 = worksheet7.Range("A2:E" + (PersonsBalance.Count + 2)).CreateTable();
-            table5.ShowAutoFilter = true;
-            table5.Theme = XLTableTheme.TableStyleMedium2;
-
-            worksheet7.Columns().AdjustToContents();
 
             var fileTitle = $"بيانات النطام - {DateTime.Now.ToString("yyyy-MM-dd-(HH-mm-ss)")}.xlsx";
             using (var stream = new MemoryStream())
